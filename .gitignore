@@ -1,4 +1,4 @@
 # files
 
 *.swp
-*__python__
+*__pycache__
