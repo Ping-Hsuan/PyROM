@@ -1,4 +1,6 @@
-import numpy as np
+import sys
+sys.path.append('../')
+from read_helpers.read_helpers import *
 
 
 def setops(N, msg):
@@ -14,24 +16,33 @@ def setops(N, msg):
 
 
 def seta(fname, N):
-    t = np.loadtxt(fname)
-    lb = int(np.sqrt(len(t)))
-    t = np.reshape(t, (lb, lb))
+    t = read_mat(fname, N)
     a = t[1:N+1, 1:N+1]
     return a
 
 
 def setb(fname, N):
-    t = np.loadtxt(fname)
-    lb = int(np.sqrt(len(t)))
-    t = np.reshape(t, (lb, lb))
+    t = read_mat(fname, N)
     b = t[1:N+1, 1:N+1]
     return b
 
 
 def setc(fname, N):
-    t = np.loadtxt(fname)
-    lb = int(np.floor((len(t))**(1/3)))
-    t = np.reshape(t, (lb, lb+1, lb+1))
+    t = read_tensor(fname, N)
     c = t[0:N, 0:N+1, 0:N+1]
     return c
+
+
+def setbut(N,ldim):
+
+    t = read_mat('./but_x', N)
+    but_x = t[1:N+1, 1:N+1]
+
+    t = read_mat('./but_y', N)
+    but_y = t[1:N+1, 1:N+1]
+    if (ldim == 2):
+        return but_x, but_y
+    else:
+        t = read_mat('./but_z', N)
+        but_z = t[1:N+1, 1:N+1]
+        return but_x, but_y, but_z
