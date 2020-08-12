@@ -25,13 +25,17 @@ class setops_new:
             else: 
                 print('operator directory name in argument '+str(4)+ \
                         'is incorrect')
-            self.a = read_mat(arg[0], size)
-            self.b = read_mat(arg[1], size)
+            self.a0 = read_mat(arg[0], size)
+            self.b0 = read_mat(arg[1], size)
+            self.a = self.a0[1:size+1, 1:size+1]
+            self.b = self.b0[1:size+1, 1:size+1]
             self.c = read_tensor(arg[2], size)
             self.size = size
         else:
-            self.a = read_mat(arg[0], size)
-            self.b = read_mat(arg[1], size)
+            self.a0 = read_mat(arg[0], size)
+            self.b0 = read_mat(arg[1], size)
+            self.a = self.a0[1:size+1, 1:size+1]
+            self.b = self.b0[1:size+1, 1:size+1]
             self.c = read_tensor(arg[2], size)
             self.size = size
 
