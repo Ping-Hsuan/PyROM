@@ -47,9 +47,9 @@ f.close()
 # word size
 wdsz = int(a_string[5])
 if (wdsz == 4):
-    realtype = '*float32'
+    realtype = 'float32'
 elif (wdsz == 8):
-    realtype = '*float64'
+    realtype = 'float64'
 else:
     raise ValueError("ERROR: could not interpret real type", wdsz)
 
@@ -67,6 +67,7 @@ nel = int(a_string[16:27])
 
 # number of elements in the file
 nelf = int(a_string[27:38])
+print(nelf)
 
 # time
 time = format(float(a_string[38:59]), '16.15E')
@@ -88,21 +89,21 @@ print(nf)
 fields = a_string[83:87]
 fields = a_string[83:]
 
-var = []
+var = np.zeros((5,)).astype(np.int)
 if "X" in fields:
     print('Coordinate')
-    var.append(ndim)
+    var[0] = ndim
 if "U" in fields:
     print('Velocity')
-    var.append(ndim)
+    var[1] = ndim
 if "P" in fields:
     print('Pressure')
-    var.append(1)
+    var[2] = 1
 if "T" in fields:
     print('Temperature')
-    var.append(1)
+    var[3] = 1
 
-nfields = sum(var)
+nfields = (sum(var))
 print(nfields)
 
 # read element map
@@ -117,10 +118,28 @@ f = open(fname, "rb")
 f.seek(136+nelf*4, os.SEEK_SET)
 data = np.zeros((nelf, npel, nfields))
 for ivar in range(0,len(var)):
-    idim0 = sum(var[:ivar+1])
+    idim0 = sum(var[:ivar+1])-2
     for iel in elmap:
-        print(idim0)
-        print(var[ivar])
-        for idim in (range(var[ivar])+idim0):
-            data[iel-1,:,idim] = np.fromfile(f, dtype=realtype, count=npel)
+        for idim in range(0, var[ivar]):
+            data[iel-1,:,idim+idim0] = np.fromfile(f, dtype=realtype, count=npel)
 
+if ndim == 3:
+    if var[0] != 0:
+        metax = []
+    else:
+        metax = []
+    if var[1] != 0:
+        metax = []
+    else:
+        metau = []
+    if var[2] != 0:
+        metax = []
+    else:
+        metap = []
+    if var[3] != 0:
+        metax = []
+    else:
+        metat = []
+
+# CLOSE FILE
+f.close()
