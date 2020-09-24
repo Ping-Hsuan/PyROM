@@ -123,23 +123,24 @@ for ivar in range(0,len(var)):
         for idim in range(0, var[ivar]):
             data[iel-1,:,idim+idim0] = np.fromfile(f, dtype=realtype, count=npel)
 
-if ndim == 3:
-    if var[0] != 0:
-        metax = []
-    else:
-        metax = []
-    if var[1] != 0:
-        metax = []
-    else:
-        metau = []
-    if var[2] != 0:
-        metax = []
-    else:
-        metap = []
-    if var[3] != 0:
-        metax = []
-    else:
-        metat = []
-
+# Check with Paul whether there is a metadata?
+#if ndim == 3:
+#    if var[0] != 0:
+#        metax = []
+#    else:
+#        metax = []
+#    if var[1] != 0:
+#        metax = []
+#    else:
+#        metau = []
+#    if var[2] != 0:
+#        metax = []
+#    else:
+#        metap = []
+#    if var[3] != 0:
+#        metax = []
+#    else:
+#        metat = []
+#
 # CLOSE FILE
 f.close()
