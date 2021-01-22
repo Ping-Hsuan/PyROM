@@ -45,3 +45,19 @@ def read_ei(fname):
                      in list_of_lines][:-1]
     ei = np.array(list_of_words).astype(np.float64)
     return ei
+
+
+def atoi(text):
+    return int(text) if text.isdigit() else text
+
+
+def natural_keys(text):
+    import re
+    return [atoi(c) for c in re.split('(\d+)', text)]
+
+
+def find_nearest(array, value):
+    import numpy as np
+    array = np.asarray(array)
+    idx = (np.abs(array - value)).argmin()
+    return idx
