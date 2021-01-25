@@ -169,6 +169,10 @@ Nuflux = np.argmax(fene_accum_v/fene_accum_v[-1] > 0.9) + 2
 Ntflux = np.argmax(fene_accum_t/fene_accum_t[-1] > 0.9) + 2
 print("90% fluctuating energy in u with N = ", Nuflux)
 print("90% fluctuating energy in temp with N = ", Ntflux)
+print("95% fluctuating energy in u with N = ", np.argmax(fene_accum_v/fene_accum_v[-1] > 0.95) + 2)
+print("95% fluctuating energy in temp with N = ", np.argmax(fene_accum_t/fene_accum_t[-1] > 0.95) + 2)
+print("99% fluctuating energy in u with N = ", np.argmax(fene_accum_v/fene_accum_v[-1] > 0.99) + 2)
+print("99% fluctuating energy in temp with N = ", np.argmax(fene_accum_t/fene_accum_t[-1] > 0.99) + 2)
 Nu_g90pt = np.argmax((ene_accum_v/ene_accum_v[-1]) > 0.9) + 1
 Nt_g90pt = np.argmax((ene_accum_t/ene_accum_t[-1]) > 0.9) + 1
 print("N_vel: %3d contains %4.4f in total energy" % (Nu_g90pt, ene_accum_v[Nu_g90pt-1]/ene_accum_v[-1]))
@@ -189,4 +193,4 @@ print("Minimum Nu to be used is: ", Nu_g90pt)
 print("Minimum Nt to be used is: ", Nt_g90pt)
 print("Maximum Nu to be used is: ", Nu_max)
 print("Maximum Nt to be used is: ", Nt_max)
-print("N = ", max(Nu_l1pt, Nt_l1pt), " is suggested")
+print("N = ", max(max(Nu_l1pt,Nu_g90pt), max(Nt_l1pt,Nt_g90pt)), " is suggested")
