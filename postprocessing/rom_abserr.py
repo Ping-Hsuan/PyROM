@@ -35,7 +35,7 @@ else:
     print("Create the target directory successfully")
 print("---------------------------------------------")
 
-for root, dirs, files in os.walk("./crom/", topdown=False):
+for root, dirs, files in os.walk("./rom/", topdown=False):
     for name in files:
         if re.match('^.*_(.*)rom_.*$', name):
             pass
@@ -93,7 +93,7 @@ for nb, fnames in dict_final:
         list_of_words = [[k for k in line.split(' ') if k and k != 'dual'
                          and k != 'norm:'] for line in list_of_lines][:-1]
         data = [x[-1] for x in list_of_words]
-        data.pop(0)
+        data.pop(1)
         data = np.array(data).astype(np.float64)
         merr_proj.append(data)
         angle.append(int(forleg[-1])+90)
@@ -102,7 +102,7 @@ for nb, fnames in dict_final:
     nb = int(match_nb.groups()[0])
     data = data[data[:, 0].argsort()]
     ax.plot(data[:, 0], data[:, 1], '-o', color=colors[i],
-                mfc="None", label=r'$N = $'+str(nb))
+            mfc="None", label=r'$N = $'+str(nb))
     i += 1
 
 ax.set_ylabel(r'$\|u - \widehat{u}\|_{H^1}$')
