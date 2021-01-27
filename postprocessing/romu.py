@@ -98,6 +98,9 @@ fomu = np.loadtxt('uk')
 fomu = np.reshape(np.array(fomu).astype(np.float64),
                   (int(len(fomu)/K), K), order='F')
 
+umax = np.loadtxt('umax')
+umin = np.loadtxt('umin')
+ul_bounds = [umax, umin]
 if min(4, nb) == 1:
     fig, ax = plt.subplots(min(4, nb), sharex=True, squeeze=True, tight_layout=True)
     ax.plot(t_grid[i, K:], romu[i, K:], 'b-', mfc="None", label='N = '+str(i))
@@ -110,8 +113,11 @@ else:
     for i in range(min(4, nb)):
         axs[i].plot(t_grid[i, K:], romu[i, K:], 'b-', mfc="None", label='N = '+str(i))
         axs[i].plot(t_grid[i, K:], fomu[i+1, :], 'k-', mfc="None")
+        axs[i].hlines(y=umax[i], xmin=t_grid[i, K], xmax=t_grid[i, -1], colors='r')
+        axs[i].hlines(y=umin[i], xmin=t_grid[i, K], xmax=t_grid[i, -1], colors='r')
         axs[i].set_xlabel(r'$t$')
         axs[i].legend(loc=0)
+        axs[i].set_ylabel(r'$u_{'+str(i+1)+'}(t)$')
     fig.savefig('./romu/romu.png')
 
 uas = np.loadtxt('uas')
