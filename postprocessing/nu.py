@@ -36,7 +36,7 @@ if isExist:
 else:
     os.mkdir(os.getcwd()+'/nu/')
 
-for root, dirs, files in os.walk("./crom/", topdown=False):
+for root, dirs, files in os.walk("./nu/", topdown=False):
     for name in files:
         if re.match('^.*_(.*)rom_.*$', name):
             print(os.path.join(root, name))
@@ -74,10 +74,10 @@ for nb, fnames in dict_final:
     for fname in fnames:
 
         forleg = fname.split('_')
-        deg = int(forleg[-1])
+        deg = int(forleg[-2])
 
         # get the FOM data
-        filename = '../../fom_nuss/nuss_fom_'+str(deg+90)
+        filename = '../../../fom_nuss/nuss_fom_'+str(deg+90)
         data = mypostpro.read_nuss(filename)
         data[:, 2] = data[:, 2]/40
         idx1 = mypostpro.find_nearest(data[:, 0], 0)
@@ -133,10 +133,10 @@ for nb, fnames in dict_final:
     ax.axes.grid(True, axis='y')
     ax.legend(loc=0)
 
-np.savetxt('./nu/angle.dat', data[:, 0])
-np.savetxt('./nu/merr.dat', data[:, 1])
-np.savetxt('./nu/sderr.dat', data[:, 2])
-np.savetxt('./nu/m.dat', data[:, 3])
-np.savetxt('./nu/sd.dat', data[:, 4])
-fig.savefig('./nu/relmnu.png')
+    np.savetxt('./nu/angle.dat', data[:, 0])
+    np.savetxt('./nu/merr_N'+str(nb)+'.dat', data[:, 1])
+    np.savetxt('./nu/sderr_N'+str(nb)+'.dat', data[:, 2])
+    np.savetxt('./nu/m_N'+str(nb)+'.dat', data[:, 3])
+    np.savetxt('./nu/sd_N'+str(nb)+'.dat', data[:, 4])
+    fig.savefig('./nu/relmnu_N'+str(nb)+'.png')
 
