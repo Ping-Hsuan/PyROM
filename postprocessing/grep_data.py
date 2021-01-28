@@ -1,15 +1,18 @@
-import numpy as np
-import matplotlib
-import matplotlib.pyplot as plt
-import matplotlib.cm as cm
-from matplotlib.ticker import MaxNLocator
-from itertools import accumulate
-from matplotlib.ticker import ScalarFormatter, NullFormatter
 import re
 import os
-import subprocess
-import operator
 import sys
+
+
+def create_dir(fname):
+    # get the absolute error in ROM
+    isExist = os.path.exists(os.getcwd()+fname)
+    if isExist:
+        print("The target directory "+fname+" exist")
+        pass
+    else:
+        os.mkdir(os.getcwd()+fname)
+        print("Create the target "+fname+" directory successfully")
+    print("---------------------------------------------")
 
 
 print("---------------------------------------------")
@@ -20,7 +23,8 @@ os.chdir(str(sys.argv[1]))
 print(os.getcwd())
 print("---------------------------------------------")
 
-for root, dirs, files in os.walk("./crom/", topdown=False):
+rom_dir = str(sys.argv[2])
+for root, dirs, files in os.walk("./"+rom_dir+"/", topdown=False):
     for name in files:
         if re.match('^.*_(.*)rom_.*$', name):
             pass
@@ -28,26 +32,17 @@ for root, dirs, files in os.walk("./crom/", topdown=False):
         pass
 filenames = [name for name in files if re.match('^.*_(.*)rom_.*$', name)]
 
-def create_dir(fname):
-    # get the absolute error in ROM
-    isExist = os.path.exists(os.getcwd()+fname)
-    if isExist:
-        print("The target directory "+fname+" exist")
-        pass
-    else:
-        os.mkdir(os.getcwd()+fname)
-        print("Create the target"+fname+" directory successfully")
-    print("---------------------------------------------")
+create_dir('/'+rom_dir+'_info/')
 
+labels = ['rom_abserr', 'fom_norm', 'nu', 'romu', 'romt', 'proj_relerr', 'dual_norm']
 
-data_tpath = ['./rom_abserr/', './fom_norm/', './nu/', './romu/', './romt/', './proj_relerr/', './dual_norm/']
-data_mkdir = ['/rom_abserr/', '/fom_norm/', '/nu/', '/romu/', '/romt/', '/proj_relerr/', '/dual_norm/']
-data_fname = ['_rom_abserr', '_fom_norm', '_nu', '_romu', '_romt', '_projrelerr', '_dn']
+data_mkdir = ['/'+element+'/' for element in labels]
+data_fname = ['_'+element for element in labels]
 data_pattern = [r'^\sh1\serror:', r'^\sFOM\sh1\snorm:', r'\snus', r'\sromu', r'\sromt', r'\srelative\sh1\serror:', r'(residual in h1 norm:\s\s+)(\d\.\d+E?-?\d+)']
-]
 
-for (tpath, mkdir, label, pattern) in zip(data_tpath, data_mkdir, data_fname, data_pattern):
-    create_dir(mkdir)
+
+for (mkdir, label, pattern) in zip(data_mkdir, data_fname, data_pattern):
+    create_dir('/'+rom_dir+'_info'+mkdir)
     for fname in filenames:
         forleg = fname.split('_')
 
@@ -55,7 +50,7 @@ for (tpath, mkdir, label, pattern) in zip(data_tpath, data_mkdir, data_fname, da
         assert match_rom is not None
 
         # write out absolute error in ROM
-        ft = open(tpath+fname+label, 'w')
+        ft = open('./'+rom_dir+'_info'+mkdir+fname+label, 'w')
         with open(root+fname, 'r') as f:
             for line in f:
                 if re.search(pattern, line):
