@@ -62,7 +62,6 @@ dict_final = sorted(dic_for_files.items(), key=operator.itemgetter(0))
 
 i = 0
 tpath = './nu/'
-fig, ax = plt.subplots(1, tight_layout=True)
 
 for nb, fnames in dict_final:
     merr_list = []
@@ -100,15 +99,7 @@ for nb, fnames in dict_final:
         elif match_rom.groups()[0] == 'l':
             solver = 'Leray ROM'
 
-        # write out nu information
-        ft = open(tpath+fname+'_nu', 'w')
-        with open(root+fname, 'r') as f:
-            for line in f:
-                if re.search(r'\snus', line):
-                    ft.write(line)
-        ft.close()
-
-        nuss = mypostpro.read_nuss(tpath+fname+'_nu')
+        nuss = mypostpro.read_nuss(tpath+fname)
         nuss[:, 2] = nuss[:, 2]/40
         avgidx1 = mypostpro.find_nearest(nuss[:, 1], 501)
         rom_mean = mypostpro.cmean(nuss[avgidx1:-1, :], 2)
