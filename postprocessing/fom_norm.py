@@ -34,7 +34,7 @@ else:
     print("Create the target directory successfully")
 print("---------------------------------------------")
 
-for root, dirs, files in os.walk("./crom/", topdown=False):
+for root, dirs, files in os.walk("./fom_norm/", topdown=False):
     for name in files:
         if re.match('^.*_(.*)rom_.*$', name):
             pass
@@ -59,7 +59,6 @@ dict_final = sorted(dic_for_files.items(), key=operator.itemgetter(0))
 
 i = 0
 tpath = './fom_norm/'
-fig, ax = plt.subplots(1, tight_layout=True)
 
 for nb, fnames in dict_final:
     angle = []
@@ -78,15 +77,7 @@ for nb, fnames in dict_final:
         elif match_rom.groups()[0] == 'l':
             solver = 'Leray ROM'
 
-        # write out projection error information
-        ft = open(tpath+fname+'_fom_norm', 'w')
-        with open(root+fname, 'r') as f:
-            for line in f:
-                if re.search(r'^\sFOM\sh1\snorm:', line):
-                    ft.write(line)
-        ft.close()
-
-        with open(tpath+fname+'_fom_norm', 'r') as f:
+        with open(tpath+fname, 'r') as f:
             k = f.read()
         list_of_lines = k.split('\n')
         list_of_words = [[k for k in line.split(' ') if k and k != 'dual'
@@ -95,25 +86,25 @@ for nb, fnames in dict_final:
         data.pop(0)
         data = np.array(data).astype(np.float64)
         merr_proj.append(data)
-        angle.append(int(forleg[-1])+90)
-        print(fname)
+        angle.append(int(forleg[-3])+90)
 
     data = np.column_stack((angle, merr_proj))
     nb = int(match_nb.groups()[0])
     data = data[data[:, 0].argsort()]
+    fig, ax = plt.subplots(1, tight_layout=True)
     ax.plot(data[:, 0], data[:, 1], '-o', color=colors[i],
-                mfc="None", label=r'$N = $'+str(nb))
-    i += 1
+            mfc="None", label=r'$N = $'+str(nb))
 
-ax.set_ylabel(r'$\|u\|_{H^1}$')
-ax.set_xlabel(r'$\theta_g$')
-ax.set_xticks(np.linspace(0, 180, 5, dtype=int))
-ax.legend(loc=0)
-print("---------------------------------------------")
-fig.savefig(tpath+'fom_norm.png')
-print(tpath+'fom_norm.png saved successfully')
-np.savetxt(tpath+'angle.dat', data[:, 0])
-print(tpath+'angle.dat saved successfully')
-np.savetxt(tpath+'fom_norm.dat', data[:, 1])
-print(tpath+'fom_norm.dat saved successfully')
-print("---------------------------------------------")
+    ax.set_ylabel(r'$\|u\|_{H^1}$')
+    ax.set_xlabel(r'$\theta_g$')
+    ax.set_xticks(np.linspace(0, 180, 5, dtype=int))
+    ax.legend(loc=0)
+    print("---------------------------------------------")
+    fig.savefig(tpath+'fom_norm.png')
+    print(tpath+'fom_norm.png saved successfully')
+    np.savetxt(tpath+'angle.dat', data[:, 0])
+    print(tpath+'angle.dat saved successfully')
+    np.savetxt(tpath+'fom_norm.dat', data[:, 1])
+    print(tpath+'fom_norm.dat saved successfully')
+    print("---------------------------------------------")
+    i += 1
