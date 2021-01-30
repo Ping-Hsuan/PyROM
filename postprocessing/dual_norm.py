@@ -1,17 +1,11 @@
 import numpy as np
-import numpy.linalg as LA
 import matplotlib
 import matplotlib.pyplot as plt
 import matplotlib.cm as cm
-from matplotlib.ticker import MaxNLocator
-from itertools import accumulate
-from matplotlib.ticker import ScalarFormatter, NullFormatter
 import re
 import os
 import sys
-import subprocess
 import operator
-from operator import itemgetter, attrgetter
 
 plt.style.use('report')
 
@@ -33,11 +27,8 @@ if isExist:
     pass
 else:
     os.mkdir(os.getcwd()+'/dual_norm/')
-print(os.getcwd())
-#os.chdir('./crom/')
-#print(os.getcwd())
 
-for root, dirs, files in os.walk("./crom/", topdown=False):
+for root, dirs, files in os.walk("./dual_norm/", topdown=False):
     for name in files:
         if re.match('^.*_(.*)rom_.*$', name):
             print(os.path.join(root, name))
@@ -58,21 +49,11 @@ for fname in filenames:
 colors = cm.Set1(np.linspace(0, 1, 9))
 color_ctr = 0
 
-
-def atoi(text):
-    return int(text) if text.isdigit() else text
-
-
-def natural_keys(text):
-    return [atoi(c) for c in re.split('(\d+)', text)]
-
-
 dict_final = sorted(dic_for_files.items(), key=operator.itemgetter(0))
 
 i = 0
-pattern = re.compile(r'(residual in h1 norm:\s\s+)(\d\.\d+E?-?\d+)')
 tpath = './dual_norm/'
-fig, ax = plt.subplots(1, tight_layout=True)
+
 for nb, fnames in dict_final:
     erri = []
     angle = []
@@ -82,6 +63,7 @@ for nb, fnames in dict_final:
         pl = 1
 
         match_rom = re.match('^.*_(.*)rom_.*$', fname)
+        assert match_rom is not None
 
         if match_rom.groups()[0] == '':
             solver = 'Galerkin ROM'
@@ -90,36 +72,29 @@ for nb, fnames in dict_final:
         elif match_rom.groups()[0] == 'l':
             solver = 'Leray ROM'
 
-        assert match_rom is not None
-
-        with open(root+fname, 'r') as f:
-            contents = f.read()
-            matches = pattern.finditer(contents)
-            for match in matches:
-                print(match)
-                dual_norm = match.group(2)
+        with open(tpath+fname, 'r') as f:
+              k = f.read()
+        list_of_lines = k.split('\n')
+        list_of_words = [[k for k in line.split(' ') if k and k != 'dual' and k != 'norm:'] for line in list_of_lines][:-1]
+        data = [x[-1] for x in list_of_words]
+        dual_norm = np.array(data).astype(np.float64)
 
         erri.append(float(dual_norm))
-        angle.append(int(forleg[-1])+90)
-
-        with open(tpath+fname+'_dn', 'w') as f:
-            f.write(dual_norm)
+        angle.append(int(forleg[-3])+90)
 
     data = np.column_stack((angle, erri))
     data = data[data[:, 0].argsort()]
-    print(data[:, 0])
-    print(data[:, 1])
-    print(type(data[:, 0]))
-    print(type(data[:, 1]))
+    fig, ax = plt.subplots(1, tight_layout=True)
     ax.semilogy(data[:, 0], data[:, 1], '-o', color=colors[i],
                 mfc="None", label=r'$N = $'+str(nb))
-    i += 1
 
-ax.set_ylabel(r'$\triangle$')
-ax.set_xlabel(r'$\theta_g$')
-ax.set_xticks(np.linspace(0, 180, 5, dtype=int))
-ax.set_ylim([1e-2, 1])
-ax.legend(loc=0, ncol=2)
-fig.savefig(tpath+'online.png')
-np.savetxt(tpath+'angle.dat', data[:, 0])
-np.savetxt(tpath+'erri.dat', data[:, 1])
+    ax.set_ylabel(r'$\triangle$')
+    ax.set_xlabel(r'$\theta_g$')
+    ax.set_xticks(np.linspace(0, 180, 5, dtype=int))
+    ax.set_ylim([1e-2, 1])
+    ax.legend(loc=0, ncol=2)
+    fig.savefig(tpath+'online_N'+str(nb)+'.png')
+    np.savetxt(tpath+'angle.dat', data[:, 0])
+    np.savetxt(tpath+'erri_N'+str(nb)+'.dat', data[:, 1])
+
+    i += 1
