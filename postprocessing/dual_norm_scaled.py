@@ -21,10 +21,9 @@ matplotlib.rcParams['text.latex.preamble'] = [
 print("---------------------------------------------")
 print("This is the name of the program:", sys.argv[0])
 print("Argument List:", str(sys.argv))
-print(os.getcwd())
 os.chdir(str(sys.argv[1]))
-print(os.getcwd())
 print("---------------------------------------------")
+N = str(sys.argv[2])
 
 isExist = os.path.exists(os.getcwd()+'/dual_norm_scaled/')
 if isExist:
@@ -37,16 +36,17 @@ print("---------------------------------------------")
 
 root = os.getcwd()
 sp1 = (root.split('/'))
-sp2 = (sp1.pop())
-sp3 = sp2.split('_')
-anchor = float(sp3.pop())
+for element in sp1:
+    z = re.match(r"theta_(\d+)", element)
+    if z:
+        anchor = float(((z.groups())[0]))
 
 tpath = './dual_norm_scaled/'
 
 # compute the dual_norm_scaled
 angle = np.loadtxt(root+'/dual_norm/angle.dat')
-residual = np.loadtxt(root+'/dual_norm/erri.dat')
-effectivity = np.loadtxt(root+'/effectivity/effectivity.dat')
+residual = np.loadtxt(root+'/dual_norm/erri_N'+N+'.dat')
+effectivity = np.loadtxt(root+'/effectivity/effectivity_N'+N+'.dat')
 # find the index associated to the anchor point
 idx = (np.where(angle == anchor))
 dual_norm_scaled = residual/effectivity[idx]
@@ -56,12 +56,11 @@ ax.semilogy(angle, dual_norm_scaled, 'k-o', mfc="None")
 ax.set_ylabel(r'$\triangle^{scaled}$')
 ax.set_xlabel(r'$\theta_g$')
 ax.set_xticks(np.linspace(0, 180, 5, dtype=int))
-#ax.legend(loc=0)
 print("---------------------------------------------")
-fig.savefig(tpath+'dual_norm_scaled.png')
+fig.savefig(tpath+'dual_norm_scaled_N'+N+'.png')
 print(tpath+'dual_norm_scaled.png saved successfully')
 np.savetxt(tpath+'angle.dat', angle)
 print(tpath+'angle.dat saved successfully')
-np.savetxt(tpath+'dual_norm_scaled.dat', dual_norm_scaled)
+np.savetxt(tpath+'dual_norm_scaled_N'+N+'.dat', dual_norm_scaled)
 print(tpath+'dual_norm_scaled.dat saved successfully')
 print("---------------------------------------------")
