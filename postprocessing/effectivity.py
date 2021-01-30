@@ -21,9 +21,8 @@ matplotlib.rcParams['text.latex.preamble'] = [
 print("---------------------------------------------")
 print("This is the name of the program:", sys.argv[0])
 print("Argument List:", str(sys.argv))
-print(os.getcwd())
 os.chdir(str(sys.argv[1]))
-print(os.getcwd())
+N = str(sys.argv[2])
 print("---------------------------------------------")
 
 isExist = os.path.exists(os.getcwd()+'/effectivity/')
@@ -40,8 +39,8 @@ tpath = './effectivity/'
 
 # compute the effectivity
 angle = np.loadtxt(root+'/dual_norm/angle.dat')
-residual = np.loadtxt(root+'/dual_norm/erri.dat')
-rom_abserr = np.loadtxt(root+'/rom_abserr/rom_abserr.dat')
+residual = np.loadtxt(root+'/dual_norm/erri_N'+N+'.dat')
+rom_abserr = np.loadtxt(root+'/rom_abserr/rom_abserr_N'+N+'.dat')
 effectivity = residual/rom_abserr
 
 fig, ax = plt.subplots(1, tight_layout=True)
@@ -49,12 +48,11 @@ ax.semilogy(angle, effectivity, 'k-o', mfc="None")
 ax.set_ylabel(r'$\eta$')
 ax.set_xlabel(r'$\theta_g$')
 ax.set_xticks(np.linspace(0, 180, 5, dtype=int))
-#ax.legend(loc=0)
 print("---------------------------------------------")
-fig.savefig(tpath+'effectivity.png')
+fig.savefig(tpath+'effectivity_N'+N+'.png')
 print(tpath+'effectivity.png saved successfully')
 np.savetxt(tpath+'angle.dat', angle)
 print(tpath+'angle.dat saved successfully')
-np.savetxt(tpath+'effectivity.dat', effectivity)
+np.savetxt(tpath+'effectivity_N'+N+'.dat', effectivity)
 print(tpath+'effectivity.dat saved successfully')
 print("---------------------------------------------")
