@@ -63,6 +63,7 @@ for nb, fnames in dict_final:
         pl = 1
 
         match_rom = re.match('^.*_(.*)rom_.*$', fname)
+        assert match_rom is not None
 
         if match_rom.groups()[0] == '':
             solver = 'Galerkin ROM'
@@ -71,7 +72,6 @@ for nb, fnames in dict_final:
         elif match_rom.groups()[0] == 'l':
             solver = 'Leray ROM'
 
-        assert match_rom is not None
 
         with open(tpath+fname, 'r') as f:
               k = f.read()
