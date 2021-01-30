@@ -1,16 +1,10 @@
 import numpy as np
-import numpy.linalg as LA
 import matplotlib
 import matplotlib.pyplot as plt
 import matplotlib.cm as cm
-from matplotlib.ticker import MaxNLocator
-from itertools import accumulate
-from matplotlib.ticker import ScalarFormatter, NullFormatter
 import re
 import os
-import subprocess
 import operator
-from operator import itemgetter, attrgetter
 import sys
 sys.path.append('/Users/bigticket0501/Developer/PyMOR/code/plot_helpers/')
 import mypostpro
