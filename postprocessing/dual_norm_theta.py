@@ -17,10 +17,13 @@ matplotlib.rcParams['text.latex.preamble'] = [
        r'\sansmath'               # <- tricky! -- gotta actually tell tex to use!
 ]
 
+print("---------------------------------------------")
 print("This is the name of the program:", sys.argv[0])
 print("Argument List:", str(sys.argv))
 os.chdir(str(sys.argv[1]))
 deg = str(int(sys.argv[2])-90)
+print("---------------------------------------------")
+
 isExist = os.path.exists(os.getcwd()+'/dual_norm/')
 if isExist:
     pass
@@ -58,8 +61,6 @@ N_list = []
 data = []
 for nb in dict_final:
     fname = (dict_final.get(nb)).pop()
-    forleg = fname.split('_')
-    pl = 1
 
     match_rom = re.match('^.*_(.*)rom_.*$', fname)
     assert match_rom is not None
@@ -89,11 +90,13 @@ ax.semilogy(data[:, 0], data[:, 1], 'k-o',
             mfc="None")
 ax.set_ylabel(r'$\triangle('+str(int(deg)+90)+')$')
 ax.set_xlabel(r'$N$')
-ax.set_xticks(np.linspace(0, 180, 5, dtype=int))
+ax.set_xlim([1, max(data[:, 0])])
 ax.set_ylim([1e-2, 1])
 ax.legend(loc=0, ncol=2)
+
+print("---------------------------------------------")
 fig.savefig(tpath+'dual_norm_theta_'+str(int(deg)+90)+'.png')
 np.savetxt(tpath+'N_list_'+str(int(deg)+90)+'.dat', data[:, 0])
 np.savetxt(tpath+'erri_theta_'+str(int(deg)+90)+'.dat', data[:, 1])
-
+print("---------------------------------------------")
 
