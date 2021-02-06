@@ -70,7 +70,7 @@ for nb, fnames in dict_final:
         deg = int(forleg[-2])
 
         # get the FOM data
-        filename = '../../../fom_nuss/nuss_fom_'+str(deg+90)
+        filename = '../../../../fom_nuss/nuss_fom_'+str(deg+90)
         data = mypostpro.read_nuss(filename)
         data[:, 2] = data[:, 2]/40
         idx1 = mypostpro.find_nearest(data[:, 0], 0)
@@ -95,7 +95,7 @@ for nb, fnames in dict_final:
 
         nuss = mypostpro.read_nuss(tpath+fname)
         nuss[:, 2] = nuss[:, 2]/40
-        avgidx1 = mypostpro.find_nearest(nuss[:, 1], 501)
+        avgidx1 = mypostpro.find_nearest(nuss[:, 1], int(sys.argv[2]))
         rom_mean = mypostpro.cmean(nuss[avgidx1:-1, :], 2)
         rom_var = mypostpro.cvar(nuss[avgidx1:-1, :], rom_mean, 2)
         rom_sd = mypostpro.csd(nuss[avgidx1:-1, :], rom_mean, 2)
