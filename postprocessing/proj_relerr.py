@@ -51,7 +51,13 @@ color_ctr = 0
 
 dict_final = sorted(dic_for_files.items(), key=operator.itemgetter(0))
 
-i = 0
+root = os.getcwd()
+sp1 = (root.split('/'))
+for element in sp1:
+    z = re.match(r"theta_(\d+)", element)
+    if z:
+        anchor = float(((z.groups())[0]))
+
 tpath = './proj_relerr/'
 
 for nb, fnames in dict_final:
@@ -86,16 +92,15 @@ for nb, fnames in dict_final:
     data = np.column_stack((angle, merr_proj))
     data = data[data[:, 0].argsort()]
     fig, ax = plt.subplots(1, tight_layout=True)
-    ax.semilogy(data[:, 0], data[:, 1], '-o', color=colors[i],
-                mfc="None", label=r'$N = $'+str(nb))
+    ax.semilogy(data[:, 0], data[:, 1], 'k-o',
+                mfc="None", label=r'$N = $'+str(nb)+', '+r'$\theta^*_g = '+str(int(anchor))+'$')
 
     ax.set_ylabel(r'$\frac{\|u - \mathcal{P}u\|_{H^1}}{\|u\|_{H^1}}$')
     ax.set_xlabel(r'$\theta_g$')
     ax.set_xticks(np.linspace(0, 180, 5, dtype=int))
-    ax.set_ylim([1e-2, 1])
+    ax.set_ylim([1e-3, 1])
     ax.legend(loc=0, ncol=2)
     fig.savefig(tpath+'proj_relerr_N'+str(nb)+'.png')
     np.savetxt(tpath+'angle.dat', data[:, 0])
     np.savetxt(tpath+'proj_relerr_N'+str(nb)+'.dat', data[:, 1])
 
-    i += 1
