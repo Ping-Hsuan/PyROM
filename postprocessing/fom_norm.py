@@ -20,9 +20,7 @@ matplotlib.rcParams['text.latex.preamble'] = [
 print("---------------------------------------------")
 print("This is the name of the program:", sys.argv[0])
 print("Argument List:", str(sys.argv))
-print(os.getcwd())
 os.chdir(str(sys.argv[1]))
-print(os.getcwd())
 print("---------------------------------------------")
 
 isExist = os.path.exists(os.getcwd()+'/fom_norm/')
@@ -92,8 +90,7 @@ for nb, fnames in dict_final:
     nb = int(match_nb.groups()[0])
     data = data[data[:, 0].argsort()]
     fig, ax = plt.subplots(1, tight_layout=True)
-    ax.plot(data[:, 0], data[:, 1], '-o', color=colors[i],
-            mfc="None", label=r'$N = $'+str(nb))
+    ax.plot(data[:, 0], data[:, 1], 'k-o', mfc="None")
 
     ax.set_ylabel(r'$\|u\|_{H^1}$')
     ax.set_xlabel(r'$\theta_g$')
