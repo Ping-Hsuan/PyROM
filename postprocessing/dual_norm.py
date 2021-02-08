@@ -19,9 +19,8 @@ matplotlib.rcParams['text.latex.preamble'] = [
 
 print("This is the name of the program:", sys.argv[0])
 print("Argument List:", str(sys.argv))
-print(os.getcwd())
 os.chdir(str(sys.argv[1]))
-print(os.getcwd())
+N = int(sys.argv[2])
 isExist = os.path.exists(os.getcwd()+'/dual_norm/')
 if isExist:
     pass
@@ -51,50 +50,57 @@ color_ctr = 0
 
 dict_final = sorted(dic_for_files.items(), key=operator.itemgetter(0))
 
-i = 0
+root = os.getcwd()
+sp1 = (root.split('/'))
+for element in sp1:
+    z = re.match(r"theta_(\d+)", element)
+    if z:
+        anchor = float(((z.groups())[0]))
+
 tpath = './dual_norm/'
 
 for nb, fnames in dict_final:
     erri = []
     angle = []
     data = []
-    for fname in fnames:
-        forleg = fname.split('_')
-        pl = 1
+    if nb == N:
+        for fname in fnames:
+            forleg = fname.split('_')
+            pl = 1
 
-        match_rom = re.match('^.*_(.*)rom_.*$', fname)
-        assert match_rom is not None
+            match_rom = re.match('^.*_(.*)rom_.*$', fname)
+            assert match_rom is not None
 
-        if match_rom.groups()[0] == '':
-            solver = 'Galerkin ROM'
-        elif match_rom.groups()[0] == 'c':
-            solver = 'Constrained ROM'
-        elif match_rom.groups()[0] == 'l':
-            solver = 'Leray ROM'
+            if match_rom.groups()[0] == '':
+                solver = 'Galerkin ROM'
+            elif match_rom.groups()[0] == 'c':
+                solver = 'Constrained ROM'
+            elif match_rom.groups()[0] == 'l':
+                solver = 'Leray ROM'
 
-        with open(tpath+fname, 'r') as f:
-              k = f.read()
-        list_of_lines = k.split('\n')
-        list_of_words = [[k for k in line.split(' ') if k and k != 'dual' and k != 'norm:'] for line in list_of_lines][:-1]
-        data = [x[-1] for x in list_of_words]
-        dual_norm = np.array(data).astype(np.float64)
+            with open(tpath+fname, 'r') as f:
+                  k = f.read()
+            list_of_lines = k.split('\n')
+            list_of_words = [[k for k in line.split(' ') if k and k != 'dual' and k != 'norm:'] for line in list_of_lines][:-1]
+            data = [x[-1] for x in list_of_words]
+            dual_norm = np.array(data).astype(np.float64)
 
-        erri.append(float(dual_norm))
-        angle.append(int(forleg[-3])+90)
+            erri.append(float(dual_norm))
+            angle.append(int(forleg[-3])+90)
 
-    data = np.column_stack((angle, erri))
-    data = data[data[:, 0].argsort()]
-    fig, ax = plt.subplots(1, tight_layout=True)
-    ax.semilogy(data[:, 0], data[:, 1], '-o', color=colors[i],
-                mfc="None", label=r'$N = $'+str(nb))
+        data = np.column_stack((angle, erri))
+        data = data[data[:, 0].argsort()]
+        fig, ax = plt.subplots(1, tight_layout=True)
+        ax.semilogy(data[:, 0], data[:, 1], 'k-o',
+                    mfc="None", label=r'$N = $'+str(nb)+', '+r'$\theta^*_g = '+str(int(anchor))+'$')
 
-    ax.set_ylabel(r'$\triangle$')
-    ax.set_xlabel(r'$\theta_g$')
-    ax.set_xticks(np.linspace(0, 180, 5, dtype=int))
-    ax.set_ylim([1e-2, 1])
-    ax.legend(loc=0, ncol=2)
-    fig.savefig(tpath+'online_N'+str(nb)+'.png')
-    np.savetxt(tpath+'angle.dat', data[:, 0])
-    np.savetxt(tpath+'erri_N'+str(nb)+'.dat', data[:, 1])
+        ax.set_ylabel(r'$\triangle(\theta_g)$')
+        ax.set_xlabel(r'$\theta_g$')
+        ax.set_xticks(np.linspace(0, 180, 5, dtype=int))
+        ax.set_ylim([1e-2, 1])
+        ax.legend(loc=0, ncol=2)
+        fig.savefig(tpath+'online_N'+str(nb)+'.png')
+        np.savetxt(tpath+'angle.dat', data[:, 0])
+        np.savetxt(tpath+'erri_N'+str(nb)+'.dat', data[:, 1])
+        plt.close(fig)
 
-    i += 1
