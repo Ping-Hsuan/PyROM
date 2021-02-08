@@ -21,9 +21,8 @@ matplotlib.rcParams['text.latex.preamble'] = [
 print("---------------------------------------------")
 print("This is the name of the program:", sys.argv[0])
 print("Argument List:", str(sys.argv))
-print(os.getcwd())
 os.chdir(str(sys.argv[1]))
-print(os.getcwd())
+N = int(sys.argv[2])
 print("---------------------------------------------")
 
 isExist = os.path.exists(os.getcwd()+'/rom_abserr/')
@@ -58,54 +57,53 @@ color_ctr = 0
 
 dict_final = sorted(dic_for_files.items(), key=operator.itemgetter(0))
 
-i = 0
 tpath = './rom_abserr/'
 
 for nb, fnames in dict_final:
     angle = []
     data = []
     merr_proj = []
-    for fname in fnames:
-        forleg = fname.split('_')
+    if nb == N:
+        for fname in fnames:
+            forleg = fname.split('_')
 
-        match_rom = re.match('^.*_(.*)rom_.*$', fname)
-        assert match_rom is not None
+            match_rom = re.match('^.*_(.*)rom_.*$', fname)
+            assert match_rom is not None
 
-        if match_rom.groups()[0] == '':
-            solver = 'Galerkin ROM'
-        elif match_rom.groups()[0] == 'c':
-            solver = 'Constrained ROM'
-        elif match_rom.groups()[0] == 'l':
-            solver = 'Leray ROM'
+            if match_rom.groups()[0] == '':
+                solver = 'Galerkin ROM'
+            elif match_rom.groups()[0] == 'c':
+                solver = 'Constrained ROM'
+            elif match_rom.groups()[0] == 'l':
+                solver = 'Leray ROM'
 
-        with open(tpath+fname, 'r') as f:
-            k = f.read()
-        list_of_lines = k.split('\n')
-        list_of_words = [[k for k in line.split(' ') if k and k != 'dual'
-                         and k != 'norm:'] for line in list_of_lines][:-1]
-        data = [x[-1] for x in list_of_words]
-        data.pop(1)
-        data = np.array(data).astype(np.float64)
-        merr_proj.append(data)
-        angle.append(int(forleg[-3])+90)
+            with open(tpath+fname, 'r') as f:
+                k = f.read()
+            list_of_lines = k.split('\n')
+            list_of_words = [[k for k in line.split(' ') if k and k != 'dual'
+                             and k != 'norm:'] for line in list_of_lines][:-1]
+            data = [x[-1] for x in list_of_words]
+            data.pop(1)
+            data = np.array(data).astype(np.float64)
+            merr_proj.append(data)
+            angle.append(int(forleg[-3])+90)
 
-    data = np.column_stack((angle, merr_proj))
-    data = data[data[:, 0].argsort()]
-    fig, ax = plt.subplots(1, tight_layout=True)
-    ax.plot(data[:, 0], data[:, 1], '-o', color=colors[i],
-            mfc="None", label=r'$N = $'+str(nb))
+        data = np.column_stack((angle, merr_proj))
+        data = data[data[:, 0].argsort()]
+        fig, ax = plt.subplots(1, tight_layout=True)
+        ax.plot(data[:, 0], data[:, 1], 'k-o',
+                mfc="None", label=r'$N = $'+str(nb))
 
-    ax.set_ylabel(r'$\|u - \widehat{u}\|_{H^1}$')
-    ax.set_xlabel(r'$\theta_g$')
-    ax.set_xticks(np.linspace(0, 180, 5, dtype=int))
-    ax.legend(loc=0)
-    print("---------------------------------------------")
-    fig.savefig(tpath+'rom_abserr_N'+str(nb)+'.png')
-    print(tpath+'rom_abserr_N'+str(nb)+'.png saved successfully')
-    np.savetxt(tpath+'angle.dat', data[:, 0])
-    print(tpath+'angle.dat saved successfully')
-    np.savetxt(tpath+'rom_abserr_N'+str(nb)+'.dat', data[:, 1])
-    print(tpath+'rom_abserr_N'+str(nb)+'.dat saved successfully')
-    print("---------------------------------------------")
+        ax.set_ylabel(r'$\|u - \widehat{u}\|_{H^1}$')
+        ax.set_xlabel(r'$\theta_g$')
+        ax.set_xticks(np.linspace(0, 180, 5, dtype=int))
+        ax.legend(loc=0)
+        print("---------------------------------------------")
+        fig.savefig(tpath+'rom_abserr_N'+str(nb)+'.png')
+        print(tpath+'rom_abserr_N'+str(nb)+'.png saved successfully')
+        np.savetxt(tpath+'angle.dat', data[:, 0])
+        print(tpath+'angle.dat saved successfully')
+        np.savetxt(tpath+'rom_abserr_N'+str(nb)+'.dat', data[:, 1])
+        print(tpath+'rom_abserr_N'+str(nb)+'.dat saved successfully')
+        print("---------------------------------------------")
 
-    i += 1
