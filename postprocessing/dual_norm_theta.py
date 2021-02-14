@@ -88,7 +88,7 @@ data = data[data[:, 0].argsort()]
 fig, ax = plt.subplots(1, tight_layout=True)
 ax.semilogy(data[:, 0], data[:, 1], 'k-o',
             mfc="None")
-ax.set_ylabel(r'$\triangle('+str(int(deg)+90)+')$')
+ax.set_ylabel(r'$\triangle(\theta_g='+str(int(deg)+90)+')$')
 ax.set_xlabel(r'$N$')
 ax.set_xlim([1, max(data[:, 0])])
 ax.set_ylim([1e-2, 1])
