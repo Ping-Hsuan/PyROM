@@ -87,19 +87,21 @@ nb_match = re.match(r"^.*_(\d+)nb_.*", fname)
 K = int(K_match.groups()[0])
 nb = int(nb_match.groups()[0])
 T = int(len(romu)/nb)
+
+t_grid = np.reshape(np.array(t_grid).astype(np.float64),
+                    (nb, T), order='F')
 sp1 = fname.split('_')
 for element in sp1:
     if re.match(r"zero", element):
-        T0 = K
+        T0 = 500
     elif re.match(r"ic", element):
         T0 = 0
+        t_grid += 500
 
 print(f'Information K: {K}, N: {nb}, T:{T}, T0: {T0}')
 romu = np.reshape(np.array(romu).astype(np.float64),
                   (nb, T), order='F')
 
-t_grid = np.reshape(np.array(t_grid).astype(np.float64),
-                    (nb, T), order='F')
 fomu = np.loadtxt(ops_path+'uk')
 fomu = np.reshape(np.array(fomu).astype(np.float64),
                   (int(len(fomu)/K), K), order='F')
@@ -120,31 +122,36 @@ for j in range(nb):
 if min(4, nb) == 1:
     fig, ax = plt.subplots(min(4, nb), sharex=True, squeeze=True, tight_layout=True)
     ax.plot(t_grid[i, T0:], romu[i, T0:], 'b-', mfc="None", label='ROM')
-    ax.plot(t_grid[i, T0:], fomu[i+1, :], 'k-', mfc="None", label='Snapshot')
+    ax.plot(np.linspace(500, 1000, K), fomu[i+1, :], 'k-', mfc="None", label='Snapshot')
     ax.hlines(y=umax[i], xmin=t_grid[i, 0], xmax=t_grid[i, -1], colors='r')
     ax.hlines(y=umin[i], xmin=t_grid[i, 0], xmax=t_grid[i, -1], colors='r')
     ax.hlines(y=uas[i+1], xmin=t_grid[i, 0], xmax=t_grid[i, -1], colors='k', linestyle='--', label='Snapshot avg')
+    ax.hlines(y=ua[i], xmin=t_grid[i, 0], xmax=t_grid[i, -1], colors='b', linestyle='--', label='ROM avg')
     ax.annotate('Snap std:'+"%.2e"% uvs[i+1], xy=(0, 0.2), xytext=(12, -12), va='top',
                 xycoords='axes fraction', textcoords='offset points')
-    ax.annotate('ROM std:'+"%.2e"% uv[i], xy=(0, 0.25), xytext=(12, -12), va='top',
+    ax.annotate('ROM std:'+"%.2e"% uv[i], xy=(0, 0.27), xytext=(12, -12), va='top',
                 xycoords='axes fraction', textcoords='offset points')
     ax.set_xlabel(r'$t$')
-    ax.legend(loc=0)
     ax.set_ylabel(r'$u_{'+str(i+1)+'}(t)$')
-    fig.savefig('./romu/romu_N'+N+'.png')
+    ax.legend(loc='upper left', bbox_to_anchor= (0.0, 1.11), ncol=4,
+           borderaxespad=0, frameon=False)
 else:
     fig, axs = plt.subplots(min(4, nb), sharex=True, squeeze=True, tight_layout=True)
     for i in range(min(4, nb)):
-        print(i)
         axs[i].plot(t_grid[i, T0:], romu[i, T0:], 'b-', mfc="None", label='ROM')
-        axs[i].plot(t_grid[i, T0:], fomu[i+1, :], 'k-', mfc="None", label='Snapshot')
+        axs[i].plot(np.linspace(500, 1000, K), fomu[i+1, :], 'k-', mfc="None", label='Snapshot')
         axs[i].hlines(y=umax[i], xmin=t_grid[i, 0], xmax=t_grid[i, -1], colors='r')
         axs[i].hlines(y=umin[i], xmin=t_grid[i, 0], xmax=t_grid[i, -1], colors='r')
         axs[i].hlines(y=uas[i+1], xmin=t_grid[i, 0], xmax=t_grid[i, -1], colors='k', linestyle='--', label='Snapshot avg')
+        axs[i].hlines(y=ua[i], xmin=t_grid[i, 0], xmax=t_grid[i, -1], colors='b', linestyle='--', label='ROM avg')
         axs[i].set_xlabel(r'$t$')
-        axs[i].legend(loc=0)
         axs[i].set_ylabel(r'$u_{'+str(i+1)+'}(t)$')
-    fig.savefig('./romu/romu_N'+N+'.png')
+        if i == 0:
+            ax = axs[i]
+    ax.legend(loc='upper left', bbox_to_anchor= (0.0, 1.51), ncol=4,
+           borderaxespad=0, frameon=False)
+
+fig.savefig('./romu/romu_N'+N+'.png')
 
 fig, axs = plt.subplots(2, sharex=True, tight_layout=True)
 
