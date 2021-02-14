@@ -66,16 +66,23 @@ for nb, fnames in dict_final:
     if nb == N:
         for fname in fnames:
             forleg = fname.split('_')
+            print(fname)
 
-            match_rom = re.match('^.*_(.*)rom_.*$', fname)
+            match_rom = re.match('^.*_(.*)rom_([0-9]*)nb_.*$', fname)
             assert match_rom is not None
 
             if match_rom.groups()[0] == '':
                 solver = 'Galerkin ROM'
+                print(solver)
+                angle.append(int(forleg[-3])+90)
             elif match_rom.groups()[0] == 'c':
                 solver = 'Constrained ROM'
+                print(solver)
+                angle.append(int(forleg[-3])+90)
             elif match_rom.groups()[0] == 'l':
                 solver = 'Leray ROM'
+                print(solver)
+                angle.append(int(forleg[-4])+90)
 
             with open(tpath+fname, 'r') as f:
                 k = f.read()
@@ -86,7 +93,6 @@ for nb, fnames in dict_final:
             data.pop(1)
             data = np.array(data).astype(np.float64)
             merr_proj.append(data)
-            angle.append(int(forleg[-3])+90)
 
         data = np.column_stack((angle, merr_proj))
         data = data[data[:, 0].argsort()]
