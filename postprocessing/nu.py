@@ -72,8 +72,21 @@ for nb, fnames in dict_final:
     if nb == N:
         for fname in fnames:
 
+            match_rom = re.match('^.*_(.*)rom_.*$', fname)
             forleg = fname.split('_')
-            deg = int(forleg[-2])
+
+            assert match_rom is not None
+
+            if match_rom.groups()[0] == '':
+                solver = 'Galerkin ROM'
+                deg = int(forleg[-2])
+            elif match_rom.groups()[0] == 'c':
+                solver = 'Constrained ROM'
+                deg = int(forleg[-2])
+            elif match_rom.groups()[0] == 'l':
+                solver = 'Leray ROM'
+                deg = int(forleg[-3])
+
 
             # get the FOM data
             filename = '../../../../fom_nuss/nuss_fom_'+str(deg+90)
@@ -88,16 +101,6 @@ for nb, fnames in dict_final:
             fom_sd = mypostpro.csd(nuss_fom[avgidx1:idx2], fom_mean, 2)
             print('FOM data at deg '+str(deg), fom_mean, fom_var, fom_sd)
 
-            match_rom = re.match('^.*_(.*)rom_.*$', fname)
-
-            assert match_rom is not None
-
-            if match_rom.groups()[0] == '':
-                solver = 'Galerkin ROM'
-            elif match_rom.groups()[0] == 'c':
-                solver = 'Constrained ROM'
-            elif match_rom.groups()[0] == 'l':
-                solver = 'Leray ROM'
 
             nuss = mypostpro.read_nuss(tpath+fname)
             nuss[:, 2] = nuss[:, 2]/40
