@@ -12,11 +12,12 @@ setup.style(1)
 colors = setup.color(0)
 setup.text()
 
+print("---------------------------------------------")
 print("This is the name of the program:", sys.argv[0])
 print("Argument List:", str(sys.argv))
 os.chdir(str(sys.argv[1]))
 N = str(sys.argv[2])
-print(os.getcwd())
+print("---------------------------------------------")
 target_dir = '/dual_norm'
 
 setup.checkdir(target_dir)
@@ -30,7 +31,6 @@ anchor = setup.find_anchor()
 
 color_ctr = 0
 tpath = root+'/'
-
 
 for nb, fnames in dict_final:
     erri = []
@@ -69,7 +69,6 @@ for nb, fnames in dict_final:
                ylim=[1e-2, 1])
 
         ax.semilogy(data[:, 0], data[:, 1], **plot_params)
-
         ax.legend(loc=0)
 
         fig.savefig(tpath+'online_N'+str(nb)+'.png')
