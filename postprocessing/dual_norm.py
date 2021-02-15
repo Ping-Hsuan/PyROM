@@ -31,12 +31,15 @@ anchor = setup.find_anchor()
 color_ctr = 0
 tpath = root+'/'
 
+
 for nb, fnames in dict_final:
     erri = []
     angle = []
     data = []
+    plot_params = {'c': 'k', 'marker': 'o', 'mfc': 'None',
+                   'label': r'$N = $'+str(nb)+', ' +
+                   r'$\theta^*_g = '+str(int(anchor))+'$'}
     if nb == N:
-        print(nb)
         for fname in fnames:
             forleg = fname.split('_')
             pl = 1
@@ -59,18 +62,19 @@ for nb, fnames in dict_final:
 
         data = np.column_stack((angle, erri))
         data = data[data[:, 0].argsort()]
-        fig, ax = plt.subplots(1, tight_layout=True)
-        ax.semilogy(data[:, 0], data[:, 1], 'k-o',
-                    mfc="None", label=r'$N = $'+str(nb)+', '+r'$\theta^*_g = '+str(int(anchor))+'$')
 
-        ax.set_ylabel(r'$\triangle(\theta_g)$')
-        ax.set_xlabel(r'$\theta_g$')
-        ax.set_xticks(np.linspace(0, 180, 5, dtype=int))
-        ax.set_ylim([1e-2, 1])
-        ax.legend(loc=0, ncol=2)
-        print(os.getcwd())
+        fig, ax = plt.subplots(1, tight_layout=True)
+        ax.set(xlabel=r'$\theta_g$', ylabel=r'$\triangle(\theta_g)$',
+               xticks=np.linspace(0, 180, 5, dtype=int),
+               ylim=[1e-2, 1])
+
+        ax.semilogy(data[:, 0], data[:, 1], **plot_params)
+
+        ax.legend(loc=0)
+
         fig.savefig(tpath+'online_N'+str(nb)+'.png')
         np.savetxt(tpath+'angle.dat', data[:, 0])
         np.savetxt(tpath+'erri_N'+str(nb)+'.dat', data[:, 1])
+
         plt.close(fig)
 
