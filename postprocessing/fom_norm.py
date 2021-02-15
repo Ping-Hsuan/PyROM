@@ -6,81 +6,45 @@ import re
 import os
 import sys
 import operator
+sys.path.append('/Users/bigticket0501/Developer/PyMOR/code/plot_helpers/')
+import setup
+import reader
+import checker
 
-plt.style.use('report')
-
-matplotlib.rcParams['text.latex.preamble'] = [
-       r'\usepackage{siunitx}',   # i need upright \micro symbols, but you need...
-       r'\sisetup{detect-all}',   # ...this to force siunitx to actually use your fonts
-       r'\usepackage{helvet}',    # set the normal font here
-       r'\usepackage{sansmath}',  # load up the sansmath so that math -> helvet
-       r'\sansmath'               # <- tricky! -- gotta actually tell tex to use!
-]
+setup.style(1)
+colors = setup.color(0)
+setup.text()
 
 print("---------------------------------------------")
 print("This is the name of the program:", sys.argv[0])
 print("Argument List:", str(sys.argv))
 os.chdir(str(sys.argv[1]))
-N = int(sys.argv[2])
+N = str(sys.argv[2])
 print("---------------------------------------------")
+target_dir = '/fom_norm'
 
-isExist = os.path.exists(os.getcwd()+'/fom_norm/')
-if isExist:
-    print("The target directory exist")
-    pass
-else:
-    os.mkdir(os.getcwd()+'/fom_norm/')
-    print("Create the target directory successfully")
-print("---------------------------------------------")
+setup.checkdir(target_dir)
 
-for root, dirs, files in os.walk("./fom_norm/", topdown=False):
-    for name in files:
-        if re.match('^.*_(.*)rom_.*$', name):
-            pass
-#           print(os.path.join(root, name))
-    for name in dirs:
-        pass
-#       print(os.path.join(root, name))
-filenames = [name for name in files if re.match('^.*_(.*)rom_.*$', name)]
+root, filenames = setup.gtfpath(target_dir, '^.*_(.*)rom_.*$')
+files_dict = setup.create_dict(filenames, '^.*_([0-9]*)nb_.*$')
 
-dic_for_files = {}
-for fname in filenames:
-    match_nb = re.match('^.*_([0-9]*)nb_.*$', fname)
-    if match_nb:
-        if int(match_nb.groups()[0]) not in dic_for_files:
-            dic_for_files[int(match_nb.groups()[0])] = []
-        dic_for_files[int(match_nb.groups()[0])].append(fname)
+dict_final = sorted(files_dict.items(), key=operator.itemgetter(0))
 
-colors = cm.Set1(np.linspace(0, 1, 9))
 color_ctr = 0
-
-dict_final = sorted(dic_for_files.items(), key=operator.itemgetter(0))
-
-i = 0
-tpath = './fom_norm/'
+tpath = root+'/'
 
 for nb, fnames in dict_final:
     angle = []
     data = []
     merr_proj = []
     if nb == N:
+        plot_params = {'c': 'k', 'marker': 'o', 'mfc': 'None'}
         for fname in fnames:
-            forleg = fname.split('_')
 
-            match_rom = re.match('^.*_(.*)rom_.*$', fname)
-            assert match_rom is not None
+            solver = checker.rom_checker(fname, '^.*_(.*)rom_.*$')
+            angle.append(checker.angle_checker(fname, solver))
 
-            if match_rom.groups()[0] == '':
-                solver = 'Galerkin ROM'
-                angle.append(int(forleg[-3])+90)
-            elif match_rom.groups()[0] == 'c':
-                solver = 'Constrained ROM'
-                angle.append(int(forleg[-3])+90)
-            elif match_rom.groups()[0] == 'l':
-                solver = 'Leray ROM'
-                angle.append(int(forleg[-4])+90)
-
-            with open(tpath+fname, 'r') as f:
+            with open(fname, 'r') as f:
                 k = f.read()
             list_of_lines = k.split('\n')
             list_of_words = [[k for k in line.split(' ') if k and k != 'dual'
@@ -91,15 +55,16 @@ for nb, fnames in dict_final:
             merr_proj.append(data)
 
         data = np.column_stack((angle, merr_proj))
-        nb = int(match_nb.groups()[0])
         data = data[data[:, 0].argsort()]
+
         fig, ax = plt.subplots(1, tight_layout=True)
+        ax.set(ylabel=r'$\||u\|_{H^1}$', xlabel=r'$\theta_g$',
+               xticks=np.linspace(0, 180, 5, dtype=int))
+
         ax.plot(data[:, 0], data[:, 1], 'k-o', mfc="None")
 
-        ax.set_ylabel(r'$\|u\|_{H^1}$')
-        ax.set_xlabel(r'$\theta_g$')
-        ax.set_xticks(np.linspace(0, 180, 5, dtype=int))
         ax.legend(loc=0)
+
         print("---------------------------------------------")
         fig.savefig(tpath+'fom_norm.png')
         print(tpath+'fom_norm.png saved successfully')
@@ -108,4 +73,3 @@ for nb, fnames in dict_final:
         np.savetxt(tpath+'fom_norm.dat', data[:, 1])
         print(tpath+'fom_norm.dat saved successfully')
         print("---------------------------------------------")
-        i += 1
