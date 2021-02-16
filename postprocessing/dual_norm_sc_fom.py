@@ -1,12 +1,11 @@
 import numpy as np
-import matplotlib
 import matplotlib.pyplot as plt
-import re
 import os
 import sys
 sys.path.append('/Users/bigticket0501/Developer/PyMOR/code/plot_helpers/')
 import setup
 import reader
+import checker
 
 setup.style(1)
 colors = setup.color(0)
@@ -18,36 +17,27 @@ print("Argument List:", str(sys.argv))
 os.chdir(str(sys.argv[1]))
 N = str(sys.argv[2])
 print("---------------------------------------------")
-target_dir = '/dual_norm_scaled'
+target_dir = '/dual_norm_sc_fom'
 
 setup.checkdir(target_dir)
 
+anchor = setup.find_anchor()
 root = os.getcwd()
-sp1 = (root.split('/'))
-for element in sp1:
-    z = re.match(r"theta_(\d+)", element)
-    if z:
-        anchor = float(((z.groups())[0]))
+#'^.*_(.*)rom_.*$'
+solver = checker.rom_checker(root, '.*/(.*)rom_info')
 
-match_rom = re.match('^.*/(.*)rom_info$', root)
-assert match_rom is not None
-
-if match_rom.groups()[0] == '':
-    solver = 'Galerkin ROM'
-elif match_rom.groups()[0] == 'c':
-    solver = 'Constrained ROM'
-elif match_rom.groups()[0] == 'l':
-    solver = 'Leray ROM'
-
-tpath = './dual_norm_scaled/'
+tpath = './dual_norm_sc_fom/'
 
 # compute the dual_norm_scaled
 angle = np.loadtxt(root+'/dual_norm/angle.dat')
 residual = np.loadtxt(root+'/dual_norm/erri_N'+N+'.dat')
-effectivity = np.loadtxt(root+'/effectivity/effectivity_N'+N+'.dat')
+fom_norm = np.loadtxt(root+'/fom_norm/fom_norm.dat')
+print(fom_norm)
 # find the index associated to the anchor point
 idx = (np.where(angle == anchor))
-dual_norm_scaled = residual/effectivity[idx]
+print(idx)
+print(angle[idx])
+dual_norm_scaled = residual/fom_norm[idx]
 
 plot_params = {'c': 'k', 'marker': 'o', 'mfc': 'None',
                'label': solver+' with '+r'$N = $'+N}
