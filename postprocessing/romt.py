@@ -13,7 +13,7 @@ import checker
 import myplot
 import mypostpro
 
-setup.style(1)
+#setup.style(1)
 colors = setup.color(0)
 setup.text()
 
