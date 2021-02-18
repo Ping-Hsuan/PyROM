@@ -23,7 +23,7 @@ model = str(sys.argv[2])
 deg = str(int(sys.argv[3])-90)
 print("---------------------------------------------")
 
-target_dir = '/rom_abserr/'
+target_dir = '/abserr/'
 setup.checkdir(target_dir)
 
 search_dir = './'+model+'_info/rom_abserr'
@@ -40,6 +40,7 @@ merr_rom = []
 merr_proj = []
 for nb, fnames in dict_final:
     for fname in fnames:
+        solver = checker.rom_checker(fname, '^.*_(.*)rom_.*$')
         data = reader.reader(fname)
         data = np.array(data).astype(np.float64)
         merr_rom.append(data[0])
@@ -57,8 +58,10 @@ else:
            xlim=[0, max(data[:, 0])], title='Absolute error in the ' +
            r'mean flow at $\theta_g='+str(int(deg)+90)+'$')
 
-    plot_params1 = {'c': 'b', 'marker': 'o', 'mfc': 'None'}
-    plot_params2 = {'c': 'k', 'marker': 'o', 'mfc': 'None'}
+    plot_params1 = {'c': 'b', 'marker': 'o', 'mfc': 'None',
+                    'label': solver}
+    plot_params2 = {'c': 'k', 'marker': 'o', 'mfc': 'None',
+                    'label': 'Projection'}
     ax.semilogy(data[:, 0], data[:, 1], **plot_params1)
     ax.semilogy(data[:, 0], data[:, 2], **plot_params2)
 
