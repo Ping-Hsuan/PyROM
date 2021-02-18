@@ -27,8 +27,13 @@ target_dir = '/nu'
 setup.checkdir(target_dir)
 
 search_dir = './'+model+'_info/nu'
-root, filenames = setup.gtfpath(search_dir,
-                                '^.*_(.*)rom_.*_ic.*_.*_'+theta_g+'_nu$')
+if int(sys.argv[4]) == 1:
+    root, filenames = setup.gtfpath(search_dir,
+                                    '^.*_(.*)rom_.*_ic.*_.*_'+theta_g+'_nu$')
+elif int(sys.argv[4]) > 1:
+    root, filenames = setup.gtfpath(search_dir,
+                                    '^.*_(.*)rom_.*_zero.*_.*_'+theta_g+'_nu$')
+
 files_dict = setup.create_dict(filenames, '^.*_([0-9]*)nb_.*$')
 dict_final = sorted(files_dict.items(), key=operator.itemgetter(0))
 
