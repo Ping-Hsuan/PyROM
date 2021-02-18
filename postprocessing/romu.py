@@ -1,63 +1,39 @@
 import numpy as np
-import matplotlib
 import matplotlib.pyplot as plt
-import matplotlib.cm as cm
 from matplotlib.ticker import MaxNLocator
 import re
 import os
 import sys
 sys.path.append('/Users/bigticket0501/Developer/PyMOR/code/plot_helpers/')
+import setup
+import reader
+import checker
+import myplot
 import mypostpro
 
-#plt.style.use('report')
-
-matplotlib.rcParams['text.latex.preamble'] = [
-       r'\usepackage{siunitx}',   # i need upright \micro symbols, but you need...
-       r'\sisetup{detect-all}',   # ...this to force siunitx to actually use your fonts
-       r'\usepackage{helvet}',    # set the normal font here
-       r'\usepackage{sansmath}',  # load up the sansmath so that math -> helvet
-       r'\sansmath'               # <- tricky! -- gotta actually tell tex to use!
-]
+colors = setup.color(0)
+setup.text()
 
 print("---------------------------------------------")
 print("This is the name of the program:", sys.argv[0])
 print("Argument List:", str(sys.argv))
 os.chdir(str(sys.argv[1]))
+model = str(sys.argv[2])
+deg = str(int(sys.argv[3])-90)
+N = str((sys.argv[4]))
 print("---------------------------------------------")
-N = str((sys.argv[2]))
-isExist = os.path.exists(os.getcwd()+'/romu/')
-if isExist:
-    print("The target directory exist")
-    pass
-else:
-    os.mkdir(os.getcwd()+'/romu/')
-    print("The target directory exist")
-print("---------------------------------------------")
+
+target_dir = '/romu_'+N
+setup.checkdir(target_dir)
 ops_path = '../ops/'
 
-root = os.getcwd()
-sp1 = (root.split('/'))
-for element in sp1:
-    z = re.match(r"theta_(\d+)", element)
-    if z:
-        anchor = float(((z.groups())[0]))
-
-for root, dirs, files in os.walk("./romu/", topdown=False):
-    for name in files:
-        if re.match('^.*_(.*)rom_.*$', name):
-            pass
-#           print(os.path.join(root, name))
-    for name in dirs:
-        pass
-#       print(os.path.join(root, name))
-
-filenames = [name for name in files if re.match('^.*_(.*)rom_.*_'+str(int(anchor-90)), name)]
-
-colors = cm.Set1(np.linspace(0, 1, 9))
+search_dir = './'+model+'_info/romu'
+anchor = setup.find_anchor()
+root, filenames = setup.gtfpath(search_dir,
+                                '^.*_(.*)rom_.*_'+str(int(anchor-90)))
 color_ctr = 0
+tpath = root+'/'
 
-i = 0
-tpath = './romu/'
 romu = []
 t_grid = []
 
@@ -66,23 +42,13 @@ for element in filenames:
     if z.groups()[0] == N:
         fname = element
 
-match_rom = re.match('^.*_(.*)rom_.*$', fname)
-assert match_rom is not None
-
-if match_rom.groups()[0] == '':
-    solver = 'Galerkin ROM'
-elif match_rom.groups()[0] == 'c':
-    solver = 'Constrained ROM'
-elif match_rom.groups()[0] == 'l':
-    solver = 'Leray ROM'
-
-with open(tpath+fname, 'r') as f:
+with open(fname, 'r') as f:
     for line in f:
         info = line.split()
         romu.append(info[2])
         t_grid.append(info[1])
 
-K_match = re.match(r"(\d\d\d)s_.*", fname)
+K_match = re.match(r"^.*(\d\d\d)s_.*", fname)
 nb_match = re.match(r"^.*_(\d+)nb_.*", fname)
 K = int(K_match.groups()[0])
 nb = int(nb_match.groups()[0])
@@ -90,10 +56,13 @@ T = int(len(romu)/nb)
 
 t_grid = np.reshape(np.array(t_grid).astype(np.float64),
                     (nb, T), order='F')
+
+
 sp1 = fname.split('_')
+print(sp1)
 for element in sp1:
     if re.match(r"zero", element):
-        T0 = 500
+        T0 = mypostpro.find_nearest(t_grid[0, :], 501)
     elif re.match(r"ic", element):
         T0 = 0
         t_grid += 500
@@ -119,49 +88,66 @@ for j in range(nb):
     ua[j] = np.sum(romu[j, T0:])/len(romu[0, T0:])
     uv[j] = np.sum((romu[j, T0:]-ua[j])**2)/(len(romu[0, T0:])-1)
 
+i = 0
+rom_params = {'c': 'b', 'mfc': 'None', 'label': 'Snapshot'}
+snap_params = {'c': 'k', 'mfc': 'None', 'label': 'Snapshot'}
+avgsnap_params = {'c': 'k', 'linestyle': '--', 'label': 'Snapshot avg'}
+avgrom_params = {'c': 'k', 'linestyle': '--', 'label': 'ROM avg'}
+
 if min(4, nb) == 1:
     fig, ax = plt.subplots(min(4, nb), sharex=True, squeeze=True, tight_layout=True)
-    ax.plot(t_grid[i, T0:], romu[i, T0:], 'b-', mfc="None", label='ROM')
-    ax.plot(np.linspace(500, 1000, K), fomu[i+1, :], 'k-', mfc="None", label='Snapshot')
-    ax.hlines(y=umax[i], xmin=t_grid[i, 0], xmax=t_grid[i, -1], colors='r')
-    ax.hlines(y=umin[i], xmin=t_grid[i, 0], xmax=t_grid[i, -1], colors='r')
-    ax.hlines(y=uas[i+1], xmin=t_grid[i, 0], xmax=t_grid[i, -1], colors='k', linestyle='--', label='Snapshot avg')
-    ax.hlines(y=ua[i], xmin=t_grid[i, 0], xmax=t_grid[i, -1], colors='b', linestyle='--', label='ROM avg')
+    ax.set(xlabel=r'$t$', ylabel=r'$u_{'+str(i+1)+'}(t)$')
+
+    myplot.rom_coef(ax, t_grid[i, T0:], np.linspace(500, 1000, K),
+                    romu[i, T0:], fomu[i+1, :],
+                    rom_params, snap_params)
+    myplot.rom_minmax(ax, umax[i], umin[i],
+                      t_grid[i, T0], t_grid[i, -1])
+    myplot.coef_avg(ax, ua[i], uas[i+1], t_grid[i, T0], t_grid[i, -1])
+
     ax.annotate('Snap std:'+"%.2e"% uvs[i+1], xy=(0, 0.2), xytext=(12, -12), va='top',
                 xycoords='axes fraction', textcoords='offset points')
     ax.annotate('ROM std:'+"%.2e"% uv[i], xy=(0, 0.27), xytext=(12, -12), va='top',
                 xycoords='axes fraction', textcoords='offset points')
-    ax.set_xlabel(r'$t$')
-    ax.set_ylabel(r'$u_{'+str(i+1)+'}(t)$')
+
     ax.legend(loc='upper left', bbox_to_anchor= (0.0, 1.11), ncol=4,
            borderaxespad=0, frameon=False)
 else:
     fig, axs = plt.subplots(min(4, nb), sharex=True, squeeze=True, tight_layout=True)
     for i in range(min(4, nb)):
-        axs[i].plot(t_grid[i, T0:], romu[i, T0:], 'b-', mfc="None", label='ROM')
-        axs[i].plot(np.linspace(500, 1000, K), fomu[i+1, :], 'k-', mfc="None", label='Snapshot')
-        axs[i].hlines(y=umax[i], xmin=t_grid[i, 0], xmax=t_grid[i, -1], colors='r')
-        axs[i].hlines(y=umin[i], xmin=t_grid[i, 0], xmax=t_grid[i, -1], colors='r')
-        axs[i].hlines(y=uas[i+1], xmin=t_grid[i, 0], xmax=t_grid[i, -1], colors='k', linestyle='--', label='Snapshot avg')
-        axs[i].hlines(y=ua[i], xmin=t_grid[i, 0], xmax=t_grid[i, -1], colors='b', linestyle='--', label='ROM avg')
-        axs[i].set_xlabel(r'$t$')
-        axs[i].set_ylabel(r'$u_{'+str(i+1)+'}(t)$')
+        axs[i].set(xlabel=r'$t$', ylabel=r'$T_{'+str(i+1)+'}(t)$')
+
+        myplot.rom_coef(axs[i], t_grid[i, T0:], np.linspace(500, 1000, K),
+                        romu[i, T0:], fomu[i+1, :],
+                        rom_params, snap_params)
+        myplot.rom_minmax(axs[i], umax[i], umin[i],
+                          t_grid[i, T0], t_grid[i, -1])
+        myplot.coef_avg(axs[i], ua[i], uas[i+1], t_grid[i, T0], t_grid[i, -1])
+
+        axs[i].annotate('Snap std:'+"%.2e"% uvs[i+1], xy=(0.2, -0.1), xytext=(12, -12), va='top',
+                        xycoords='axes fraction', textcoords='offset points')
+        axs[i].annotate('ROM std:'+"%.2e"% uv[i], xy=(-0.1, -0.1), xytext=(12, -12), va='top',
+                        xycoords='axes fraction', textcoords='offset points')
         if i == 0:
             ax = axs[i]
+
     ax.legend(loc='upper left', bbox_to_anchor= (0.0, 1.51), ncol=4,
            borderaxespad=0, frameon=False)
 
-fig.savefig('./romu/romu_N'+N+'.png')
+fig.savefig('./romu_'+N+'/romu_N'+N+'.png')
 
 fig, axs = plt.subplots(2, sharex=True, tight_layout=True)
 
-POD_modes = [np.linspace(1, nb, nb, dtype=int), np.linspace(1, nb, nb, dtype=int)]
+POD_modes = [np.linspace(1, nb, nb, dtype=int),
+             np.linspace(1, nb, nb, dtype=int)]
 data = [ua, uv]
 refs = [uas, uvs]
 ylabels = [r'$\langle u_{n} \rangle_s$', r'$V_s(u_n)$']
+params = [{'c': 'b', 'marker': 'o', 'mfc': 'None', 'label': 'ROM'},
+          {'c': 'k', 'marker': 'o', 'mfc': 'None', 'label': 'FOM'}]
 for i in range(2):
-    axs[i].plot(POD_modes[i], data[i], 'b-o', label='ROM')
-    axs[i].plot(POD_modes[i], refs[i][1:nb+1], 'k-o', label='FOM')
+    axs[i].plot(POD_modes[i], data[i], **params[0])
+    axs[i].plot(POD_modes[i], refs[i][1:nb+1], **params[1])
     axs[i].legend(loc=0)
     axs[i].set_ylabel(ylabels[i])
     axs[i].set_xlabel(r'$n$')
@@ -169,4 +155,4 @@ for i in range(2):
     if i == 1:
         axs[i].set_yscale('log')
 
-fig.savefig('./romu/ua_uv_N'+N+'.png')
+fig.savefig('./romu_'+N+'/ua_uv_N'+N+'.png')

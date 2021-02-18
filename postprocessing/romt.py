@@ -1,7 +1,5 @@
 import numpy as np
-import matplotlib
 import matplotlib.pyplot as plt
-import matplotlib.cm as cm
 from matplotlib.ticker import MaxNLocator
 import re
 import os
@@ -13,7 +11,6 @@ import checker
 import myplot
 import mypostpro
 
-#setup.style(1)
 colors = setup.color(0)
 setup.text()
 
@@ -21,15 +18,18 @@ print("---------------------------------------------")
 print("This is the name of the program:", sys.argv[0])
 print("Argument List:", str(sys.argv))
 os.chdir(str(sys.argv[1]))
-N = str((sys.argv[2]))
+model = str(sys.argv[2])
+deg = str(int(sys.argv[3])-90)
+N = str((sys.argv[4]))
 print("---------------------------------------------")
 
-target_dir = '/romt'
+target_dir = '/romt_'+N
 setup.checkdir(target_dir)
 ops_path = '../ops/'
 
+search_dir = './'+model+'_info/romt'
 anchor = setup.find_anchor()
-root, filenames = setup.gtfpath(target_dir,
+root, filenames = setup.gtfpath(search_dir,
                                 '^.*_(.*)rom_.*_'+str(int(anchor-90)))
 
 color_ctr = 0
@@ -60,7 +60,7 @@ t_grid = np.reshape(np.array(t_grid).astype(np.float64),
 sp1 = fname.split('_')
 for element in sp1:
     if re.match(r"zero", element):
-        T0 = K
+        T0 = mypostpro.find_nearest(t_grid[0, :], 501)
     elif re.match(r"ic", element):
         T0 = 0
         t_grid += 500
@@ -98,8 +98,8 @@ if min(4, nb) == 1:
                     romt[i, T0:], fomt[i+1, :],
                     rom_params, snap_params)
     myplot.rom_minmax(ax, tmax[i], tmin[i],
-                      t_grid[i, 0], t_grid[i, -1])
-    myplot.coef_avg(ax, ta[i], tas[i+1], t_grid[i, 0], t_grid[i, -1])
+                      t_grid[i, T0], t_grid[i, -1])
+    myplot.coef_avg(ax, ta[i], tas[i+1], t_grid[i, T0], t_grid[i, -1])
 
     ax.annotate('Snap std:'+"%.2e"% tvs[i+1], xy=(0, 0.2), xytext=(12, -12), va='top',
              xycoords='axes fraction', textcoords='offset points')
@@ -117,8 +117,8 @@ else:
                         romt[i, T0:], fomt[i+1, :],
                         rom_params, snap_params)
         myplot.rom_minmax(axs[i], tmax[i], tmin[i],
-                          t_grid[i, 0], t_grid[i, -1])
-        myplot.coef_avg(axs[i], ta[i], tas[i+1], t_grid[i, 0], t_grid[i, -1])
+                          t_grid[i, T0], t_grid[i, -1])
+        myplot.coef_avg(axs[i], ta[i], tas[i+1], t_grid[i, T0], t_grid[i, -1])
 
         axs[i].annotate('Snap std:'+"%.2e"% tvs[i+1], xy=(0.2, -0.1), xytext=(12, -12), va='top',
                         xycoords='axes fraction', textcoords='offset points')
@@ -130,7 +130,7 @@ else:
     ax.legend(loc='upper left', bbox_to_anchor= (0.0, 1.51), ncol=4,
            borderaxespad=0, frameon=False)
 
-fig.savefig('./romt/romt_N'+N+'.png')
+fig.savefig('./romt_'+N+'/romt_N'+N+'.png')
 
 POD_modes = [np.linspace(1, nb, nb, dtype=int),
              np.linspace(1, nb, nb, dtype=int)]
@@ -142,8 +142,8 @@ params = [{'c': 'b', 'marker': 'o', 'mfc': 'None', 'label': 'ROM'},
 
 fig, axs = plt.subplots(2, sharex=True, tight_layout=True)
 for i in range(2):
-    axs[i].plot(POD_modes[i], data[i], **params[i])
-    axs[i].plot(POD_modes[i], refs[i][1:nb+1], **params[i])
+    axs[i].plot(POD_modes[i], data[i], **params[0])
+    axs[i].plot(POD_modes[i], refs[i][1:nb+1], **params[1])
     axs[i].legend(loc=0)
     axs[i].set_ylabel(ylabels[i])
     axs[i].set_xlabel(r'$n$')
@@ -151,4 +151,4 @@ for i in range(2):
     if i == 1:
         axs[i].set_yscale('log')
 
-fig.savefig('./romt/ta_tv_N'+N+'.png')
+fig.savefig('./romt_'+N+'/ta_tv_N'+N+'.png')
