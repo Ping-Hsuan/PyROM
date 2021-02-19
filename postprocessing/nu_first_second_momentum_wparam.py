@@ -97,7 +97,7 @@ ax.set(ylim=[1e-4, 1], xticks=np.linspace(0, 180, 19, dtype=int),
 ax.set_xticklabels(ax.get_xticks(), rotation=45)
 ax.semilogy(data[:, 0], data[:, 1], **plot_params)
 ax.legend(loc=1)
-fig.savefig('.'+target_dir+'relmnu_N_'+N+'.png')
+fig.savefig('.'+target_dir+'relmnu_N'+N+'.png')
 plt.close(fig)
 
 plot_params = {'c': 'b', 'marker': 'o', 'mfc': 'None',
@@ -110,7 +110,7 @@ ax.set_xticklabels(ax.get_xticks(), rotation=45)
 ax.plot(data[:, 0], data[:, 3], **plot_params)
 ax.plot(data[:, 0], data[:, 5], **FOM_params)
 ax.legend(loc=1)
-fig.savefig('.'+target_dir+'mnu_N_'+N+'.png')
+fig.savefig('.'+target_dir+'mnu_N'+N+'.png')
 
 fig, ax = plt.subplots(1, tight_layout=True)
 ax.set(ylim=[0, 0.3], xticks=np.linspace(0, 180, 19, dtype=int),
@@ -119,10 +119,10 @@ ax.set_xticklabels(ax.get_xticks(), rotation=45)
 ax.plot(data[:, 0], data[:, 4], **plot_params)
 ax.plot(data[:, 0], data[:, 6], **FOM_params)
 ax.legend(loc=1)
-fig.savefig('.'+target_dir+'stdnu_N_'+N+'.png')
+fig.savefig('.'+target_dir+'stdnu_N'+N+'.png')
 
 np.savetxt('.'+target_dir+'angle.dat', data[:, 0])
-np.savetxt('.'+target_dir+'merr_N_'+N+'.dat', data[:, 1])
-np.savetxt('.'+target_dir+'sderr_N_'+N+'.dat', data[:, 2])
-np.savetxt('.'+target_dir+'m_N_'+N+'.dat', data[:, 3])
-np.savetxt('.'+target_dir+'sd_N_'+N+'.dat', data[:, 4])
+np.savetxt('.'+target_dir+'merr_N'+N+'.dat', data[:, 1])
+np.savetxt('.'+target_dir+'stderr_N'+N+'.dat', data[:, 2])
+np.savetxt('.'+target_dir+'mnu_N'+N+'.dat', data[:, 3])
+np.savetxt('.'+target_dir+'stdnu_N'+N+'.dat', data[:, 4])
