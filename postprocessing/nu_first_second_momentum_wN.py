@@ -89,7 +89,7 @@ plot_params = {'c': 'k', 'marker': 'o', 'mfc': 'None',
                'label': solver+' with '+r'$\theta^*_g = '+str(int(anchor))+'$'}
 fig, ax = plt.subplots(1, tight_layout=True)
 ax.set(ylim=[1e-4, 1], xlim=[1, max(data[:, 0])],
-       xlabel=r'$\theta_g$', ylabel=r'$\frac{|\langle \text{Nu} \rangle_s -' +
+       xlabel=r'$N$', ylabel=r'$\frac{|\langle \text{Nu} \rangle_s -' +
        r'\langle \widehat{\text{Nu}} \rangle_s|}' +
        r'{|\langle \text{Nu} \rangle_s|}$')
 
