@@ -30,19 +30,33 @@ for root, dirs, files in os.walk("./"+rom_dir+"/", topdown=False):
             pass
     for name in dirs:
         pass
-filenames = [name for name in files if re.match('^.*_(.*)rom_.*$', name)]
 
+
+if len(sys.argv) >= 4:
+    N = str(sys.argv[3])
+    filenames = [name for name in files if
+                 re.match('^.*_(.*)rom_'+N+'nb_.*$', name)]
+else:
+    filenames = [name for name in files if re.match('^.*_(.*)rom_.*$', name)]
+
+print(filenames)
 create_dir('/'+rom_dir+'_info/')
 
-labels = ['rom_abserr', 'fom_norm', 'nu', 'romu', 'romt', 'proj_relerr', 'dual_norm']
+labels = ['rom_abserr', 'nu', 'romu', 'romt', 'proj_relerr', 'dual_norm',
+          'fom_norm', 'rom_norm']
 
 data_mkdir = ['/'+element+'/' for element in labels]
 data_fname = ['_'+element for element in labels]
-data_pattern = [r'^\sh1\serror:', r'^\sFOM\sh1\snorm:', r'\snus', r'\sromu', r'\sromt', r'\srelative\sh1\serror:', r'(residual in h1 norm:\s\s+)(\d\.\d+E?-?\d+)']
+data_pattern = [r'^\sh1\serror:', r'\snus', r'\sromu', r'\sromt',
+                r'\srelative\sh1\serror:',
+                r'(residual in h1 norm:\s\s+)(\d\.\d+E?-?\d+)',
+                r'^\sFOM*', r'^\sROM*']
 
 
 for (mkdir, label, pattern) in zip(data_mkdir, data_fname, data_pattern):
     create_dir('/'+rom_dir+'_info'+mkdir)
+    print("---------------------------------------------")
+    print('Getting '+label+' info')
     for fname in filenames:
         forleg = fname.split('_')
 
@@ -57,3 +71,4 @@ for (mkdir, label, pattern) in zip(data_mkdir, data_fname, data_pattern):
                     ft.write(line)
         ft.close()
 
+    print("---------------------------------------------")
