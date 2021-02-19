@@ -48,6 +48,7 @@ for nb, fnames in dict_final:
 
 anchor = setup.find_anchor()
 solver = checker.rom_checker(fname, '^.*_(.*)rom_.*$')
+
 data = np.column_stack((N_list, rom_norm))
 data = data[data[:, 0].argsort()]
 
@@ -61,7 +62,8 @@ plot_params = {'c': 'k', 'marker': 'o', 'mfc': 'None',
                'label': solver+' with '+r'$\theta^*_g = '+str(int(anchor))+'$'}
 
 fig, ax = plt.subplots(1, tight_layout=True)
-ax.set(ylabel=r'$\||(u, T)\|_{*}$', xlabel=r'$N$')
+ax.set(ylabel=r'$\||(u, T)\|_{*}$', xlabel=r'$N$',
+       title=solver+' with '+r'$\theta^*_g = '+str(int(anchor))+'$')
 ax.plot(data[:, 0], data[:, 7], 'b-o', mfc="None", label=r'$H^1_0$')
 ax.plot(data[:, 0], data[:, 8], 'r-o', mfc="None", label=r'$L^2$')
 ax.plot(data[:, 0], data[:, 9], 'k-o', mfc="None", label=r'$H^1$')
@@ -76,7 +78,8 @@ print("---------------------------------------------")
 plt.close(fig)
 
 fig, ax = plt.subplots(1, tight_layout=True)
-ax.set(ylabel=r'$\||u\|_{*}$', xlabel=r'$N$')
+ax.set(ylabel=r'$\||u\|_{*}$', xlabel=r'$N$',
+       title=solver+' with '+r'$\theta^*_g = '+str(int(anchor))+'$')
 ax.plot(data[:, 0], data[:, 1], 'b-o', mfc="None", label=r'$H^1_0$')
 ax.plot(data[:, 0], data[:, 2], 'r-o', mfc="None", label=r'$L^2$')
 ax.plot(data[:, 0], data[:, 3], 'k-o', mfc="None", label=r'$H^1$')
@@ -89,7 +92,8 @@ np.savetxt('.'+target_dir+'rom_u_h1nor_theta_'+str(int(deg)+90)+'m.dat', data[:,
 print("---------------------------------------------")
 
 fig, ax = plt.subplots(1, tight_layout=True)
-ax.set(ylabel=r'$\||T\|_{*}$', xlabel=r'$N$')
+ax.set(ylabel=r'$\||T\|_{*}$', xlabel=r'$N$',
+       title=solver+' with '+r'$\theta^*_g = '+str(int(anchor))+'$')
 ax.plot(data[:, 0], data[:, 4], 'b-o', mfc="None", label=r'$H^1_0$')
 ax.plot(data[:, 0], data[:, 5], 'r-o', mfc="None", label=r'$L^2$')
 ax.plot(data[:, 0], data[:, 6], 'k-o', mfc="None", label=r'$H^1$')
