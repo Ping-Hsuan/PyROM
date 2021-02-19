@@ -30,7 +30,6 @@ dict_final = sorted(files_dict.items(), key=operator.itemgetter(0))
 
 
 color_ctr = 0
-tpath = root+'/'
 
 rom_norm = []
 N_list = []
