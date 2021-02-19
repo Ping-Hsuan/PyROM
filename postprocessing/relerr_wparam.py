@@ -59,7 +59,7 @@ plot_params2 = {'c': 'k', 'marker': 'o', 'mfc': 'None',
 
 fig, ax = plt.subplots(1, tight_layout=True)
 ax.set(xlabel=r'$\theta_g$', ylabel=r'$\frac{\|u(\theta_g) -' +
-       r'\tilde{u}(\theta_g;{\theta^*_g} =' +
+       r'\tilde{u}(\theta_g;{\theta^*_g}) =' +
        str(int(anchor))+r'\|_{H^1}}{\|u(\theta_g)\|_{H^1}}$',
        ylim=[0, 1], yticks=np.linspace(0, 1, 11),
        xticks=np.linspace(0, 180, 19, dtype=int),
