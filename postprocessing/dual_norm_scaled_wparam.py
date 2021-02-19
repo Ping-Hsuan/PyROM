@@ -80,7 +80,7 @@ ax.semilogy(data[:, 0], data[:, 1], **plot_params)
 ax.legend(loc=0)
 
 print("---------------------------------------------")
-fig.savefig('.'+target_dir+'dual_norm_N_'+N+'_sc_'+sc+'.png')
-np.savetxt('.'+target_dir+'erri_N_'+N+'_sc_'+sc+'.dat', data[:, 1])
+fig.savefig('.'+target_dir+'dual_norm_N'+N+'_sc_'+sc+'.png')
+np.savetxt('.'+target_dir+'erri_N'+N+'_sc_'+sc+'.dat', data[:, 1])
 print("---------------------------------------------")
 

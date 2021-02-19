@@ -62,8 +62,8 @@ ax.semilogy(data[:, 0], data[:, 1], **plot_params)
 ax.legend(loc=0)
 
 print("---------------------------------------------")
-fig.savefig('.'+target_dir+'dual_norm_N_'+N+'.png')
+fig.savefig('.'+target_dir+'dual_norm_N'+N+'.png')
 np.savetxt('.'+target_dir+'angle_list.dat', data[:, 0])
-np.savetxt('.'+target_dir+'erri_N_'+N+'.dat', data[:, 1])
+np.savetxt('.'+target_dir+'erri_N'+N+'.dat', data[:, 1])
 print("---------------------------------------------")
 

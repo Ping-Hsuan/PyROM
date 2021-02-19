@@ -72,9 +72,9 @@ ax.plot(data[:, 0], data[:, 2], **plot_params2)
 ax.legend(loc=0, ncol=1)
 
 print("---------------------------------------------")
-fig.savefig('.'+target_dir+'relerr_N_'+N+'.png')
+fig.savefig('.'+target_dir+'relerr_N'+N+'.png')
 np.savetxt('.'+target_dir+'angle_list.dat', data[:, 0])
-np.savetxt('.'+target_dir+'rom_relerr_N_'+N+'.dat', data[:, 1])
-np.savetxt('.'+target_dir+'proj_relerr_N_'+N+'.dat', data[:, 2])
+np.savetxt('.'+target_dir+'rom_relerr_N'+N+'.dat', data[:, 1])
+np.savetxt('.'+target_dir+'proj_relerr_N'+N+'.dat', data[:, 2])
 print("---------------------------------------------")
 
