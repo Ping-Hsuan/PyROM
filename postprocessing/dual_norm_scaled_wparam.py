@@ -42,6 +42,7 @@ for angle, fnames in dict_final:
         erri.append(float(dual_norm))
         angles.append(int(angle)+90)
 
+anchor = setup.find_anchor()
 data = np.column_stack((angles, erri))
 data = data[data[:, 0].argsort()]
 
@@ -52,10 +53,14 @@ if sc == 'rom':
     scale = np.loadtxt(sc_dir+'rom_h1norm_N'+N+'.dat')
     ylb = r'$\frac{\triangle(\theta_g)}{\|u_{ROM}(\theta_g)\|_{H^1}}$'
 elif sc == 'fom':
-    # scaled with the fom_norm (not practical, for experiment purpose only)
+    # scaled with the fom_norm at anchor point
     sc_dir = '../'+model+'_info/fom_norm/'
-    scale = np.loadtxt(sc_dir+'fom_h1norm.dat')
-    ylb = r'$\frac{\triangle(\theta_g)}{\|u_{FOM}(\theta_g)\|_{H^1}}$'
+    angles = np.loadtxt(sc_dir+'angle.dat')
+    idx = np.where(angles == int(anchor))
+    print('Scaled with fom norm anchored at:', angles[idx])
+    tmp = np.loadtxt(sc_dir+'fom_h1norm.dat')
+    scale = tmp[idx]
+    ylb = r'$\frac{\triangle(\theta_g)}{\|u_{FOM}(\theta^*_g)\|_{H^1}}$'
 elif sc == 'romabserr':
     # scaled with the rom_abserr
     sc_dir = './abserr/'
@@ -66,7 +71,6 @@ elif sc == 'romabserr':
 # scaled the erri
 data[:, 1] = data[:, 1]/scale
 
-anchor = setup.find_anchor()
 solver = checker.rom_checker(fname, '^.*_(.*)rom_.*$')
 
 fig, ax = plt.subplots(1, tight_layout=True)
