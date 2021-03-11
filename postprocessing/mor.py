@@ -18,7 +18,7 @@ class ROM:
         # norm when doing POD
         self.info['POD_norm'] = (match.groups()[4])
 
-    def coef(self):
+    def get_coef(self, field):
         import numpy as np
         coef = []
         t = []
@@ -28,25 +28,65 @@ class ROM:
                 coef.append(info[2])
                 t.append(info[1])
 
-        t = np.reshape(np.array(t).astype(np.float64),
-                       (self.info['nb'], -1), order='F')
-        coef = np.reshape(np.array(coef).astype(np.float64),
-                          (self.info['nb'], -1), order='F')
-        return t, coef
+        self.outputs = {}
+        self.outputs['t'] = np.reshape(np.array(t).astype(np.float64),
+                                       (self.info['nb'], -1), order='F')
+        self.outputs[field] = np.reshape(np.array(coef).astype(np.float64),
+                                         (self.info['nb'], -1), order='F')
+        return
 
-    def coef_mean(self, coef, T0):
+    def coef_mean(self, T0, field):
         import numpy as np
-        ua = np.zeros((self.info['nb'],))
+
+        avg_coef = np.zeros((self.info['nb'],))
+        num_sample = len(self.outputs[field][0, T0:])
+
         for j in range(self.info['nb']):
-            ua[j] = np.sum(coef[j, T0:])/len(coef[0, T0:])
+            avg_coef[j] = np.sum(self.outputs[field][j, T0:]) \
+                        / num_sample
 
-        return ua
+        self.outputs[field+'a'] = avg_coef
+        return
 
-    def coef_variance(self, coef, T0, ua):
+    def coef_variance(self, T0, field):
         import numpy as np
-        uv = np.zeros((self.info['nb'],))
-        for j in range(self.info['nb']):
-            uv[j] = np.sum((coef[j, T0:]-ua[j])**2)/(len(coef[0, T0:])-1)
 
-        return uv
+        var_coef = np.zeros((self.info['nb'],))
+        num_sample = len(self.outputs[field][0, T0:])
+
+        for j in range(self.info['nb']):
+            var_coef[j] = np.sum((self.outputs[field][j, T0:]
+                                 - self.outputs[field+'a'][j])**2) \
+                                 / (num_sample-1)
+
+        self.outputs[field+'v'] = var_coef
+        return
+
+    def plot_coef_in_t(self, ax, i, fomcoef, minc, maxc, asnap, vsnap, T0, field):
+        import numpy as np
+        rom_params = {'c': 'b', 'mfc': 'None', 'label': 'Snapshot'}
+        snap_params = {'c': 'k', 'mfc': 'None', 'label': 'Snapshot'}
+
+        ax.set(xlabel=r'$t$', ylabel=r'$u_{'+str(i+1)+'}(t)$')
+
+        ax.plot(self.outputs['t'][i, T0:], self.outputs[field][i, T0:],
+                **rom_params)
+        ax.plot(np.linspace(500, 1000, self.info['K']), fomcoef[i+1, :], **snap_params)
+
+        tmin = self.outputs['t'][i, T0]
+        tmax = self.outputs['t'][i, -1]
+        ax.hlines(y=maxc[i], xmin=tmin, xmax=tmax, colors='r')
+        ax.hlines(y=minc[i], xmin=tmin, xmax=tmax, colors='r')
+
+        ax.hlines(y=asnap[i+1], xmin=tmin, xmax=tmax, colors='k',
+                  linestyle='--', label='Snapshot avg')
+        ax.hlines(y=self.outputs[field+'a'][i], xmin=tmin, xmax=tmax, colors='b',
+                  linestyle='--', label='ROM avg')
+
+        ax.annotate('Snap std:'+"%.2e"% vsnap[i+1], xy=(0, 0.2), xytext=(12, -12), va='top',
+                    xycoords='axes fraction', textcoords='offset points')
+        ax.annotate('ROM std:'+"%.2e"% self.outputs[field+'v'][i], xy=(0, 0.27), xytext=(12, -12), va='top',
+                    xycoords='axes fraction', textcoords='offset points')
+
+        return
 
