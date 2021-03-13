@@ -5,7 +5,10 @@ class Snapshot:
 
     def __init__(self, ops_path, field):
         self.ops_path = ops_path
-        self.field = field
+        if field == 't':
+            self.field = field.upper()
+        else:
+            self.field = field
 
     def coef(self, K):
         field = self.field
