@@ -62,10 +62,10 @@ def add_std_in_t(ax, n, T0, snap, rom):
     sfield = snap.field
     rfield = rom.field
     ax.annotate('Snap std:'+"%.2e" % snap.outputs[sfield+'vs'][n+1],
-                xy=(0, 0.2), xytext=(12, -12), va='top',
+                xy=(0.2, -0.1), xytext=(12, -12), va='top',
                 xycoords='axes fraction', textcoords='offset points')
     ax.annotate(rom.info['method']+' std:'+"%.2e" % rom.outputs[rfield+'v'][n],
-                xy=(0, 0.27), xytext=(12, -12), va='top',
+                xy=(-0.1, -0.1), xytext=(12, -12), va='top',
                 xycoords='axes fraction', textcoords='offset points')
 
 
@@ -98,3 +98,5 @@ def plt_sample_mean_var(rom, snap):
         axs[i].xaxis.set_major_locator(MaxNLocator(integer=True))
         if i == 1:
             axs[i].set_yscale('log')
+
+    return fig
