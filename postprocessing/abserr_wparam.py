@@ -30,10 +30,11 @@ setup.checkdir(target_dir)
 search_dir = './'+model+'_info/rom_abserr'
 root, filenames = setup.gtfpath(search_dir, '^.*_'+N+'nb_.*$')
 if T0 == 1:
-    files_dict = setup.create_dict(filenames, '^.*_ic_h10_(.*\d+)_.*$')
+    files_dict = setup.create_dict(filenames, '^.*_ic_h10_(-?\d+)_.*$')
 elif T0 >= 1:
-    files_dict = setup.create_dict(filenames, '^.*_zero_h10_(.*\d+)_.*$')
+    files_dict = setup.create_dict(filenames, '^.*_zero_h10_(-?\d+)_.*$')
 dict_final = sorted(files_dict.items(), key=operator.itemgetter(0))
+print(dict_final)
 
 color_ctr = 0
 tpath = root+'/'
@@ -44,6 +45,9 @@ abserr_proj = []
 for angle, fnames in dict_final:
     for fname in fnames:
         data = reader.reader(fname)
+        if not data:
+            data.append(1e8)
+            data.append(1e8)
         data = np.array(data).astype(np.float64)
         abserr_rom.append(data[0])
         abserr_proj.append(data[1])
