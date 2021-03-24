@@ -28,9 +28,9 @@ setup.checkdir(target_dir)
 search_dir = './'+model+'_info/rom_norm'
 root, filenames = setup.gtfpath(search_dir, '^.*_'+N+'nb_.*$')
 if T0 == 1:
-    files_dict = setup.create_dict(filenames, '^.*_ic_h10_(.*\d+)_.*$')
+    files_dict = setup.create_dict(filenames, '^.*_ic_h10_(-?\d+)_.*$')
 elif T0 >= 1:
-    files_dict = setup.create_dict(filenames, '^.*_zero_h10_(.*\d+)_.*$')
+    files_dict = setup.create_dict(filenames, '^.*_zero_h10_(-?\d+)_.*$')
 dict_final = sorted(files_dict.items(), key=operator.itemgetter(0))
 
 color_ctr = 0
@@ -46,6 +46,8 @@ for angle, fnames in dict_final:
         list_of_words = [[k for k in line.split(' ') if k and k != 'dual'
                          and k != 'norm:'] for line in list_of_lines][:-1]
         data = [x[-1] for x in list_of_words]
+        if not data:
+            data = [1e8 for i in range(9)]
         data = np.array(data).astype(np.float64)
         rom_norm.append(data)
         angles.append(int(angle)+90)
