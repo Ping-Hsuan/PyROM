@@ -23,7 +23,36 @@ model = str(sys.argv[2])
 print('The model is:', model)
 print("---------------------------------------------")
 
-with open('train_info.csv', newline='') as f:
+if len(sys.argv) <= 3:
+#   ylb = r'$\triangle$'
+    ylb = 'Unscaled error indicator'
+    tag = ''
+    title = 'Unscaled error indicator'
+else:
+    if sys.argv[3] == 'fom':
+#       ylb = r'$\frac{\triangle(\theta_g)}{\|u_{FOM}(\theta^*_g)\|_{H^1}}$'
+        ylb = 'Scaled error indicator'
+        tag = '_sc_fom'
+        title = r'Error indicator scaled with $H^1$ norm of FOM solution'
+    elif sys.argv[3] == 'relerr':
+#       ylb = r'$\frac{\triangle(\theta_g) \|u(\theta_g)\|_{H^1}}' + \
+#             r'{\|u_{FOM}({\theta_g})-u_{ROM}({\theta_g})\|_{H^1}}$'
+        ylb = 'Scaled error indicator'
+        tag = '_sc_relerr'
+        title = r'Error indicator scaled with relative $H^1$ error'
+    elif sys.argv[3] == 'romabserr':
+#       ylb = r'$\frac{\triangle(\theta_g)}' + \
+#             r'{\|u_{FOM}({\theta_g})-u_{ROM}({\theta_g})\|_{H^1}}$'
+        ylb = 'Scaled error indicator'
+        tag = '_sc_romabserr'
+        title = r'Error indicator scaled with absolute $H^1$ error'
+    elif sys.argv[3] == 'rom':
+#       ylb = r'$\frac{\triangle(\theta_g)}{\|u_{ROM}(\theta_g)\|_{H^1}}$'
+        ylb = 'Scaled error indicator'
+        tag = '_sc_rom'
+        title = r'Error indicator scaled with $H^1$ norm of ROM solution'
+
+with open('train_info'+tag+'.csv', newline='') as f:
      reader = csv.reader(f)
      data = list(reader)
 
@@ -47,38 +76,25 @@ erri_his = []
 erri_anchor = []
 max_erri = []
 
-if len(sys.argv) <= 3:
-    ylb = r'$triangle$'
-    tag = ''
-else:
-    if sys.argv[3] == 'fom':
-        ylb = r'$\frac{\triangle(\theta_g)}{\|u_{FOM}(\theta^*_g)\|_{H^1}}$'
-        tag = '_sc_fom'
-    elif sys.argv[3] == 'relerr':
-        ylb = r'$\frac{\triangle(\theta_g) \|u(\theta_g)\|_{H^1}}' + \
-              r'{\|u_{FOM}({\theta_g})-u_{ROM}({\theta_g})\|_{H^1}}$'
-        tag = '_sc_relerr'
-    elif sys.argv[3] == 'romabserr':
-        ylb = r'$\frac{\triangle(\theta_g)}' + \
-              r'{\|u_{FOM}({\theta_g})-u_{ROM}({\theta_g})\|_{H^1}}$'
-        tag = '_sc_romabserr'
-    elif sys.argv[3] == 'rom':
-        ylb = r'$\frac{\triangle(\theta_g)}{\|u_{ROM}(\theta_g)\|_{H^1}}$'
-        tag = '_sc_rom'
 
 for itr, anchor, N, K in zip(data[0], data[1], data[2], data[3]):
+
     ax.set(xlabel=r'$\theta_g$', ylabel=ylb,
            ylim=[1e-5, 1e1],
            xticks=np.linspace(0, 180, 19, dtype=int))
+
     print(itr, anchor, N, K)
+
     if len(sys.argv) <= 3:
         angle, erri = erri_w_theta(model, anchor, N)
     else:
         angle, erri = erri_w_theta(model, anchor, N, sys.argv[3])
-    ax.semilogy(angle, erri, 'b--o', label=r'$\textit{it} = '+str(itr) +
-                '$, '+r'$\theta^*_{'+'g,'+str(itr)+'}$'+r'$='+anchor+'$')
-    
+
+    ax.semilogy(angle, erri, 'b--o')
+    ax.set_title('iteration '+str(itr) +
+                ', '+r'$\theta^*_{'+'g,'+str(itr)+'}$'+r'$='+anchor+'$')
     idx = np.where(angle == int(anchor))
+    
     erri_anchor.append(erri[idx])
     anchors.append(int(anchor))
     ax.semilogy(anchors, erri_anchor, 'ro')
@@ -91,11 +107,19 @@ for itr, anchor, N, K in zip(data[0], data[1], data[2], data[3]):
     idxmax = np.argmax(erri_min)
     max_erri.append(erri_min[idxmax])
 
+    candidate = str(int(angle[idxmax]))
+    while candidate in P_train_max[:itr]:
+        print('Skipping the same anchor point')
+        erri_min[idxmax] = 1e-8
+        idxmax = np.argmax(erri_min)
+        candidate = str(int(angle[idxmax]))
+        print('Next candidate', candidate)
     print('h-greedy, l=', itr, 'max erri:', erri_min[idxmax])
     print("The next anchor point is ", angle[idxmax])
 
-    ax.legend(loc=0, ncol=5, fontsize=10)
+    ax.legend(loc=0, ncol=1)
     ax.axes.grid(True, axis='y')
+    ax.set_xticklabels(ax.get_xticks(), rotation=45)
     fig.savefig('offline_erri_L'+str(itr)+tag+'.png')
     ax.clear()
 
