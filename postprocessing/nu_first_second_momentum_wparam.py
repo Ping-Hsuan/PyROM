@@ -28,9 +28,9 @@ setup.checkdir(target_dir)
 search_dir = './'+model+'_info/nu'
 root, filenames = setup.gtfpath(search_dir, '^.*_'+N+'nb_.*$')
 if T0 == 1:
-    files_dict = setup.create_dict(filenames, '^.*_ic_h10_(.*\d+)_.*$')
+    files_dict = setup.create_dict(filenames, '^.*_ic_h10_(-?\d+)_.*$')
 elif T0 >= 1:
-    files_dict = setup.create_dict(filenames, '^.*_zero_h10_(.*\d+)_.*$')
+    files_dict = setup.create_dict(filenames, '^.*_zero_h10_(-?\d+)_.*$')
 dict_final = sorted(files_dict.items(), key=operator.itemgetter(0))
 
 
