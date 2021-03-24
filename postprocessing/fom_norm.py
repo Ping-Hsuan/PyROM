@@ -30,9 +30,9 @@ setup.checkdir(target_dir)
 search_dir = './'+model+'_info/fom_norm/'
 root, filenames = setup.gtfpath(search_dir, '^.*_'+N+'nb_.*$')
 if T0 == 1:
-    files_dict = setup.create_dict(filenames, '^.*_ic_h10_(.*\d+)_.*$')
+    files_dict = setup.create_dict(filenames, '^.*_ic_h10_(-?\d+)_.*$')
 elif T0 >= 1:
-    files_dict = setup.create_dict(filenames, '^.*_zero_h10_(.*\d+)_.*$')
+    files_dict = setup.create_dict(filenames, '^.*_zero_h10_(-?\d+)_.*$')
 
 dict_final = sorted(files_dict.items(), key=operator.itemgetter(0))
 
@@ -67,10 +67,12 @@ for j in range(data.shape[0]):
 
 fig, ax = plt.subplots(1, tight_layout=True)
 ax.set(ylabel=r'$\||(u, T)\|_{*}$', xlabel=r'$\theta_g$',
-       xticks=np.linspace(0, 180, 5, dtype=int))
+       xticks=np.linspace(0, 180, 19, dtype=int),
+       title='Norm of the velocity and temperature')
 ax.plot(data[:, 0], data[:, 7], 'b-o', mfc="None", label=r'$H^1_0$')
 ax.plot(data[:, 0], data[:, 8], 'r-o', mfc="None", label=r'$L^2$')
 ax.plot(data[:, 0], data[:, 9], 'k-o', mfc="None", label=r'$H^1$')
+ax.set_xticklabels(ax.get_xticks(), rotation=45)
 ax.legend(loc=0)
 print("---------------------------------------------")
 fig.savefig('.'+search_dir+'fom_h1norm.png')
@@ -83,10 +85,12 @@ plt.close(fig)
 
 fig, ax = plt.subplots(1, tight_layout=True)
 ax.set(ylabel=r'$\||u\|_{*}$', xlabel=r'$\theta_g$',
-       xticks=np.linspace(0, 180, 5, dtype=int))
+       xticks=np.linspace(0, 180, 19, dtype=int),
+       title='Norm of the velocity')
 ax.plot(data[:, 0], data[:, 1], 'b-o', mfc="None", label=r'$H^1_0$')
 ax.plot(data[:, 0], data[:, 2], 'r-o', mfc="None", label=r'$L^2$')
 ax.plot(data[:, 0], data[:, 3], 'k-o', mfc="None", label=r'$H^1$')
+ax.set_xticklabels(ax.get_xticks(), rotation=45)
 ax.legend(loc=0)
 print("---------------------------------------------")
 fig.savefig('.'+search_dir+'fom_u_norm.png')
@@ -98,10 +102,12 @@ print("---------------------------------------------")
 
 fig, ax = plt.subplots(1, tight_layout=True)
 ax.set(ylabel=r'$\||T\|_{*}$', xlabel=r'$\theta_g$',
-       xticks=np.linspace(0, 180, 5, dtype=int))
+       xticks=np.linspace(0, 180, 19, dtype=int),
+       title='Norm of the temperature')
 ax.plot(data[:, 0], data[:, 4], 'b-o', mfc="None", label=r'$H^1_0$')
 ax.plot(data[:, 0], data[:, 5], 'r-o', mfc="None", label=r'$L^2$')
 ax.plot(data[:, 0], data[:, 6], 'k-o', mfc="None", label=r'$H^1$')
+ax.set_xticklabels(ax.get_xticks(), rotation=45)
 ax.legend(loc=0)
 print("---------------------------------------------")
 fig.savefig('.'+search_dir+'fom_T_h1norm.png')
