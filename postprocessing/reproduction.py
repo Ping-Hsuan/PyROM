@@ -16,28 +16,36 @@ from mor import ROM
 with open('reproduction.yaml') as f:
     info = yaml.load(f, Loader=yaml.FullLoader)
 
-rom = ROM(info)
-rom.get_data()
-rom.field = 'u'
-rom.get_coef()
-rom.compute_momentum()
-aux.plt_coef_in_t(rom)
-1/o
+# Setup the directory
 setup_path = os.getcwd()
-model = info['formulation']
-
-dir1 = model+'_reproduction'
+dir1 = info['method']+'_reproduction'
 for key, value in info['parameters'].items():
     dir1 += '_'+str(key)+'_'+str(value)
-T0 = info['T0']
-N = info['nb']
-
 tpath = os.path.join(setup_path, dir1)
 isExist = os.path.exists(tpath)
 if isExist:
     pass
 else:
     os.mkdir(tpath)
+
+# Start postprocessing
+rom = ROM(info)
+rom.get_data()
+if (info['features']['romu'] and info['ifrom(1)']):
+    rom.field = 'u'
+    rom.get_coef()
+    rom.compute_momentum()
+    aux.plt_coef_in_t(rom, tpath)
+
+if (info['features']['romt'] and info['ifrom(2)']):
+    rom.field = 'T'
+    rom.get_coef()
+    rom.compute_momentum()
+    aux.plt_coef_in_t(rom, tpath)
+
+print(tpath)
+1/o
+
 
 for feature in info['features'].keys():
     search_dir = model+'_info'
