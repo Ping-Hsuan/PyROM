@@ -3,6 +3,8 @@ import sys
 sys.path.append('/Users/bigticket0501/Developer/PyMOR/postprocessing/')
 from mor import ROM
 from snapshot import Snapshot
+sys.path.append('/Users/bigticket0501/Developer/PyMOR/code/plot_helpers/')
+import setup
 
 
 def dual_norm():
@@ -54,14 +56,13 @@ def plt_coef_in_t(rom, tdir):
     import numpy as np
     import matplotlib.pyplot as plt
     import sys
-    sys.path.append('/Users/bigticket0501/Developer/PyMOR/code/plot_helpers/')
-    import setup
     from myplot import plt_romcoef_in_t, plt_snapcoef_in_t, \
     plt_snap_minmax, plt_mean_in_t, add_std_in_t, plt_sample_mean_var
     sys.path.append('/Users/bigticket0501/Developer/PyMOR/postprocessing/')
     from snapshot import Snapshot
     import os
 
+    setup.style(1)
     setup.text()
 
     field = rom.field
@@ -115,7 +116,6 @@ def plt_coef_in_t(rom, tdir):
     fig = plt_sample_mean_var(rom, snap)
     output = os.path.join(sub_dir, field+'a_'+field+'v_N'+str(nb)+'.png')
     fig.savefig(output)
-    plt.show()
 
 
 def checkdir(dir_path):
@@ -127,4 +127,60 @@ def checkdir(dir_path):
     else:
         os.mkdir(dir_path)
 
+    return
+
+
+def plt_erri_w_N(rom, tdir):
+    import numpy as np
+    import matplotlib.pyplot as plt
+    import os
+
+    setup.style(1)
+    setup.text()
+
+    solver = rom.info['method']
+    anchor = rom.info['anchors']
+
+    # Create subdirectory
+    sub_dir = os.path.join(tdir, 'dual_norm')
+    checkdir(sub_dir)
+
+    # Create filename
+    fname1 = 'dual_norm'
+    fname2 = 'N_list'
+    fname3 = 'erri'
+    for key, value in rom.info['parameters'].items():
+        fname1 += '_'+str(key)+'_'+str(value)
+        fname2 += '_'+str(key)+'_'+str(value)
+        fname3 += '_'+str(key)+'_'+str(value)
+
+    fname2 += '.dat'
+    fname3 += '.dat'
+
+    fig, ax = plt.subplots(1, tight_layout=True)
+    # Create label
+    lb = solver + ' with '
+    anc_lb = ''
+    for key, value in rom.info['parameters'].items():
+        if key == 'theta':
+            anc_lb += '\\'+str(key)+'^*_g='+str(value)
+        else:
+            anc_lb += str(key)+'^*='+str(value)
+    plot_params = {'c': 'k', 'marker': 'o', 'mfc': 'None',
+                   'label': lb+r'$'+anc_lb+'$'}
+
+    ax.set(ylabel=r'$\triangle('+anc_lb+')$', xlabel=r'$N$',
+           ylim=[10**np.floor(np.log10(min(rom.erris))), 1], xlim=[1, max(rom.nbs)])
+    ax.semilogy(rom.nbs, rom.erris, **plot_params)
+    plt.legend()
+
+    print("---------------------------------------------")
+    output = os.path.join(sub_dir, fname1)
+    fig.savefig(output)
+    print("---------------------------------------------")
+    plt.show()
+    output = os.path.join(sub_dir, fname2)
+    np.savetxt(output, rom.nbs)
+    output = os.path.join(sub_dir, fname3)
+    np.savetxt(output, rom.erris)
     return
