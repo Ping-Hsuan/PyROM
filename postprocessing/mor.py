@@ -1,43 +1,39 @@
 import numpy as np
+import sys
 import re
 import os
+sys.path.append('/Users/bigticket0501/Developer/PyMOR/code/post_pro/')
+import aux
+sys.path.append('/Users/bigticket0501/Developer/PyMOR/code/plot_helpers/')
+import mypostpro
 
 
 class ROM:
 
-    def __init__(self, fpath, field='u'):
-        self.fpath = fpath
-        print(self.fpath)
-        self.fname = self.fpath.split('/')[-1]
-        if field == 't':
-            self.field = field.upper()
-        else:
-            self.field = field
+    def __init__(self, info_dict):
         self.info = {}
+        self.fnames = {}
         self.outputs = {}
+        # Assign ROM info based on info_dict specifed by user
+        for key, value in info_dict.items():
+            self.info[key] = value
 
-        match = re.match(r"(.*)s_(.*)_(.*)nb_(.*)_(.*)_(.*)_.*", self.fname)
-        # Number of snapshots
-        self.info['K'] = int(match.groups()[0])
-        # Types of ROM
-        if match.groups()[1] == 'rom':
-            self.info['method'] = 'GROM'
-        elif match.groups()[1] == 'crom':
-            self.info['method'] = 'CROM'
-        elif match.groups()[1] == 'lrom':
-            self.info['method'] = 'LROM'
-        # Number of POD modes
-        self.info['nb'] = int(match.groups()[2])
-        # Start from 0 or ic
-        self.info['init'] = (match.groups()[3])
-        # norm when doing POD
-        self.info['POD_norm'] = (match.groups()[4])
+    def get_data(self):
+        for feature in self.info['features'].keys():
+            search_dir = self.info['method']+'_info'
+            self.fnames[feature] = aux.gtfpath(search_dir, '^.*_h10_.*_'+feature)
+        return
 
     def get_coef(self):
         field = self.field
+        # Get the only file
+        for element in self.fnames['rom'+field.lower()]:
+            z = re.match(r"^.*_(\d+)nb_.*", element)
+            if int(z.groups()[0]) == self.info['nb']:
+                fname = element
         coef = []
         t = []
-        with open(self.fpath, 'r') as f:
+        with open(fname, 'r') as f:
             for line in f:
                 info = line.split()
                 coef.append(info[2])
@@ -94,4 +90,15 @@ class ROM:
             z = re.match(parameter+r"_(\d+)", element)
             if z:
                 self.info['anchor'] = float(((z.groups())[0]))
+        return
+
+    def compute_momentum(self):
+        field = self.field
+        if self.info['init'] == 'zero':
+            self.info['T0'] = mypostpro.find_nearest(self.outputs['t'][0, :], 501)
+        elif self.info['init'] == 'ic':
+            self.info['T0'] = 0
+            self.outputs['t'] += 500
+        self.coef_mean(self.info['T0'])
+        self.coef_variance(self.info['T0'])
         return
