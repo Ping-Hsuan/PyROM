@@ -43,7 +43,9 @@ if (info['features']['romt'] and info['ifrom(2)']):
     rom.compute_momentum()
     aux.plt_coef_in_t(rom, tpath)
 
-print(tpath)
+if (info['features']['dual_norm']):
+    rom.get_dual_wN()
+    aux.plt_erri_w_N(rom, tpath)
 1/o
 
 
