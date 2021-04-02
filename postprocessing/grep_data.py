@@ -46,7 +46,7 @@ print(filenames)
 create_dir(rom_dir)
 
 # Create a dictionary for supproted features
-labels = ['rom_abserr', 'nu', 'romu', 'romt', 'proj_relerr', 'dual_norm',
+labels = ['mabserr', 'nu', 'romu', 'romt', 'mrelerr', 'dual_norm',
           'fom_norm', 'rom_norm']
 data_pattern = [r'^\sh1\serror:', r'\snus', r'\sromu', r'\sromt',
                 r'\srelative\sh1\serror:',
