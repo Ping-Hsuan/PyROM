@@ -1,16 +1,16 @@
 import sys
 import os
-import subprocess
-import operator
 import yaml
-#sys.path.append('/Users/bigticket0501/Developer/PyMOR/code/plot_helpers/')
 sys.path.append('/Users/bigticket0501/Developer/PyMOR/code/post_pro/')
 import aux
 from mor import ROM
 
-# This python script is used to plot reproduction results
-# You must the model and the parameter theta_g
-# (for now only support for theta_g)
+# This python script is used to plot "reproduction" results
+# What you should do before running this script:
+# 1. Specify the reproduction.yaml in the directory you put the logfile
+# 2. Run the grep_data script.
+# Once the two steps above are doen, simple call this script
+# It will done the postprocessing for you
 
 # Extract user specify features
 with open('reproduction.yaml') as f:
@@ -31,6 +31,7 @@ else:
 # Start postprocessing
 rom = ROM(info)
 rom.get_data()
+
 if (info['features']['romu'] and info['ifrom(1)']):
     rom.field = 'u'
     rom.get_coef()
@@ -46,22 +47,16 @@ if (info['features']['romt'] and info['ifrom(2)']):
 if (info['features']['dual_norm']):
     rom.get_dual_wN()
     aux.plt_erri_w_N(rom, tpath)
-1/o
 
+if (info['features']['mrelerr']):
+    rom.get_mrelerr()
+    aux.plt_mrelerr_w_N(rom, tpath)
 
-for feature in info['features'].keys():
-    search_dir = model+'_info'
-    fnames = aux.gtfpath(search_dir, '^.*_h10_.*_'+feature)
-#   files_dict = aux.create_dict(fnames, '^.*_([0-9]*)nb_.*$')
-    # sort the dictionary key
-#   dict_final = sorted(files_dict.items(), key=operator.itemgetter(0))
-    data = aux.get_data(fnames, feature, info)
+if (info['features']['mabserr']):
+    rom.get_mabserr()
+    aux.plt_mabserr_w_N(rom, tpath)
 
-1/o
-#subprocess.run(["python3", "grep_data.py", setup_path, model])
-#subprocess.run(["python3", "romt.py", tpath, model, theta_g, N])
-subprocess.run(["python3", "romu.py", tpath, model, theta_g, N])
-#subprocess.run(["python3", "relerr_wN.py", tpath, model, theta_g])
-#subprocess.run(["python3", "abserr_wN.py", tpath, model, theta_g])
-#subprocess.run(["python3", "rom_norm_wN.py", tpath, model, theta_g])
+if (info['features']['rom_norm']):
+    rom.get_rom_norm()
+    aux.plt_rom_norm_w_N(rom, tpath)
 #subprocess.run(["python3", "nu_first_second_momentum_wN.py", tpath, model, theta_g, T0])
