@@ -139,7 +139,6 @@ def plt_erri_w_N(rom, tdir):
     setup.text()
 
     solver = rom.info['method']
-    anchor = rom.info['anchors']
 
     # Create subdirectory
     sub_dir = os.path.join(tdir, 'dual_norm')
@@ -174,13 +173,283 @@ def plt_erri_w_N(rom, tdir):
     ax.semilogy(rom.nbs, rom.erris, **plot_params)
     plt.legend()
 
-    print("---------------------------------------------")
     output = os.path.join(sub_dir, fname1)
     fig.savefig(output)
-    print("---------------------------------------------")
-    plt.show()
+
     output = os.path.join(sub_dir, fname2)
     np.savetxt(output, rom.nbs)
     output = os.path.join(sub_dir, fname3)
     np.savetxt(output, rom.erris)
+    return
+
+
+def plt_mrelerr_w_N(rom, tdir):
+    import numpy as np
+    import matplotlib.pyplot as plt
+    import os
+
+    setup.style(1)
+    setup.text()
+
+    # Create subdirectory
+    sub_dir = os.path.join(tdir, 'mrelerr')
+    checkdir(sub_dir)
+
+    solver = rom.info['method']
+    plot_params1 = {'c': 'b', 'marker': 'o', 'mfc': 'None',
+                    'label': solver}
+    plot_params2 = {'c': 'k', 'marker': 'o', 'mfc': 'None',
+                    'label': 'Projection'}
+    # Create title
+    title = 'Relative error in the mean flow at '
+    anc_lb = ''
+    for key, value in rom.info['parameters'].items():
+        if key == 'theta':
+            anc_lb += '\\'+str(key)+'^*_g='+str(value)
+        else:
+            anc_lb += str(key)+'^*='+str(value)
+
+    fig, ax = plt.subplots(1, tight_layout=True)
+    ax.set(xlabel=r'$N$', ylabel=r'$\frac{\|u - \tilde{u}\|_{H^1}}{\|u\|_{H^1}}$',
+           xlim=[0, max(rom.nbs)], title=title+'$'+anc_lb+'$')
+
+    ax.semilogy(rom.nbs, rom.rom_relerr, **plot_params1)
+    ax.semilogy(rom.nbs, rom.proj_relerr, **plot_params2)
+    ax.legend(loc=0, ncol=1)
+
+    # Create filename
+    fname1 = 'mrelerr'
+    fname2 = 'N_list'
+    fname3 = 'rom_mrelerr'
+    fname4 = 'proj_mrelerr'
+    for key, value in rom.info['parameters'].items():
+        fname1 += '_'+str(key)+'_'+str(value)
+        fname2 += '_'+str(key)+'_'+str(value)
+        fname3 += '_'+str(key)+'_'+str(value)
+        fname4 += '_'+str(key)+'_'+str(value)
+
+    fname2 += '.dat'
+    fname3 += '.dat'
+    fname4 += '.dat'
+
+    output = os.path.join(sub_dir, fname1)
+    fig.savefig(output)
+    output = os.path.join(sub_dir, fname2)
+    np.savetxt(output, rom.nbs)
+    output = os.path.join(sub_dir, fname3)
+    np.savetxt(output, rom.rom_relerr)
+    output = os.path.join(sub_dir, fname4)
+    np.savetxt(output, rom.proj_relerr)
+    return
+
+
+def reader(fname):
+    with open(fname, 'r') as f:
+        k = f.read()
+    list_of_lines = k.split('\n')
+    list_of_words = [[k for k in line.split(' ') if k] for line in list_of_lines][:-1]
+    data = [x[-1] for x in list_of_words]
+    return data
+
+
+def plt_mabserr_w_N(rom, tdir):
+    import numpy as np
+    import matplotlib.pyplot as plt
+    import os
+
+    setup.style(1)
+    setup.text()
+
+    # Create subdirectory
+    sub_dir = os.path.join(tdir, 'mabserr')
+    checkdir(sub_dir)
+
+    solver = rom.info['method']
+    plot_params1 = {'c': 'b', 'marker': 'o', 'mfc': 'None',
+                    'label': solver}
+    plot_params2 = {'c': 'k', 'marker': 'o', 'mfc': 'None',
+                    'label': 'Projection'}
+    # Create title
+    title = 'Absolute error in the mean flow at '
+    anc_lb = ''
+    for key, value in rom.info['parameters'].items():
+        if key == 'theta':
+            anc_lb += '\\'+str(key)+'^*_g='+str(value)
+        else:
+            anc_lb += str(key)+'^*='+str(value)
+
+    fig, ax = plt.subplots(1, tight_layout=True)
+    ax.set(xlabel=r'$N$', ylabel=r'$\|u - \tilde{u}\|_{H^1}$',
+           xlim=[0, max(rom.nbs)], title=title+'$'+anc_lb+'$')
+
+    ax.semilogy(rom.nbs, rom.rom_relerr, **plot_params1)
+    ax.semilogy(rom.nbs, rom.proj_relerr, **plot_params2)
+    ax.legend(loc=0, ncol=1)
+
+    # Create filename
+    fname1 = 'mabserr'
+    fname2 = 'N_list'
+    fname3 = 'rom_mabserr'
+    fname4 = 'proj_mabserr'
+    for key, value in rom.info['parameters'].items():
+        fname1 += '_'+str(key)+'_'+str(value)
+        fname2 += '_'+str(key)+'_'+str(value)
+        fname3 += '_'+str(key)+'_'+str(value)
+        fname4 += '_'+str(key)+'_'+str(value)
+
+    fname2 += '.dat'
+    fname3 += '.dat'
+    fname4 += '.dat'
+
+    output = os.path.join(sub_dir, fname1)
+    fig.savefig(output)
+    output = os.path.join(sub_dir, fname2)
+    np.savetxt(output, rom.nbs)
+    output = os.path.join(sub_dir, fname3)
+    np.savetxt(output, rom.rom_relerr)
+    output = os.path.join(sub_dir, fname4)
+    np.savetxt(output, rom.proj_relerr)
+    return
+
+
+def plt_rom_norm_w_N(rom, tdir):
+    import numpy as np
+    import matplotlib.pyplot as plt
+    import os
+
+    setup.style(1)
+    setup.text()
+
+    # Create subdirectory
+    sub_dir = os.path.join(tdir, 'rom_norm')
+    checkdir(sub_dir)
+
+    solver = rom.info['method']
+    # Create title
+    title = 'Norm of the predictied mean flow by '+solver+' at '
+    anc_lb = ''
+    for key, value in rom.info['parameters'].items():
+        if key == 'theta':
+            anc_lb += '\\'+str(key)+'^*_g='+str(value)
+        else:
+            anc_lb += str(key)+'^*='+str(value)
+
+    # Data transform
+    data = np.column_stack((rom.nbs, rom.rom_norm))
+    data = data[data[:, 0].argsort()]
+    # fix the h1 norm
+    for j in range(data.shape[0]):
+        if (rom.info['ifrom(1)']):
+            idx1 = 1
+            data[j, idx1+2] = np.sqrt(data[j, idx1]**2+data[j, idx1+1]**2)
+        if (rom.info['ifrom(2)']):
+            idx2 = 4
+            data[j, idx2+2] = np.sqrt(data[j, idx2]**2+data[j, idx2+1]**2)
+        if (rom.info['ifrom(1)'] and rom.info['ifrom(2)']):
+            idx3 = 7
+            data[j, idx3+2] = np.sqrt(data[j, idx3]**2+data[j, idx3+1]**2)
+
+    if (rom.info['ifrom(1)']):
+        fig, ax = plt.subplots(1, tight_layout=True)
+        ax.set(xlabel=r'$N$', ylabel=r'$\|\tilde{u}\|_{*}$',
+               xlim=[0, max(rom.nbs)], title=title+'$'+anc_lb+'$')
+        ax.plot(data[:, 0], data[:, idx1], 'b-o', mfc="None", label=r'$H^1_0$')
+        ax.plot(data[:, 0], data[:, idx1+1], 'r-o', mfc="None", label=r'$L^2$')
+        ax.plot(data[:, 0], data[:, idx1+2], 'k-o', mfc="None", label=r'$H^1$')
+        ax.legend(loc=0)
+        fname1 = 'rom_u_norm'
+        fname2 = 'N_list'
+        fname3 = 'rom_u_h10'
+        fname4 = 'rom_u_l2'
+        fname5 = 'rom_u_h1'
+        for key, value in rom.info['parameters'].items():
+            fname1 += '_'+str(key)+'_'+str(value)
+            fname2 += '_'+str(key)+'_'+str(value)
+            fname3 += '_'+str(key)+'_'+str(value)
+            fname4 += '_'+str(key)+'_'+str(value)
+            fname5 += '_'+str(key)+'_'+str(value)
+
+        fname2 += '.dat'
+        fname3 += '.dat'
+        fname4 += '.dat'
+        fname5 += '.dat'
+        output = os.path.join(sub_dir, fname1)
+        fig.savefig(output)
+        output = os.path.join(sub_dir, fname2)
+        np.savetxt(output, data[:, 0])
+        output = os.path.join(sub_dir, fname3)
+        np.savetxt(output, data[:, idx1])
+        output = os.path.join(sub_dir, fname4)
+        np.savetxt(output, data[:, idx1+1])
+        output = os.path.join(sub_dir, fname5)
+        np.savetxt(output, data[:, idx1+2])
+
+    if (rom.info['ifrom(2)']):
+        fig, ax = plt.subplots(1, tight_layout=True)
+        ax.set(ylabel=r'$\||T\|_{*}$', xlabel=r'$N$', title=title)
+        ax.plot(data[:, 0], data[:, idx2], 'b-o', mfc="None", label=r'$H^1_0$')
+        ax.plot(data[:, 0], data[:, idx2+1], 'r-o', mfc="None", label=r'$L^2$')
+        ax.plot(data[:, 0], data[:, idx2+2], 'k-o', mfc="None", label=r'$H^1$')
+        ax.legend(loc=0)
+        fname1 = 'rom_T_norm'
+        fname2 = 'N_list'
+        fname3 = 'rom_T_h10'
+        fname4 = 'rom_T_l2'
+        fname5 = 'rom_T_h1'
+        for key, value in rom.info['parameters'].items():
+            fname1 += '_'+str(key)+'_'+str(value)
+            fname2 += '_'+str(key)+'_'+str(value)
+            fname3 += '_'+str(key)+'_'+str(value)
+            fname4 += '_'+str(key)+'_'+str(value)
+            fname5 += '_'+str(key)+'_'+str(value)
+
+        fname2 += '.dat'
+        fname3 += '.dat'
+        fname4 += '.dat'
+        fname5 += '.dat'
+        output = os.path.join(sub_dir, fname1)
+        fig.savefig(output)
+        output = os.path.join(sub_dir, fname2)
+        np.savetxt(output, data[:, 0])
+        output = os.path.join(sub_dir, fname3)
+        np.savetxt(output, data[:, idx2])
+        output = os.path.join(sub_dir, fname4)
+        np.savetxt(output, data[:, idx2+1])
+        output = os.path.join(sub_dir, fname5)
+        np.savetxt(output, data[:, idx2+2])
+
+    if (rom.info['ifrom(1)'] and rom.info['ifrom(2)']):
+        fig, ax = plt.subplots(1, tight_layout=True)
+        ax.set(ylabel=r'$\||(u, T)\|_{*}$', xlabel=r'$N$', title=title)
+        ax.plot(data[:, 0], data[:, idx3], 'b-o', mfc="None", label=r'$H^1_0$')
+        ax.plot(data[:, 0], data[:, idx3+1], 'r-o', mfc="None", label=r'$L^2$')
+        ax.plot(data[:, 0], data[:, idx3+2], 'k-o', mfc="None", label=r'$H^1$')
+        ax.legend(loc=0)
+        fname1 = 'rom_norm'
+        fname2 = 'N_list'
+        fname3 = 'rom_h10'
+        fname4 = 'rom_l2'
+        fname5 = 'rom_h1'
+        for key, value in rom.info['parameters'].items():
+            fname1 += '_'+str(key)+'_'+str(value)
+            fname2 += '_'+str(key)+'_'+str(value)
+            fname3 += '_'+str(key)+'_'+str(value)
+            fname4 += '_'+str(key)+'_'+str(value)
+            fname5 += '_'+str(key)+'_'+str(value)
+
+        fname2 += '.dat'
+        fname3 += '.dat'
+        fname4 += '.dat'
+        fname5 += '.dat'
+
+        output = os.path.join(sub_dir, fname1)
+        fig.savefig(output)
+        output = os.path.join(sub_dir, fname2)
+        np.savetxt(output, data[:, 0])
+        output = os.path.join(sub_dir, fname3)
+        np.savetxt(output, data[:, idx3])
+        output = os.path.join(sub_dir, fname4)
+        np.savetxt(output, data[:, idx3+1])
+        output = os.path.join(sub_dir, fname5)
+        np.savetxt(output, data[:, idx3+2])
     return
