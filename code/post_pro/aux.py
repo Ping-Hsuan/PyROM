@@ -117,7 +117,7 @@ def plt_erri_w_N(rom, tdir):
     setup.style(1)
     setup.text()
 
-    solver = rom.info['method']
+    solver = rom.info['method'].upper()
 
     # Create subdirectory
     sub_dir = os.path.join(tdir, 'dual_norm')
@@ -174,7 +174,7 @@ def plt_mrelerr_w_N(rom, tdir):
     sub_dir = os.path.join(tdir, 'mrelerr')
     checkdir(sub_dir)
 
-    solver = rom.info['method']
+    solver = rom.info['method'].upper()
     plot_params1 = {'c': 'b', 'marker': 'o', 'mfc': 'None',
                     'label': solver}
     plot_params2 = {'c': 'k', 'marker': 'o', 'mfc': 'None',
@@ -243,7 +243,7 @@ def plt_mabserr_w_N(rom, tdir):
     sub_dir = os.path.join(tdir, 'mabserr')
     checkdir(sub_dir)
 
-    solver = rom.info['method']
+    solver = rom.info['method'].upper()
     plot_params1 = {'c': 'b', 'marker': 'o', 'mfc': 'None',
                     'label': solver}
     plot_params2 = {'c': 'k', 'marker': 'o', 'mfc': 'None',
@@ -261,8 +261,8 @@ def plt_mabserr_w_N(rom, tdir):
     ax.set(xlabel=r'$N$', ylabel=r'$\|u - \tilde{u}\|_{H^1}$',
            xlim=[0, max(rom.nbs)], title=title+'$'+anc_lb+'$')
 
-    ax.semilogy(rom.nbs, rom.rom_relerr, **plot_params1)
-    ax.semilogy(rom.nbs, rom.proj_relerr, **plot_params2)
+    ax.semilogy(rom.nbs, rom.rom_abserr, **plot_params1)
+    ax.semilogy(rom.nbs, rom.proj_abserr, **plot_params2)
     ax.legend(loc=0, ncol=1)
 
     # Create filename
@@ -303,7 +303,7 @@ def plt_rom_norm_w_N(rom, tdir):
     sub_dir = os.path.join(tdir, 'rom_norm')
     checkdir(sub_dir)
 
-    solver = rom.info['method']
+    solver = rom.info['method'].upper()
     # Create title
     title = 'Norm of the predictied mean flow by '+solver+' at '
     anc_lb = ''
