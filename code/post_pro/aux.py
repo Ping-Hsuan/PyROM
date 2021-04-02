@@ -7,11 +7,6 @@ sys.path.append('/Users/bigticket0501/Developer/PyMOR/code/plot_helpers/')
 import setup
 
 
-def dual_norm():
-    print('hello')
-    return
-
-
 def gtfpath(target_dir, pattern):
     import re
     import os
@@ -34,22 +29,6 @@ def create_dict(filenames, pattern):
             file_dict[match.groups()[0]].append(fname)
 
     return file_dict
-
-
-def get_data(fnames, feature, info):
-    if feature == 'romu':
-        data = get_romu(fnames, feature, info)
-    return data
-
-
-def get_romu(fnames, feature, info):
-    for element in fnames:
-        z = re.match(r"^.*_(\d+)nb_.*", element)
-        if z.groups()[0] == str(info['nb']):
-            fname = element
-    rom = ROM(fname, 'u')
-    rom.get_coef()
-    return rom
 
 
 def plt_coef_in_t(rom, tdir):
