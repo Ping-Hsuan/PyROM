@@ -21,7 +21,7 @@ class ROM:
     def get_data(self):
         for feature in self.info['features'].keys():
             search_dir = self.info['method']+'_info'
-            self.fnames[feature] = aux.gtfpath(search_dir, '^.*_h10_.*_'+feature)
+            self.fnames[feature] = aux.gtfpath(search_dir, '^.*_'+self.info['POD_norm']+'_.*_'+feature)
         return
 
     def get_coef(self):
@@ -93,7 +93,6 @@ class ROM:
         return
 
     def compute_momentum(self):
-        field = self.field
         if self.info['init'] == 'zero':
             self.info['T0'] = mypostpro.find_nearest(self.outputs['t'][0, :], 501)
         elif self.info['init'] == 'ic':
@@ -101,4 +100,64 @@ class ROM:
             self.outputs['t'] += 500
         self.coef_mean(self.info['T0'])
         self.coef_variance(self.info['T0'])
+        return
+
+    def get_dual_wN(self):
+        # Should make the regular expression more specific
+        # Rightnow it will grep other files
+        files_dict = aux.create_dict(self.fnames['dual_norm'], '^.*_([0-9]*)nb_.*$')
+        data = []
+        nbs = []
+        for nb, fnames in files_dict.items():
+            for fname in fnames:
+                with open(fname, 'r') as f:
+                    k = f.read()
+                list_of_lines = k.split('\n')
+                list_of_words = [[k for k in line.split(' ') if k] for line in list_of_lines][:-1]
+                data.append([float(x[-1]) for x in list_of_words])
+                nbs.append(int(nb))
+        self.nbs, self.erris = [list(tuple) for tuple in zip(*sorted(zip(nbs, data)))]
+        return
+
+    def get_mrelerr(self):
+        # For now, grep proj and rom relerr at the same time
+        files_dict = aux.create_dict(self.fnames['mrelerr'], '^.*_([0-9]*)nb_.*$')
+        nbs = []
+        rom = []
+        proj = []
+        for nb, fnames in files_dict.items():
+            for fname in fnames:
+                data = aux.reader(fname)
+                rom.append(float(data[0]))
+                proj.append(float(data[1]))
+                nbs.append(int(nb))
+        self.nbs, self.rom_relerr, self.proj_relerr = [list(tuple) for tuple in zip(*sorted(zip(nbs, rom, proj)))]
+        return
+
+    def get_mabserr(self):
+        # For now, grep proj and rom abserr at the same time
+        files_dict = aux.create_dict(self.fnames['mabserr'], '^.*_([0-9]*)nb_.*$')
+        nbs = []
+        rom = []
+        proj = []
+        for nb, fnames in files_dict.items():
+            for fname in fnames:
+                data = aux.reader(fname)
+                rom.append(float(data[0]))
+                proj.append(float(data[1]))
+                nbs.append(int(nb))
+        self.nbs, self.rom_abserr, self.proj_abserr= [list(tuple) for tuple in zip(*sorted(zip(nbs, rom, proj)))]
+        return
+
+    def get_rom_norm(self):
+        files_dict = aux.create_dict(self.fnames['rom_norm'], '^.*_([0-9]*)nb_.*$')
+        nbs = []
+        rom_norm = []
+        for nb, fnames in files_dict.items():
+            for fname in fnames:
+                data = aux.reader(fname)
+                data = np.array(data).astype(np.float64)
+                rom_norm.append((data))
+                nbs.append(int(nb))
+        self.nbs, self.rom_norm = [list(tuple) for tuple in zip(*sorted(zip(nbs, rom_norm)))]
         return
