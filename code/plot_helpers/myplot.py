@@ -20,7 +20,7 @@ def plot_coef_avg(ax, rom_avg, snap_avg, tmax, tmin):
 def plt_romcoef_in_t(ax, n, T0, data):
     field = data.field
     rom_params = {'c': 'b', 'mfc': 'None'}
-    rom_params['label'] = data.info['method']
+    rom_params['label'] = data.info['method'].upper()
     ax.set(xlabel=r'$t$', ylabel=r'$'+field+r'_{'+str(n+1)+'}(t)$')
     ax.plot(data.outputs['t'][n, T0:], data.outputs[field][n, T0:],
             **rom_params)
@@ -55,7 +55,7 @@ def plt_mean_in_t(ax, n, T0, snap, rom):
     ax.hlines(y=snap.outputs[sfield+'as'][n+1], xmin=tmin, xmax=tmax,
               colors='k', linestyle='--', label='Snapshot avg')
     ax.hlines(y=rom.outputs[rfield+'a'][n], xmin=tmin, xmax=tmax, colors='b',
-              linestyle='--', label=rom.info['method']+' avg')
+              linestyle='--', label=rom.info['method'].upper()+' avg')
 
 
 def add_std_in_t(ax, n, T0, snap, rom):
@@ -69,11 +69,10 @@ def add_std_in_t(ax, n, T0, snap, rom):
                 xycoords='axes fraction', textcoords='offset points')
 
 
-def plt_sample_mean_var(rom, snap):
+def plt_sample_mean_var(rom, snap, nb):
     sfield = snap.field
     rfield = rom.field
 
-    nb = rom.info['nb']
     asnap = snap.outputs[sfield+'as']
     vsnap = snap.outputs[sfield+'vs']
 
@@ -87,7 +86,7 @@ def plt_sample_mean_var(rom, snap):
 
     ylabels = [r'$\langle '+rfield+r'_{n} \rangle_s$', r'$V_s('+rfield+r'_n)$']
     params = [{'c': 'b', 'marker': 'o', 'mfc': 'None',
-               'label': rom.info['method']},
+               'label': rom.info['method'].upper()},
               {'c': 'k', 'marker': 'x', 'mfc': 'None', 'label': 'FOM'}]
     for i in range(2):
         axs[i].plot(POD_modes[i], data[i], **params[0])
