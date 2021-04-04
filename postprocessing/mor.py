@@ -161,3 +161,24 @@ class ROM:
                 nbs.append(int(nb))
         self.nbs, self.rom_norm = [list(tuple) for tuple in zip(*sorted(zip(nbs, rom_norm)))]
         return
+
+    def get_tke(self):
+        files_dict = aux.create_dict(self.fnames['tke'], '^.*_([0-9]*)nb_.*$')
+        self.tke = {}
+        for nb, fnames in files_dict.items():
+            t = []
+            tke = []
+            self.tke[nb] = {}
+            for fname in fnames:
+                with open(fname, 'r') as f:
+                    for line in f:
+                        info = line.split()
+                        t.append(info[0])
+                        tke.append(info[1])
+            self.tke[nb]['t'] = (np.array(t).astype(np.float64))
+            self.tke[nb]['tke'] = (np.array(tke).astype(np.float64))
+#       for element in self.fnames['rom'+field.lower()]:
+#           z = re.match(r"^.*_(\d+)nb_.*", element)
+#           if int(z.groups()[0]) == self.info['tke']:
+#               fname = element
+        return
