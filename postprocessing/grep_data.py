@@ -47,11 +47,11 @@ create_dir(rom_dir)
 
 # Create a dictionary for supproted features
 labels = ['mabserr', 'nu', 'romu', 'romt', 'mrelerr', 'dual_norm',
-          'fom_norm', 'rom_norm']
+          'fom_norm', 'rom_norm', 'tke']
 data_pattern = [r'^\sh1\serror:', r'\snus', r'\sromu', r'\sromt',
                 r'\srelative\sh1\serror:',
                 r'(residual in h1 norm:\s\s+)(\d+\.\d+E?-?\d+)',
-                r'^\sFOM*', r'^\sROM*']
+                r'^\sFOM*', r'^\sROM*', r'^(?!.*?(?:MOR)s?).*tke$']
 sprt_features = dict(zip(labels, data_pattern))
 
 # Extract user specify features
