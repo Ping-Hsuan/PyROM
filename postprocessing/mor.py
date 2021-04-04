@@ -24,12 +24,12 @@ class ROM:
             self.fnames[feature] = aux.gtfpath(search_dir, '^.*_'+self.info['POD_norm']+'_.*_'+feature)
         return
 
-    def get_coef(self):
+    def get_coef(self, nb):
         field = self.field
         # Get the only file
         for element in self.fnames['rom'+field.lower()]:
             z = re.match(r"^.*_(\d+)nb_.*", element)
-            if int(z.groups()[0]) == self.info['nb']:
+            if int(z.groups()[0]) == nb:
                 fname = element
         coef = []
         t = []
@@ -40,20 +40,17 @@ class ROM:
                 t.append(info[1])
 
         self.outputs['t'] = np.reshape(np.array(t).astype(np.float64),
-                                       (self.info['nb'], -1), order='F')
+                                       (nb,-1), order='F')
         self.outputs[field] = np.reshape(np.array(coef).astype(np.float64),
-                                         (self.info['nb'], -1), order='F')
+                                         (nb, -1), order='F')
         return
 
     def coef_mean(self, T0):
         field = self.field
 
-        avg_coef = np.zeros((self.info['nb'],))
         num_sample = len(self.outputs[field][0, T0:])
 
-        for j in range(self.info['nb']):
-            avg_coef[j] = np.sum(self.outputs[field][j, T0:]) \
-                        / num_sample
+        avg_coef = np.sum(self.outputs[field][:, T0:], axis=1) / num_sample
 
         self.outputs[field+'a'] = avg_coef
         return
@@ -61,13 +58,11 @@ class ROM:
     def coef_variance(self, T0):
         field = self.field
 
-        var_coef = np.zeros((self.info['nb'],))
         num_sample = len(self.outputs[field][0, T0:])
 
-        for j in range(self.info['nb']):
-            var_coef[j] = np.sum((self.outputs[field][j, T0:]
-                                 - self.outputs[field+'a'][j])**2) \
-                                 / (num_sample-1)
+        var_coef = np.sum((self.outputs[field][:, T0:]
+                           - self.outputs[field+'a'][:, None])**2, axis=1) \
+                           / (num_sample-1)
 
         self.outputs[field+'v'] = var_coef
         return
