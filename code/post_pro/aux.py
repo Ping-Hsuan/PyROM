@@ -31,7 +31,7 @@ def create_dict(filenames, pattern):
     return file_dict
 
 
-def plt_coef_in_t(rom, tdir):
+def plt_coef_in_t(rom, nb, tdir):
     import numpy as np
     import matplotlib.pyplot as plt
     import sys
@@ -46,7 +46,7 @@ def plt_coef_in_t(rom, tdir):
 
     field = rom.field
 
-    sub_dir = os.path.join(tdir, 'rom'+field+'_'+str(rom.info['nb']))
+    sub_dir = os.path.join(tdir, 'rom'+field+'_'+str(nb))
     checkdir(sub_dir)
 
     # Create snapshot class
@@ -60,12 +60,11 @@ def plt_coef_in_t(rom, tdir):
     snap.var()
 
     K = rom.info['K']
-    nb = rom.info['nb']
     T0 = rom.info['T0']
     print(f'Information K: {K}, N: {nb}, T0: {T0}')
 
     # Plot rom coefficient
-    if rom.info['nb'] == 1:
+    if nb == 1:
         fig, ax = plt.subplots(1, squeeze=True, tight_layout=True)
         plt_romcoef_in_t(ax, 0, T0, rom)
         plt_snapcoef_in_t(ax, 0, T0, snap)
@@ -89,10 +88,10 @@ def plt_coef_in_t(rom, tdir):
                 ax = axs[n]
         ax.legend(loc='upper left', bbox_to_anchor=(0.0, 1.51), ncol=4,
                   borderaxespad=0, frameon=False)
-    output = os.path.join(sub_dir, 'rom'+field+'_N'+str(rom.info['nb'])+'.png')
+    output = os.path.join(sub_dir, 'rom'+field+'_N'+str(nb)+'.png')
     fig.savefig(output)
 
-    fig = plt_sample_mean_var(rom, snap)
+    fig = plt_sample_mean_var(rom, snap, nb)
     output = os.path.join(sub_dir, field+'a_'+field+'v_N'+str(nb)+'.png')
     fig.savefig(output)
 
@@ -432,3 +431,38 @@ def plt_rom_norm_w_N(rom, tdir):
         output = os.path.join(sub_dir, fname5)
         np.savetxt(output, data[:, idx3+2])
     return
+
+
+def plt_tke_in_t(rom, nb, tdir):
+    import numpy as np
+    import matplotlib.pyplot as plt
+    import sys
+    from myplot import plt_romcoef_in_t, plt_snapcoef_in_t, \
+    plt_snap_minmax, plt_mean_in_t, add_std_in_t, plt_sample_mean_var
+    sys.path.append('/Users/bigticket0501/Developer/PyMOR/postprocessing/')
+    from snapshot import Snapshot
+    import os
+
+    setup.style(1)
+    setup.text()
+
+    sub_dir = os.path.join(tdir, 'tke')
+    checkdir(sub_dir)
+
+    K = rom.info['K']
+    T0 = rom.info['T0']
+    print(f'Information K: {K}, N: {nb}, T0: {T0}')
+
+    rom_params = {'c': 'b', 'mfc': 'None'}
+    rom_params['label'] = rom.info['method'].upper()
+    xlabel = r'$t$'
+    ylabel = 'tke'+r'$(t)$'
+
+    fig, ax = plt.subplots(1, squeeze=True, tight_layout=True)
+    ax.set(ylabel=ylabel, xlabel=xlabel)
+    ax.semilogy(rom.tke[str(nb)]['t'], rom.tke[str(nb)]['tke'],
+            **rom_params)
+    ax.legend(loc='upper left', bbox_to_anchor= (0.0, 1.11), ncol=4,
+              borderaxespad=0, frameon=False)
+    output = os.path.join(sub_dir, 'tke_N'+str(nb)+'.png')
+    fig.savefig(output)
