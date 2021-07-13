@@ -1,5 +1,4 @@
 import numpy as np
-import matplotlib
 import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 import re
@@ -8,58 +7,34 @@ import operator
 import sys
 sys.path.append('/Users/bigticket0501/Developer/PyMOR/code/plot_helpers/')
 import mypostpro
+import setup
 
-plt.style.use('report_1fig')
+colors = setup.color(0)
+setup.text()
 
-matplotlib.rcParams['text.latex.preamble'] = [
-       r'\usepackage{siunitx}',   # i need upright \micro symbols, but you need...
-       r'\sisetup{detect-all}',   # ...this to force siunitx to actually use your fonts
-       r'\usepackage{helvet}',    # set the normal font here
-       r'\usepackage{sansmath}',  # load up the sansmath so that math -> helvet
-       r'\sansmath'               # <- tricky! -- gotta actually tell tex to use!
-]
-
+print("---------------------------------------------")
 print("This is the name of the program:", sys.argv[0])
 print("Argument List:", str(sys.argv))
 os.chdir(str(sys.argv[1]))
-N = int(sys.argv[2])
-K = int(sys.argv[3])
-isExist = os.path.exists(os.getcwd()+'/nu/')
-if isExist:
-    pass
-else:
-    os.mkdir(os.getcwd()+'/nu/')
+model = str(sys.argv[2])
+N = str(sys.argv[3])
+K = int(sys.argv[4])
+print("---------------------------------------------")
 
-for root, dirs, files in os.walk("./nu/", topdown=False):
-    for name in files:
-        if re.match('^.*_(.*)rom_.*$', name):
-            print(os.path.join(root, name))
-    for name in dirs:
-        print(os.path.join(root, name))
+target_dir = '/nu_'+str(N)
+setup.checkdir(target_dir)
 
-filenames = [name for name in files if re.match('^.*_(.*)rom_.*$', name)]
+search_dir = './'+model+'_info/nu'
+anchor = setup.find_anchor()
+if int(sys.argv[4]) == 1:
+    root, filenames = setup.gtfpath(search_dir, '^.*_(.*)rom_'+N+'nb_ic.*_'+str(int(anchor-90))+'_nu$')
+elif int(sys.argv[4]) > 1:
+    root, filenames = setup.gtfpath(search_dir, '^.*_(.*)rom_'+N+'nb_zero.*_'+str(int(anchor-90))+'_*nu$')
 
-dic_for_files = {}
+files_dict = setup.create_dict(filenames, '^.*_([0-9]*)nb_.*$')
+dict_final = sorted(files_dict.items(), key=operator.itemgetter(0))
 
-for fname in filenames:
-    match_nb = re.match('^.*_([0-9]*)nb_.*$', fname)
-    if match_nb:
-        if int(match_nb.groups()[0]) not in dic_for_files:
-            dic_for_files[int(match_nb.groups()[0])] = []
-        dic_for_files[int(match_nb.groups()[0])].append(fname)
-
-colors = cm.Set1(np.linspace(0, 1, 9))
 color_ctr = 0
-
-dict_final = sorted(dic_for_files.items(), key=operator.itemgetter(0))
-
-root = os.getcwd()
-sp1 = (root.split('/'))
-T0 = sys.argv[3]
-for element in sp1:
-    z = re.match(r"theta_(\d+)", element)
-    if z:
-        anchor = float(((z.groups())[0]))
 
 i = 0
 tpath = './nu/'
@@ -95,9 +70,10 @@ for nb, fnames in dict_final:
             elif match_rom.groups()[0] == 'l':
                 solver = 'Leray ROM'
 
-            nuss = mypostpro.read_nuss(tpath+fname)
+            nuss = mypostpro.read_nuss(fname)
             nuss[:, 2] = nuss[:, 2]/40
             avgidx1 = mypostpro.find_nearest(nuss[:, 1], int(K))
+            print(avgidx1)
             rom_mean = mypostpro.cmean(nuss[avgidx1:-1, :], 2)
             rom_var = mypostpro.cvar(nuss[avgidx1:-1, :], rom_mean, 2)
             rom_sd = mypostpro.csd(nuss[avgidx1:-1, :], rom_mean, 2)
@@ -120,14 +96,14 @@ for nb, fnames in dict_final:
             ax.annotate('ROM mean(Nu):'+"%.2e"% rom_mean, xy=(0.3, 0.27), xytext=(12, -12), va='top',
                 xycoords='axes fraction', textcoords='offset points')
             ax.set_xlabel(r'$t$')
-            ax.set_ylabel(r'$\text{Nu}(t,\theta_g='+str(deg+90)+')$')
-            print(r'$\text{Nu}(t,\theta_g='+str(deg+90)+'$)')
+            ax.set_ylabel('Nu'+r'$(t,\theta_g=$'+str(deg+90)+r'$)$')
+#           print(r'$\text{Nu}(t,\theta_g='+str(deg+90)+'$)')
             ax.set_ylim([0, 4])
             ax.axes.grid(True, axis='y')
 #           ax.legend(loc='upper left', bbox_to_anchor= (0.0, 1.11), ncol=4,
 #                  borderaxespad=0, frameon=False)
             ax.legend(loc=0)
-
-            fig.savefig('./nu/nu_in_time_N'+str(nb)+'_'+str(deg+90)+'.png')
+            print('.'+target_dir+'/'+'nu_in_time_N'+str(nb)+'_'+str(deg+90)+'.png')
+            fig.savefig('.'+target_dir+'/'+'nu_in_time_N'+str(nb)+'_'+str(deg+90)+'.png')
             plt.close(fig)
 
