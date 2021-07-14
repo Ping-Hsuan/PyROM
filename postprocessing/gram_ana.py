@@ -1,6 +1,6 @@
 import numpy as np
 import numpy.linalg as LA
-import matplotlib
+import matplotlib as mpl
 import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 from matplotlib.ticker import MaxNLocator
@@ -10,18 +10,17 @@ from matplotlib.ticker import ScalarFormatter, NullFormatter
 import os
 import sys
 sys.path.append('/Users/bigticket0501/Developer/PyMOR/code/post_pro/')
+sys.path.append('/Users/bigticket0501/Developer/PyMOR/code/plot_helpers/')
 import pod
+import setup
 
-plt.style.use('report_3fig')
+setup.style(1)
+colors = setup.color(0)
+setup.text()
 
-matplotlib.rcParams['text.latex.preamble'] = [
-       r'\usepackage{siunitx}',   # i need upright \micro symbols, but you need...
-       r'\sisetup{detect-all}',   # ...this to force siunitx to actually use your fonts
-       r'\usepackage{helvet}',    # set the normal font here
-       r'\usepackage{sansmath}',  # load up the sansmath so that math -> helvet
-       r'\sansmath'               # <- tricky! -- gotta actually tell tex to use!
-]
-
+# adjust markersize
+mpl.rcParams['lines.markersize'] = 3
+mpl.rcParams['lines.linewidth'] = 1
 
 print("This is the name of the program:", sys.argv[0])
 print("Argument List:", str(sys.argv))
@@ -59,6 +58,9 @@ np.savetxt(tpath+'veig.dat', vu)
 vfer = pod.cfer(vu)
 np.savetxt(tpath+'vfer.dat', vfer)
 
+vetfl = pod.cetfl(vu)
+np.savetxt(tpath+'vetfl.dat', vetfl)
+
 vett = pod.cett(vu)
 np.savetxt(tpath+'vett.dat', vett)
 
@@ -85,6 +87,9 @@ if (ifrom[1]):
 
     tfer = pod.cfer(vt)
     np.savetxt(tpath+'tfer.dat', tfer)
+
+    tetfl = pod.cetfl(vt)
+    np.savetxt(tpath+'tetfl.dat', tetfl)
 
     tett = pod.cett(vt)
     np.savetxt(tpath+'tett.dat', tett)
@@ -132,6 +137,15 @@ for percent in [0.01]:
         print("temp: mode {:3d} only has {:4.4f} % of total energy".format(Nt_l1pt, tett[Nt_l1pt-1]*100))
 
 # Given the percentage, compute which mode has energy
+# less than percentage*fluctuating energy
+for percent in [0.01]:
+    Nu_l1pt = pod.N_etfllp(vetfl, percent)
+    print("vel mode {:3d} only has {:f} % of the fluctuating energy".format(Nu_l1pt, vetfl[Nu_l1pt-1]*100))
+    if (ifrom[1]):
+        Nt_l1pt = pod.N_etfllp(tetfl, percent)
+        print("temp mode {:3d} only has {:f} % of the fluctuating energy".format(Nt_l1pt, tetfl[Nt_l1pt-1]*100))
+
+# Given the percentage, compute which mode has energy
 # less than percentage*first POD modes
 for percent in [0.01]:
     Nu_l1pt = pod.N_etflp(vetf, percent)
@@ -155,13 +169,30 @@ ax.semilogx(xdata[1:], vfer, 'b-o', label=r'$H^{1}$'+'-POD, vel')
 if (ifrom[1]):
     ax.semilogx(xdata[1:], tfer, 'r-o', label=r'$H^{1}$'+'-POD, temp')
 ax.legend()
-ax.set_ylabel(r'$\lambda_N$')
+ax.set_ylabel(r'$r_2$')
 ax.set_xlabel(r'$N$')
 ax.set_xticks([2, 10, 100, 1000])
-ax.set_xticks([0.9, 0.95, 0.99, 1])
-ax.set_xlim([1, 500])
-ax.set_ylim([0.9, 1])
+ax.set_xlim([1, 300])
+ax.axhline(y=0.9, color='tab:pink', linestyle='--')
+#ax.set_yticks([0.9, 0.95, 0.99, 1])
+ax.set_ylim([0, 1])
 fig.savefig(tpath+'ene_in_flucf.png')
+fig.clf()
+
+
+fig, ax = plt.subplots(1, tight_layout=True)
+ax.semilogx(xdata[1:], vetfl, 'b-o', label=r'$H^{1}$'+'-POD, vel')
+if (ifrom[1]):
+    ax.semilogx(xdata[1:], tetfl, 'r-o', label=r'$H^{1}$'+'-POD, temp')
+ax.legend()
+ax.set_ylabel(r'$r_3$')
+ax.set_xlabel(r'$N$')
+ax.set_xticks([2, 10, 100, 1000])
+ax.set_xlim([1, 300])
+ax.axhline(y=0.01, color='tab:pink', linestyle='--')
+#ax.set_yticks([0.9, 0.95, 0.99, 1])
+ax.set_ylim([0, 1])
+fig.savefig(tpath+'ene_in_etfl.png')
 fig.clf()
 
 fig, ax = plt.subplots(1, tight_layout=True)
@@ -171,15 +202,26 @@ if (ifrom[1]):
 ax.legend()
 ax.set_ylabel(r'$\lambda_N$')
 ax.set_xlabel(r'$N$')
-ax.set_xticks([1, 10, 100, 1000])
-ax.set_xlim([1, 1000])
-ax.set_ylim([1e-12, 1e7])
+ax.set_xlim([1, 300])
+ax.set_ylim([1e-4, 1e7])
 fig.savefig(tpath+'gram_eig.png')
 ax.set_xlim([100, 1000])
 ax.set_ylim([1e-12, 1e-4])
 ax.xaxis.set_major_formatter(ScalarFormatter())
 ax.xaxis.set_minor_formatter(NullFormatter())
 fig.savefig(tpath+'gram_eig_zoom_loglog.png')
+fig.clf()
+
+fig, ax = plt.subplots(1, tight_layout=True)
+ax.semilogx(xdata, vu, 'b-o', label=r'$H^{1}$'+'-POD, vel')
+if (ifrom[1]):
+    ax.semilogx(xdata, vt, 'r-o', label=r'$H^{1}$'+'-POD, temp')
+ax.legend()
+ax.set_ylabel(r'$\lambda_N$')
+ax.set_xlabel(r'$N$')
+ax.set_xlim([1, 300])
+#ax.set_ylim([1e-12, 1e7])
+fig.savefig(tpath+'gram_eig_semi.png')
 fig.clf()
 
 fig, ax = plt.subplots(1, tight_layout=True)
@@ -192,6 +234,7 @@ ax.set_xlabel(r'$N$')
 ax.set_ylabel(r'$\displaystyle\frac{\lambda_N}{\sum^N_{i=1}\lambda_i}$',rotation=90)
 ax.set_xticks([1, 10, 100, 1000])
 ax.set_ylim([1e-8, 1])
+ax.set_xlim([1, 300])
 fig.savefig(tpath+'ene_permode.png')
 fig.clf()
 
@@ -205,6 +248,7 @@ ax.set_xlabel(r'$N$')
 ax.set_ylabel(r'$\displaystyle\frac{\lambda_N}{\lambda_1}$', rotation=90)
 ax.set_xticks([1, 10, 100, 1000])
 ax.set_ylim([1e-8, 1])
+ax.set_xlim([1, 300])
 fig.savefig(tpath+'ene_to1stmode.png')
 fig.clf()
 
@@ -215,8 +259,8 @@ if (ifrom[1]):
 ax.axhline(y=1e-4, color='k', linestyle='-')
 ax.set_xlabel(r'$N$')
 ax.set_ylabel(r'$\displaystyle\sqrt{\frac{\sum_{i>N}\lambda_i}{\sum_{i=1}\lambda_i}}$', rotation=90)
-ax.set_xticks([1, 10, 100, 1000])
 ax.set_ylim([1e-8, 1])
+ax.set_xlim([1, 300])
 ax.legend()
 fig.savefig(tpath+'Nmax.png')
 fig.clf()
