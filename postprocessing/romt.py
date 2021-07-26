@@ -85,8 +85,6 @@ for j in range(nb):
     tv[j] = np.sum((romt[j, T0:]-ta[j])**2)/(len(romt[0, T0:])-1)
 
 i = 0
-rom_params = {'c': 'b', 'mfc': 'None', 'label': 'Snapshot'}
-snap_params = {'c': 'k', 'mfc': 'None', 'label': 'Snapshot'}
 avgsnap_params = {'c': 'k', 'linestyle': '--', 'label': 'Snapshot avg'}
 avgrom_params = {'c': 'k', 'linestyle': '--', 'label': 'ROM avg'}
 

@@ -10,6 +10,7 @@ import reader
 import checker
 import myplot
 import mypostpro
+import yaml
 
 colors = setup.color(0)
 setup.text()
@@ -89,10 +90,6 @@ for j in range(nb):
     uv[j] = np.sum((romu[j, T0:]-ua[j])**2)/(len(romu[0, T0:])-1)
 
 i = 0
-rom_params = {'c': 'b', 'mfc': 'None', 'label': 'Snapshot'}
-snap_params = {'c': 'k', 'mfc': 'None', 'label': 'Snapshot'}
-avgsnap_params = {'c': 'k', 'linestyle': '--', 'label': 'Snapshot avg'}
-avgrom_params = {'c': 'k', 'linestyle': '--', 'label': 'ROM avg'}
 
 if min(4, nb) == 1:
     fig, ax = plt.subplots(min(4, nb), sharex=True, squeeze=True, tight_layout=True)
