@@ -26,10 +26,16 @@ setup.checkdir(target_dir)
 
 search_dir = './'+model+'_info/nu'
 anchor = setup.find_anchor()
-if int(sys.argv[4]) == 1:
-    root, filenames = setup.gtfpath(search_dir, '^.*_(.*)rom_'+N+'nb_ic.*_'+str(int(anchor-90))+'_nu$')
-elif int(sys.argv[4]) > 1:
-    root, filenames = setup.gtfpath(search_dir, '^.*_(.*)rom_'+N+'nb_zero.*_'+str(int(anchor-90))+'_*nu$')
+if (len(sys.argv)) < 6:
+    if int(sys.argv[4]) == 1:
+        root, filenames = setup.gtfpath(search_dir, '^.*_(.*)rom_'+N+'nb_ic.*_'+str(int(anchor-90))+'_nu$')
+    elif int(sys.argv[4]) > 1:
+        root, filenames = setup.gtfpath(search_dir, '^.*_(.*)rom_'+N+'nb_zero.*_'+str(int(anchor-90))+'_*nu$')
+else:
+    if int(sys.argv[4]) == 1:
+        root, filenames = setup.gtfpath(search_dir, '^.*_(.*)rom_'+N+'nb_ic.*_'+str(int(anchor-90))+'_.*_nu$')
+    elif int(sys.argv[4]) > 1:
+        root, filenames = setup.gtfpath(search_dir, '^.*_(.*)rom_'+N+'nb_zero.*_'+str(int(anchor-90))+'_.*_*nu$')
 
 files_dict = setup.create_dict(filenames, '^.*_([0-9]*)nb_.*$')
 dict_final = sorted(files_dict.items(), key=operator.itemgetter(0))
@@ -44,7 +50,12 @@ for nb, fnames in dict_final:
         for fname in fnames:
 
             forleg = fname.split('_')
-            deg = int(forleg[-2])
+            if model == 'lrom':
+                deg = int(forleg[-3])
+                rbf = forleg[-2]
+                rbf = str(int(float(rbf.replace('p', '.'))*100))
+            else:
+                deg = int(forleg[-2])
 
             # get the FOM data
             filename = '../../../../fom_nuss/nuss_fom_'+str(deg+90)
@@ -64,11 +75,11 @@ for nb, fnames in dict_final:
             assert match_rom is not None
 
             if match_rom.groups()[0] == '':
-                solver = 'Galerkin ROM'
+                solver = 'G-ROM'
             elif match_rom.groups()[0] == 'c':
-                solver = 'Constrained ROM'
+                solver = 'C-ROM'
             elif match_rom.groups()[0] == 'l':
-                solver = 'Leray ROM'
+                solver = 'L-ROM with '+rbf+'% filtering'
 
             nuss = mypostpro.read_nuss(fname)
             nuss[:, 2] = nuss[:, 2]/40
@@ -103,7 +114,10 @@ for nb, fnames in dict_final:
 #           ax.legend(loc='upper left', bbox_to_anchor= (0.0, 1.11), ncol=4,
 #                  borderaxespad=0, frameon=False)
             ax.legend(loc=0)
-            print('.'+target_dir+'/'+'nu_in_time_N'+str(nb)+'_'+str(deg+90)+'.png')
-            fig.savefig('.'+target_dir+'/'+'nu_in_time_N'+str(nb)+'_'+str(deg+90)+'.png')
+            if model == 'lrom':
+                s1 = '.'+target_dir+'/'+'nu_in_time_N'+str(nb)+'_'+str(deg+90)+'_'+rbf+'.png'
+            else:
+                s1 = '.'+target_dir+'/'+'nu_in_time_N'+str(nb)+'_'+str(deg+90)+'.png'
+            fig.savefig(s1)
             plt.close(fig)
 
