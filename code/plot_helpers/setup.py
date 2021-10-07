@@ -11,6 +11,7 @@ def style(num_fig):
         plt.style.use('report_4fig')
     return
 
+
 def color(idx):
     import matplotlib.cm as cm
     import numpy as np
@@ -51,10 +52,11 @@ def gtfpath(target_dir, pt1):
     import re
     import os
     filenames = []
+    root = []
     for root, dirs, files in os.walk('.'+target_dir, topdown=False):
         for name in files:
             if re.match(pt1, name):
-                print(os.path.join(root, name))
+#               print(os.path.join(root, name))
                 filenames.append(os.path.join(root, name))
     return root, filenames
 

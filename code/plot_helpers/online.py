@@ -1,4 +1,4 @@
-def get_ncand(P_test, P_train, ncand, N, model, scaled=''):
+def get_ncand(P_test, P_train, ncand, N, model, mode, scaled=''):
     import numpy as np
 
     P_test_anchor = []
@@ -10,8 +10,13 @@ def get_ncand(P_test, P_train, ncand, N, model, scaled=''):
         tmp = abs(test-P_train)
         for j in range(ncand):
             # find out the index corresponding to the closest anchor point
-            minidx = np.argmin(tmp)
-            near_anch.append(P_train[minidx])
+            if 0 in tmp:
+                minidx = np.argmin(tmp)
+                near_anch.append(P_train[minidx])
+            else:
+                minidx = np.argmin(tmp)
+                near_anch.append(P_train[minidx])
+                tmp[minidx] = 1e8
 
             # do not revisit the same anchor again
 #           aflag = test in P_train
@@ -23,17 +28,16 @@ def get_ncand(P_test, P_train, ncand, N, model, scaled=''):
 
             dirs = '../theta_'+str(int(P_train[minidx]))+'/' + \
                    model+'_parameter_'+str(int(P_train[minidx]))+'/dual_norm/'
-            fname = 'erri_N'+str(N[minidx])+scaled+'.dat'
+            fname = 'erri_N'+str(N[minidx])+scaled+'_'+mode+'.dat'
             dual_norm = np.loadtxt(dirs+fname)
             data = np.array(dual_norm).astype(np.float64)
-            erri.append(data[0])
+            erri.append(data[i])
         idx = erri.index(min(erri))
-
         P_test_anchor.append(near_anch[idx])
     return P_test_anchor
 
 
-def get_opterri(P_test, P_train, N, P_test_anchor, ax, colors, model,
+def get_opterri(P_test, P_train, N, P_test_anchor, ax, colors, model, mode,
                 scaled=''):
     import numpy as np
     # get erri with theta_g at each anchor points
@@ -41,9 +45,9 @@ def get_opterri(P_test, P_train, N, P_test_anchor, ax, colors, model,
     for i, train in enumerate(P_train):
         dirs = '../theta_'+str(train)+'/'+model+'_parameter_'+str(train) + \
                '/dual_norm/'
-        filename = 'angle_list.dat'
+        filename = 'angle_list_'+mode+'.dat'
         angle = np.loadtxt(dirs+filename)
-        filename = 'erri_N'+str(N[i])+scaled+'.dat'
+        filename = 'erri_N'+str(N[i])+scaled+'_'+mode+'.dat'
         erri = np.loadtxt(dirs+filename)
 
         erri_his.append(erri)
@@ -59,19 +63,19 @@ def get_opterri(P_test, P_train, N, P_test_anchor, ax, colors, model,
     return erri_opt
 
 
-def get_anchor_qoi(i, train, N, model):
+def get_anchor_qoi(i, train, N, model, mode):
     import numpy as np
 
     dirs = '../theta_'+str(train)+'/'+model+'_parameter_'+str(train)+'/nu/'
-    filename = 'angle.dat'
+    filename = 'angle_'+mode+'.dat'
     angle = np.loadtxt(dirs+filename)
-    filename = 'merr_N'+str(N[i])+'.dat'
+    filename = 'merr_N'+str(N[i])+'_'+mode+'.dat'
     merr = np.loadtxt(dirs+filename)
-    filename = 'stderr_N'+str(N[i])+'.dat'
+    filename = 'stderr_N'+str(N[i])+'_'+mode+'.dat'
     sderr = np.loadtxt(dirs+filename)
-    filename = 'mnu_N'+str(N[i])+'.dat'
+    filename = 'mnu_N'+str(N[i])+'_'+mode+'.dat'
     m = np.loadtxt(dirs+filename)
-    filename = 'stdnu_N'+str(N[i])+'.dat'
+    filename = 'stdnu_N'+str(N[i])+'_'+mode+'.dat'
     sd = np.loadtxt(dirs+filename)
 
     return angle, merr, sderr, m, sd
@@ -92,16 +96,16 @@ def get_optqoi(merr_all, m_all, sderr_all, sd_all, P_test, P_train,
     return opt_merr_nu, opt_stderr_nu, opt_m_nu, opt_std_nu
 
 
-def get_anchor_flderr(i, train, N, model):
+def get_anchor_flderr(i, train, N, model, mode):
     # return both the projection and rom fld relative errro
     import numpy as np
 
-    dirs = '../theta_'+str(train)+'/'+model+'_parameter_'+str(train)+'/relerr/'
-    filename = 'angle_list.dat'
+    dirs = '../theta_'+str(train)+'/'+model+'_parameter_'+str(train)+'/mrelerr/'
+    filename = 'angle_list_'+mode+'.dat'
     angle = np.loadtxt(dirs+filename)
-    filename = 'rom_relerr_N'+str(N[i])+'.dat'
+    filename = 'rom_relerr_N'+str(N[i])+'_'+mode+'.dat'
     fldrelerr_rom = np.loadtxt(dirs+filename)
-    filename = 'proj_relerr_N'+str(N[i])+'.dat'
+    filename = 'proj_relerr_N'+str(N[i])+'_'+mode+'.dat'
     fldrelerr_proj = np.loadtxt(dirs+filename)
 
     return angle, fldrelerr_rom, fldrelerr_proj

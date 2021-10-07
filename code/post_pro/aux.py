@@ -45,7 +45,6 @@ def plt_coef_in_t(rom, nb, tdir):
     setup.text()
 
     field = rom.field
-
     sub_dir = os.path.join(tdir, 'rom'+field+'_'+str(nb))
     checkdir(sub_dir)
 
@@ -79,16 +78,21 @@ def plt_coef_in_t(rom, nb, tdir):
         num_coef_show = min(num_coef_show, nb)
         fig, axs = plt.subplots(num_coef_show, sharex=True, squeeze=True, tight_layout=True)
         for n in range(num_coef_show):
-            plt_romcoef_in_t(axs[n], n, T0, rom)
-            plt_snapcoef_in_t(axs[n], n, T0, snap)
-            plt_snap_minmax(axs[n], n, T0, snap)
-            plt_mean_in_t(axs[n], n, T0, snap, rom)
-            add_std_in_t(axs[n], n, T0, snap, rom)
+            plt_romcoef_in_t(axs[n], n+43, T0, rom)
+            plt_snapcoef_in_t(axs[n], n+43, T0, snap)
+            plt_snap_minmax(axs[n], n+43, T0, snap)
+            plt_mean_in_t(axs[n], n+43, T0, snap, rom)
+            add_std_in_t(axs[n], n+43, T0, snap, rom)
             if n == 0:
                 ax = axs[n]
         ax.legend(loc='upper left', bbox_to_anchor=(0.0, 1.51), ncol=4,
                   borderaxespad=0, frameon=False)
-    output = os.path.join(sub_dir, 'rom'+field+'_N'+str(nb)+'.png')
+    if rom.info['method'] == 'cp-rom':
+        print(rom.fnames['rom'+field])
+        s1 = 'rom'+field+'_N'+str(nb)+'.png'
+    else:
+        s1 = 'rom'+field+'_N'+str(nb)+'.png'
+    output = os.path.join(sub_dir, s1)
     fig.savefig(output)
 
     fig = plt_sample_mean_var(rom, snap, nb)
@@ -148,6 +152,7 @@ def plt_erri_w_N(rom, tdir):
 
     ax.set(ylabel=r'$\triangle('+anc_lb+')$', xlabel=r'$N$',
            ylim=[10**np.floor(np.log10(min(rom.erris))), 1], xlim=[1, max(rom.nbs)])
+    print(rom.nbs,rom.erris)
     ax.semilogy(rom.nbs, rom.erris, **plot_params)
     plt.legend()
 
@@ -193,6 +198,7 @@ def plt_mrelerr_w_N(rom, tdir):
 
     ax.semilogy(rom.nbs, rom.rom_relerr, **plot_params1)
     ax.semilogy(rom.nbs, rom.proj_relerr, **plot_params2)
+    ax.set_ylim([1e-2, 1])
     ax.legend(loc=0, ncol=1)
 
     # Create filename
