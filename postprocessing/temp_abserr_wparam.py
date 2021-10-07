@@ -25,10 +25,10 @@ T0 = int(sys.argv[4])
 mode = str(sys.argv[5])
 print("---------------------------------------------")
 
-target_dir = '/mabserr/'
+target_dir = '/temp_mabserr/'
 setup.checkdir(target_dir)
 
-search_dir = './'+model+'_info/mabserr'
+search_dir = './'+model+'_info/temp_mabserr'
 if model == 'all':
     root, filenames = setup.gtfpath(search_dir, '^.*_'+N+'nb_.*$')
 else:
@@ -72,7 +72,7 @@ fig, ax = plt.subplots(1, tight_layout=True)
 ax.set(xlabel=r'$\theta_g$', ylabel=r'$\|u(\theta_g) -' +
        r'\tilde{u}(\theta_g;{\theta^*_g} =' + str(int(anchor))+')\|$',
        xticks=np.linspace(0, 180, 19, dtype=int),
-       title='Absolute error in the mean flow with \n ROM anchor at ' +
+       title='Absolute error in the mean temperature with \n ROM anchor at ' +
        r'$\theta^*_g='+str(int(anchor))+'$')
 
 ax.set_xticklabels(ax.get_xticks(), rotation=45)
@@ -83,10 +83,10 @@ ax.plot(int(anchor), ymin, 'ro', label='Anchor point')
 ax.legend(loc=0, ncol=1)
 
 print("---------------------------------------------")
-fig.savefig('.'+target_dir+'abserr_N'+N+'_'+mode+'.png')
+fig.savefig('.'+target_dir+'temp_abserr_N'+N+'_'+mode+'.png')
 np.savetxt('.'+target_dir+'angle_list_'+mode+'.dat', data[:, 0])
-np.savetxt('.'+target_dir+'rom_abserr_N'+N+'_'+mode+'.dat', data[:, 1])
-np.savetxt('.'+target_dir+'proj_abserr_N'+N+'_'+mode+'.dat', data[:, 2])
+np.savetxt('.'+target_dir+'temp_rom_abserr_N'+N+'_'+mode+'.dat', data[:, 1])
+np.savetxt('.'+target_dir+'temp_proj_abserr_N'+N+'_'+mode+'.dat', data[:, 2])
 print("---------------------------------------------")
 
 

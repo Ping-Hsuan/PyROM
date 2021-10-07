@@ -20,37 +20,44 @@ print("This is the name of the program:", sys.argv[0])
 print("Argument List:", str(sys.argv))
 print('Current directory is:', os.chdir(str(sys.argv[1])))
 model = str(sys.argv[2])
+mode = str(sys.argv[3])
 print('The model is:', model)
 print("---------------------------------------------")
 
-if len(sys.argv) <= 3:
+if len(sys.argv) <= 4:
 #   ylb = r'$\triangle$'
     ylb = 'Unscaled error indicator'
     tag = ''
     title = 'Unscaled error indicator'
 else:
-    if sys.argv[3] == 'fom':
+    if sys.argv[4] == 'fom':
 #       ylb = r'$\frac{\triangle(\theta_g)}{\|u_{FOM}(\theta^*_g)\|_{H^1}}$'
         ylb = 'Scaled error indicator'
         tag = '_sc_fom'
         title = r'Error indicator scaled with $H^1$ norm of FOM solution'
-    elif sys.argv[3] == 'relerr':
+    elif sys.argv[4] == 'relerr':
 #       ylb = r'$\frac{\triangle(\theta_g) \|u(\theta_g)\|_{H^1}}' + \
 #             r'{\|u_{FOM}({\theta_g})-u_{ROM}({\theta_g})\|_{H^1}}$'
         ylb = 'Scaled error indicator'
         tag = '_sc_relerr'
         title = r'Error indicator scaled with relative $H^1$ error'
-    elif sys.argv[3] == 'romabserr':
+    elif sys.argv[4] == 'romabserr':
 #       ylb = r'$\frac{\triangle(\theta_g)}' + \
 #             r'{\|u_{FOM}({\theta_g})-u_{ROM}({\theta_g})\|_{H^1}}$'
         ylb = 'Scaled error indicator'
         tag = '_sc_romabserr'
         title = r'Error indicator scaled with absolute $H^1$ error'
-    elif sys.argv[3] == 'rom':
+    elif sys.argv[4] == 'rom':
 #       ylb = r'$\frac{\triangle(\theta_g)}{\|u_{ROM}(\theta_g)\|_{H^1}}$'
         ylb = 'Scaled error indicator'
         tag = '_sc_rom'
         title = r'Error indicator scaled with $H^1$ norm of ROM solution'
+    elif sys.argv[4] == 'eta_rom':
+#       ylb = r'$\frac{\triangle(\theta_g)}{\|u_{ROM}(\theta_g)\|_{H^1}}$'
+        ylb = 'Scaled error indicator'
+        tag = '_sc_eta_rom'
+        title = r'Error indicator scaled with effectivity and rom norm'
+
 
 with open('train_info'+tag+'.csv', newline='') as f:
      reader = csv.reader(f)
@@ -80,30 +87,30 @@ max_erri = []
 for itr, anchor, N, K in zip(data[0], data[1], data[2], data[3]):
 
     ax.set(xlabel=r'$\theta_g$', ylabel=ylb,
-           ylim=[1e-5, 1e1],
+           ylim=[1e-3, 1e-1],
            xticks=np.linspace(0, 180, 19, dtype=int))
 
     print(itr, anchor, N, K)
 
-    if len(sys.argv) <= 3:
-        angle, erri = erri_w_theta(model, anchor, N)
+    if len(sys.argv) <= 4:
+        angle, erri = erri_w_theta(model, anchor, N, mode)
     else:
-        angle, erri = erri_w_theta(model, anchor, N, sys.argv[3])
+        angle, erri = erri_w_theta(model, anchor, N, mode, sys.argv[4])
 
-    ax.semilogy(angle, erri, 'b--o')
+    ax.plot(angle, erri, 'b--o')
     ax.set_title('iteration '+str(itr) +
                 ', '+r'$\theta^*_{'+'g,'+str(itr)+'}$'+r'$='+anchor+'$')
     idx = np.where(angle == int(anchor))
     
     erri_anchor.append(erri[idx])
     anchors.append(int(anchor))
-    ax.semilogy(anchors, erri_anchor, 'ro')
+    ax.plot(anchors, erri_anchor, 'ro')
 
     erri_his.append(erri)
     erri_comb = np.array(erri_his)
     erri_min = np.amin(erri_comb, axis=0)
 
-    ax.semilogy(angle, erri_min, 'k-', label='min')
+    ax.plot(angle, erri_min, 'k-', label='min')
     idxmax = np.argmax(erri_min)
     max_erri.append(erri_min[idxmax])
 

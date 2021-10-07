@@ -20,21 +20,22 @@ print("Argument List:", str(sys.argv))
 print('Current directory is:', os.chdir(str(sys.argv[1])))
 model = str(sys.argv[2])
 ncand = int(sys.argv[3])
+mode = str(sys.argv[4])
 ntest = 19
 print('The model is:', model)
 print("---------------------------------------------")
 
-if len(sys.argv) >= 5:
-    pt = '_sc_'+str(sys.argv[4])
+if len(sys.argv) >= 6:
+    pt = '_sc_'+str(sys.argv[5])
 else:
     pt = ''
 
-with open('../hg_'+model+'_off/train_info'+pt+'.csv', newline='') as f:
+with open('../hg_'+model+'_off_90/train_info'+pt+'.csv', newline='') as f:
      reader = csv.reader(f)
      data = list(reader)
 
 # make it list
-P_test = np.linspace(0, 180, 19, dtype=int)
+P_test = np.linspace(30, 150, 13, dtype=int)
 
 data[0] = [int(i) for i in data[0]]
 P_train_max = [int(i) for i in data[1]]
@@ -62,12 +63,12 @@ mnurelerr_2nd = []
 for itr in data[0]:
     P_train = P_train_max[0:itr]
     P_test_anchor = online.get_ncand(P_test, P_train, ncand,
-                                     N_max[:itr], model, pt)
+                                     N_max[:itr], model, mode, pt)
     print("ncand anchor points for each test parameter", P_test_anchor)
 
     fig, ax = plt.subplots(1, tight_layout=True)
     erri_opt = online.get_opterri(P_test, P_train, N_max[:itr],
-                                  P_test_anchor, ax, colors, model, pt)
+                                  P_test_anchor, ax, colors, model, mode, pt)
 
     mdual.append(max(erri_opt))
     mdual_1st.append(max(erri_opt[:5]))
@@ -92,9 +93,9 @@ for itr in data[0]:
 
     for i, train in enumerate(P_train):
         angle, merr, sderr, m, sd = online.get_anchor_qoi(i, train,
-                                                          N_max[:itr], model)
+                                                          N_max[:itr], model, mode)
         angle, flderr_rom, flderr_proj = online.get_anchor_flderr(i, train,
-                                                                  N_max[:itr], model)
+                                                                  N_max[:itr], model, mode)
         merr_his.append(merr)
         sderr_his.append(sderr)
         m_his.append(m)

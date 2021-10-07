@@ -21,18 +21,29 @@ class ROM:
     def get_data(self):
         for feature in self.info['features'].keys():
             search_dir = self.info['method']+'_info'
-            self.fnames[feature] = aux.gtfpath(search_dir, '^.*_'+self.info['POD_norm']+'_.*_'+feature)
+            if list(self.info['anchors'])[0] == 'theta':
+                self.fnames[feature] = aux.gtfpath(search_dir, '^.*_'+self.info['POD_norm']+'_'+str(self.info['anchors']['theta']-90)+'_'+feature)
+            else:
+                self.fnames[feature] = aux.gtfpath(search_dir, '^.*_'+self.info['POD_norm']+'_.*_'+feature)
+            print(self.fnames[feature])
         return
 
-    def get_coef(self, nb):
+    def get_coef(self, nb, rank=None):
         field = self.field
         # Get the only file
+        if rank is None:
+            ptr = r"^.*_(\d+)nb_.*"
+        else:
+            ptr = r"^.*_(\d+)nb_.*_r"+str(rank)+'_rom.*$'
+        print(ptr)
         for element in self.fnames['rom'+field.lower()]:
-            z = re.match(r"^.*_(\d+)nb_.*", element)
-            if int(z.groups()[0]) == nb:
-                fname = element
+            z = re.match(ptr, element)
+            if z is not None:
+                if int(z.groups()[0]) == nb:
+                    fname = element
         coef = []
         t = []
+        print(fname)
         with open(fname, 'r') as f:
             for line in f:
                 info = line.split()
@@ -154,7 +165,7 @@ class ROM:
                 data = np.array(data).astype(np.float64)
                 rom_norm.append((data))
                 nbs.append(int(nb))
-        self.nbs, self.rom_norm = [list(tuple) for tuple in zip(*sorted(zip(nbs, rom_norm)))]
+        self.nbs, self.rom_norm = [list(tuple) for tuple in zip(*sorted(zip(nbs, rom_norm), key= lambda t: t[0]))]
         return
 
     def get_tke(self):

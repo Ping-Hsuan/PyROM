@@ -1,12 +1,12 @@
 import numpy as np
 import matplotlib.pyplot as plt
-import re
 import os
 import sys
 import operator
 sys.path.append('/Users/bigticket0501/Developer/PyMOR/code/plot_helpers/')
 import setup
 import reader
+import checker
 
 setup.style(1)
 colors = setup.color(0)
@@ -18,8 +18,8 @@ print("Argument List:", str(sys.argv))
 os.chdir(str(sys.argv[1]))
 N = str(sys.argv[2])
 print("---------------------------------------------")
-target_dir = '/dual_norm'
 
+target_dir = '/dual_norm'
 setup.checkdir(target_dir)
 
 root, filenames = setup.gtfpath(target_dir, '^.*_(.*)rom_.*$')
@@ -41,21 +41,9 @@ for nb, fnames in dict_final:
                    r'$\theta^*_g = '+str(int(anchor))+'$'}
     if nb == N:
         for fname in fnames:
-            forleg = fname.split('_')
-            pl = 1
 
-            match_rom = re.match('^.*_(.*)rom_.*$', fname)
-            assert match_rom is not None
-
-            if match_rom.groups()[0] == '':
-                solver = 'Galerkin ROM'
-                angle.append(int(forleg[-3])+90)
-            elif match_rom.groups()[0] == 'c':
-                solver = 'Constrained ROM'
-                angle.append(int(forleg[-3])+90)
-            elif match_rom.groups()[0] == 'l':
-                solver = 'Leray ROM'
-                angle.append(int(forleg[-4])+90)
+            solver = checker.rom_checker(fname, '^.*_(.*)rom_.*$')
+            angle.append(checker.angle_checker(fname, solver))
 
             data = reader.reader(fname)
             erri.append(np.array(data).astype(np.float64))

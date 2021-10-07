@@ -19,6 +19,7 @@ os.chdir(str(sys.argv[1]))
 model = str(sys.argv[2])
 N = str(sys.argv[3])
 K = int(sys.argv[4])
+deg = int(sys.argv[5])
 print("---------------------------------------------")
 
 target_dir = '/nu_'+str(N)
@@ -26,34 +27,40 @@ setup.checkdir(target_dir)
 
 search_dir = './'+model+'_info/nu'
 anchor = setup.find_anchor()
-if (len(sys.argv)) < 6:
+
+if (len(sys.argv)) < 7:
     if int(sys.argv[4]) == 1:
-        root, filenames = setup.gtfpath(search_dir, '^.*_(.*)rom_'+N+'nb_ic.*_'+str(int(anchor-90))+'_nu$')
+        root, filenames = setup.gtfpath(search_dir, '^.*_(.*)rom_'+N+'nb_ic.*_'+str(int(deg-90))+'_nu$')
     elif int(sys.argv[4]) > 1:
-        root, filenames = setup.gtfpath(search_dir, '^.*_(.*)rom_'+N+'nb_zero.*_'+str(int(anchor-90))+'_*nu$')
+        root, filenames = setup.gtfpath(search_dir, '^.*_(.*)rom_'+N+'nb_zero.*_'+str(int(deg-90))+'_*nu$')
 else:
     if int(sys.argv[4]) == 1:
-        root, filenames = setup.gtfpath(search_dir, '^.*_(.*)rom_'+N+'nb_ic.*_'+str(int(anchor-90))+'_.*_nu$')
+        root, filenames = setup.gtfpath(search_dir, '^.*_(.*)rom_'+N+'nb_ic.*_'+str(int(deg-90))+'_.*_nu$')
     elif int(sys.argv[4]) > 1:
-        root, filenames = setup.gtfpath(search_dir, '^.*_(.*)rom_'+N+'nb_zero.*_'+str(int(anchor-90))+'_.*_*nu$')
+        root, filenames = setup.gtfpath(search_dir, '^.*_(.*)rom_'+N+'nb_zero.*_'+str(int(deg-90))+'_.*_nu$')
 
 files_dict = setup.create_dict(filenames, '^.*_([0-9]*)nb_.*$')
 dict_final = sorted(files_dict.items(), key=operator.itemgetter(0))
+print(dict_final)
 
 color_ctr = 0
 
 i = 0
 tpath = './nu/'
 
+
 for nb, fnames in dict_final:
     if nb == N:
         for fname in fnames:
 
             forleg = fname.split('_')
-            if model == 'lrom':
+            if model == 'lrom' or model =='l-rom':
                 deg = int(forleg[-3])
                 rbf = forleg[-2]
                 rbf = str(int(float(rbf.replace('p', '.'))*100))
+            elif model == 'l-rom_df':
+                deg = int(forleg[-3])
+                rbf = forleg[-2].strip("0")
             else:
                 deg = int(forleg[-2])
 
@@ -74,12 +81,16 @@ for nb, fnames in dict_final:
 
             assert match_rom is not None
 
-            if match_rom.groups()[0] == '':
+            if match_rom.groups()[0] == '' or match_rom.groups()[0] == 'g':
                 solver = 'G-ROM'
             elif match_rom.groups()[0] == 'c':
                 solver = 'C-ROM'
-            elif match_rom.groups()[0] == 'l':
+            elif match_rom.groups()[0] == 'l' and (model == 'lrom' or model == 'l-rom'):
                 solver = 'L-ROM with '+rbf+'% filtering'
+            elif match_rom.groups()[0] == 'l' and model == 'l-rom_df':
+                solver = 'L-ROM with filter width '+r'$\Delta=$ '+rbf
+            elif match_rom.groups()[0] == 'p':
+                solver = 'P-ROM'
 
             nuss = mypostpro.read_nuss(fname)
             nuss[:, 2] = nuss[:, 2]/40
@@ -114,7 +125,7 @@ for nb, fnames in dict_final:
 #           ax.legend(loc='upper left', bbox_to_anchor= (0.0, 1.11), ncol=4,
 #                  borderaxespad=0, frameon=False)
             ax.legend(loc=0)
-            if model == 'lrom':
+            if model == 'lrom' or model == 'l-rom' or model == 'l-rom_df':
                 s1 = '.'+target_dir+'/'+'nu_in_time_N'+str(nb)+'_'+str(deg+90)+'_'+rbf+'.png'
             else:
                 s1 = '.'+target_dir+'/'+'nu_in_time_N'+str(nb)+'_'+str(deg+90)+'.png'

@@ -1,15 +1,13 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import os
-import sys
 import operator
+import sys
 sys.path.append('/Users/bigticket0501/Developer/PyMOR/code/plot_helpers/')
+import mypostpro
 import setup
 import reader
 import checker
-
-# This script is used to plot ROM absolute error and
-# Proejction error with theta at a given N
 
 setup.style(1)
 colors = setup.color(0)
@@ -22,42 +20,41 @@ os.chdir(str(sys.argv[1]))
 model = str(sys.argv[2])
 N = str(sys.argv[3])
 T0 = int(sys.argv[4])
-mode = str(sys.argv[5])
+angle = int(sys.argv[5])
 print("---------------------------------------------")
 
-target_dir = '/mabserr/'
+target_dir = '/mrelerr/'
 setup.checkdir(target_dir)
+f1 = 1
+f2 = 100
 
-search_dir = './'+model+'_info/mabserr'
-if model == 'all':
-    root, filenames = setup.gtfpath(search_dir, '^.*_'+N+'nb_.*$')
-else:
-    root, filenames = setup.gtfpath(search_dir, '^.*_'+N+'nb_ic_h10_(?!.*-90|.*-80|.*-70).*$')
+search_dir = './'+model+'_info/mrelerr'
+root, filenames = setup.gtfpath(search_dir, '^.*_'+N+'nb_.*$')
 if T0 == 1:
-    files_dict = setup.create_dict(filenames, '^.*_ic_h10_(-?\d+)_.*$')
+    files_dict = setup.create_dict(filenames, '^.*_ic_h10_.*_(\dp\d+)_mrelerr$')
 elif T0 >= 1:
-    files_dict = setup.create_dict(filenames, '^.*_zero_h10_(-?\d+)_.*$')
+    files_dict = setup.create_dict(filenames, '^.*_zero_h10_.*_(\dp\d+)_mrelerr$')
 dict_final = sorted(files_dict.items(), key=operator.itemgetter(0))
-print(dict_final)
 
 color_ctr = 0
 tpath = root+'/'
 
-angles = []
-abserr_rom = []
-abserr_proj = []
-for angle, fnames in dict_final:
+fws = []
+mrelerr_proj = []
+mrelerr_rom = []
+for fw, fnames in dict_final:
     for fname in fnames:
         data = reader.reader(fname)
         if not data:
             data.append(1e8)
             data.append(1e8)
         data = np.array(data).astype(np.float64)
-        abserr_rom.append(data[0])
-        abserr_proj.append(data[1])
-        angles.append(int(angle)+90)
+        mrelerr_rom.append(data[0])
+        mrelerr_proj.append(data[1])
+        fw = (float(fw.replace('p', '.'))*100)
+        fws.append(float(fw))
 
-data = np.column_stack((angles, abserr_rom, abserr_proj))
+data = np.column_stack((fws, mrelerr_rom, mrelerr_proj))
 data = data[data[:, 0].argsort()]
 
 anchor = setup.find_anchor()
@@ -69,25 +66,22 @@ plot_params2 = {'c': 'k', 'marker': 'o', 'mfc': 'None',
                 'label': 'Projection with '+r'$N='+N+'$'}
 
 fig, ax = plt.subplots(1, tight_layout=True)
-ax.set(xlabel=r'$\theta_g$', ylabel=r'$\|u(\theta_g) -' +
-       r'\tilde{u}(\theta_g;{\theta^*_g} =' + str(int(anchor))+')\|$',
-       xticks=np.linspace(0, 180, 19, dtype=int),
-       title='Absolute error in the mean flow with \n ROM anchor at ' +
+ax.set(xlabel=r'\# percentage filtered', ylabel=r'$\frac{\|u(\theta_g) -' +
+       r'\tilde{u}(\theta_g;{\theta^*_g}'+r')\|_{H^1}}{\|u(\theta_g)\|_{H^1}}$',
+       ylim=[0, 1], yticks=np.linspace(0, 1, 11),
+       xticks=np.linspace(0, 100, 21, dtype=int),
+       title='Relative error in the mean flow at '+r'$\theta_g=$'+str(angle)+'\n with ROM anchor at ' +
        r'$\theta^*_g='+str(int(anchor))+'$')
 
 ax.set_xticklabels(ax.get_xticks(), rotation=45)
 ax.plot(data[:, 0], data[:, 1], **plot_params1)
 ax.plot(data[:, 0], data[:, 2], **plot_params2)
-ymin, ymax = ax.get_ylim()
-ax.plot(int(anchor), ymin, 'ro', label='Anchor point')
 ax.legend(loc=0, ncol=1)
-
-print("---------------------------------------------")
-fig.savefig('.'+target_dir+'abserr_N'+N+'_'+mode+'.png')
-np.savetxt('.'+target_dir+'angle_list_'+mode+'.dat', data[:, 0])
-np.savetxt('.'+target_dir+'rom_abserr_N'+N+'_'+mode+'.dat', data[:, 1])
-np.savetxt('.'+target_dir+'proj_abserr_N'+N+'_'+mode+'.dat', data[:, 2])
+fig.savefig('.'+target_dir+'relerr_N'+N+'.png')
 print("---------------------------------------------")
 
-
+np.savetxt('.'+target_dir+'fws_list.dat', data[:, 0])
+np.savetxt('.'+target_dir+'rom_relerr_N'+N+'.dat', data[:, 1])
+np.savetxt('.'+target_dir+'proj_relerr_N'+N+'.dat', data[:, 2])
+print("---------------------------------------------")
 

@@ -23,10 +23,10 @@ sc = str(sys.argv[5])
 mode = str(sys.argv[6])
 print("---------------------------------------------")
 
-target_dir = '/dual_norm/'
+target_dir = '/vel_dual_norm/'
 setup.checkdir(target_dir)
 
-search_dir = './'+model+'_info/dual_norm'
+search_dir = './'+model+'_info/vel_dual_norm'
 if model == 'all':
     root, filenames = setup.gtfpath(search_dir, '^.*_'+N+'nb_.*$')
 else:
@@ -55,55 +55,56 @@ ylims = [1e-4, 1e-1]
 
 # scaled the dual norm with argv[4]
 if sc == 'rom':
-    # scaled with the rom_norm
+    # scaled with the rom_norm at training points
     sc_dir = './rom_norm/'
-    scale = np.loadtxt(sc_dir+'rom_h1norm_N'+N+'_'+mode+'.dat')
-    ylb = r'$\frac{\triangle(\theta_g)}{\|\langle (\bf{u},T)_{ROM}(\theta_g)\rangle_g\|_{H^1}}$'
+    scale = np.loadtxt(sc_dir+'rom_u_h1norm_N'+N+'_'+mode+'.dat')
+    ylb = r'$\frac{\triangle_u(\theta_g)}{\|\langle \bf{u}_{ROM}(\theta_g) \rangle_g\|_{H^1}}$'
 elif sc == 'fom':
     # scaled with the fom_norm at anchor point
     sc_dir = './fom_norm/'
     angles = np.loadtxt(sc_dir+'angle.dat')
     idx = np.where(angles == int(anchor))
     print('Scaled with fom norm anchored at:', angles[idx])
-    tmp = np.loadtxt(sc_dir+'fom_h1norm.dat')
+    tmp = np.loadtxt(sc_dir+'fom_u_h1norm.dat')
     scale = tmp[idx]
-    ylb = r'$\frac{\triangle(\theta_g)}{\|\langle (\bf{u},T)_{FOM}(\theta^*_g)\rangle_g\|_{H^1}}$'
+    ylb = r'$\frac{\triangle_u(\theta_g)}{\|\langle \bf{u}_{FOM}(\theta^*_g) \rangle_g\|_{H^1}}$'
 elif sc == 'romabserr':
-    # scaled with the rom_abserr
-    # This is essentially the effectivity
-    sc_dir = './mabserr/'
-    scale = np.loadtxt(sc_dir+'rom_abserr_N'+N+'_'+mode+'.dat')
+    # scaled with the rom_abserr, the result is so called the effectivity
+    sc_dir = './vel_mabserr/'
+    scale = np.loadtxt(sc_dir+'vel_rom_abserr_N'+N+'_'+mode+'.dat')
     print(scale)
-    ylb = r'$\frac{\triangle(\theta_g)}{\|\langle (\bf{u},T)_{FOM}-(\bf{u},T)_{ROM}\rangle_g\|_{H^1}}$'
+    ylb = r'$\frac{\triangle_u(\theta_g)}{\|\langle \bf{u}_{FOM}-u_{ROM} \rangle_g\|_{H^1}}$'
 elif sc == 'eta':
-    # scaled with the rom_abserr
-    # This is essentially the effectivity
-    sc_dir = './mabserr/'
-    abserr = np.loadtxt(sc_dir+'rom_abserr_N'+N+'_'+mode+'.dat')
-    angle = np.loadtxt('./dual_norm/angle_list_'+mode+'.dat')
-    dual = np.loadtxt('./dual_norm/erri_N'+N+'_'+mode+'.dat')
+    # scaled with the effectivity
+    sc_dir = './vel_mabserr/'
+    abserr = np.loadtxt(sc_dir+'vel_rom_abserr_N'+N+'_'+mode+'.dat')
+    angle = np.loadtxt('./vel_dual_norm/angle_list_'+mode+'.dat')
+    dual = np.loadtxt('./vel_dual_norm/vel_erri_N'+N+'_'+mode+'.dat')
     anchor = setup.find_anchor()
     idx = np.where(angle == int(anchor))
-    ylb = r'$\frac{\triangle(\theta_g)}{\eta(\theta^*_g)}$'
+    print(idx)
+    ylb = r'$\frac{\triangle_u(\theta_g)}{\eta_u(\theta^*_g)}$'
     effect = dual/abserr
     scale = effect[idx]
+    print(scale)
     ylims = [1e-1, 1e3]
 elif sc == 'eta_rom':
     # scaled with the rom_abserr
     # This is essentially the effectivity
-    sc_dir = './mabserr/'
-    abserr = np.loadtxt(sc_dir+'rom_abserr_N'+N+'_'+mode+'.dat')
-    print(abserr)
-    angle = np.loadtxt('./dual_norm/angle_list_'+mode+'.dat')
-    dual = np.loadtxt('./dual_norm/erri_N'+N+'_'+mode+'.dat')
-    print(dual)
+    sc_dir = './vel_mabserr/'
+    abserr = np.loadtxt(sc_dir+'vel_rom_abserr_N'+N+'_'+mode+'.dat')
+    angle = np.loadtxt('./vel_dual_norm/angle_list_'+mode+'.dat')
+    dual = np.loadtxt('./vel_dual_norm/vel_erri_N'+N+'_'+mode+'.dat')
     anchor = setup.find_anchor()
     idx = np.where(angle == int(anchor))
-    ylb = r'$\frac{\triangle(\theta_g)\|\langle (\bf{u},T)_{ROM}(\theta^*_g) \rangle_g\|}{\eta(\theta^*_g)}$'
+    print(idx)
+    ylb = r'$\frac{\triangle_u(\theta_g)\|\langle \bf{u}_{ROM}(\theta^*_g) \rangle_g\|}{\eta_u(\theta^*_g)}$'
     effect = dual/abserr
-    print(effect)
     sc_dir = './rom_norm/'
-    rom_norm = np.loadtxt(sc_dir+'rom_h1norm_N'+N+'_'+mode+'.dat')
+    rom_norm = np.loadtxt(sc_dir+'rom_u_h1norm_N'+N+'_'+mode+'.dat')
+    print(abserr)
+    print(dual)
+    print(effect)
     print(rom_norm)
     scale = effect[idx]*rom_norm[idx]
     print(scale)
@@ -111,22 +112,33 @@ elif sc == 'eta_rom':
 elif sc == 'eta_rom_all':
     # scaled with the rom_abserr
     # This is essentially the effectivity
-    sc_dir = './mabserr/'
-    abserr = np.loadtxt(sc_dir+'rom_abserr_N'+N+'_'+mode+'.dat')
-    angle = np.loadtxt('./dual_norm/angle_list_'+mode+'.dat')
-    dual = np.loadtxt('./dual_norm/erri_N'+N+'_'+mode+'.dat')
+    sc_dir = './vel_mabserr/'
+    abserr = np.loadtxt(sc_dir+'vel_rom_abserr_N'+N+'_'+mode+'.dat')
+    angle = np.loadtxt('./vel_dual_norm/angle_list_'+mode+'.dat')
+    dual = np.loadtxt('./vel_dual_norm/vel_erri_N'+N+'_'+mode+'.dat')
     anchor = setup.find_anchor()
     idx = np.where(angle == int(anchor))
-    ylb = r'$\frac{\triangle(\theta_g)\|\langle (\bf{u},T)_{ROM}(\theta_g) \rangle_g\|}{\eta(\theta^*_g)}$'
+    print(idx)
+    ylb = r'$\frac{\triangle_u(\theta_g)\|\langle \bf{u}_{ROM}(\theta_g) \rangle_g\|}{\eta_u(\theta^*_g)}$'
     effect = dual/abserr
     sc_dir = './rom_norm/'
-    rom_norm = np.loadtxt(sc_dir+'rom_h1norm_N'+N+'_'+mode+'.dat')
+    rom_norm = np.loadtxt(sc_dir+'rom_u_h1norm_N'+N+'_'+mode+'.dat')
     print(abserr)
     print(dual)
     print(effect)
     print(rom_norm)
     scale = effect[idx]*rom_norm
     print(scale)
+    ylims = [1e-2, 1e3]
+elif sc == 'domain':
+    # scaled with the domain length
+    angle = np.loadtxt('./vel_dual_norm/angle_list_'+mode+'.dat')
+    dual = np.loadtxt('./vel_dual_norm/vel_erri_N'+N+'_'+mode+'.dat')
+    anchor = setup.find_anchor()
+    idx = np.where(angle == int(anchor))
+    ylb = r'$\frac{\triangle_u(\theta_g)}{|V|^{1/2}}$'
+    domain = 40*np.sin(angle*np.pi/180)
+    scale = np.sqrt(domain)
     ylims = [1e-2, 1e3]
 
 
@@ -139,15 +151,17 @@ solver = checker.rom_checker(fname, '^.*_(.*)rom_.*$')
 fig, ax = plt.subplots(1, tight_layout=True)
 plot_params = {'c': 'k', 'marker': 'o', 'mfc': 'None',
                'label': solver+' with '+r'$N='+N+'$'}
-ax.set(ylabel=ylb, xlabel=r'$\theta_g$', ylim=ylims,
+#ax.set(ylabel=ylb, xlabel=r'$\theta_g$', ylim=ylims,
+#       xticks=np.linspace(0, 180, 19, dtype=int))
+ax.set(ylabel=ylb, xlabel=r'$\theta_g$',
        xticks=np.linspace(0, 180, 19, dtype=int))
 
 ax.set_xticklabels(ax.get_xticks(), rotation=45)
-ax.semilogy(data[:, 0], data[:, 1], **plot_params)
+ax.plot(data[:, 0], data[:, 1], **plot_params)
 ax.legend(loc=0)
 
 print("---------------------------------------------")
-fig.savefig('.'+target_dir+'dual_norm_N'+N+'_sc_'+sc+'_'+mode+'.png')
-np.savetxt('.'+target_dir+'erri_N'+N+'_sc_'+sc+'_'+mode+'.dat', data[:, 1])
+fig.savefig('.'+target_dir+'vel_dual_norm_N'+N+'_sc_'+sc+'.png')
+np.savetxt('.'+target_dir+'vel_erri_N'+N+'_sc_'+sc+'.dat', data[:, 1])
 print("---------------------------------------------")
 

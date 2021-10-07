@@ -34,32 +34,3 @@ class PostMOR:
                     xycoords='axes fraction', textcoords='offset points')
         return
 
-    def coef_mean_and_var(self, rom, snap, field):
-
-        nb = rom.info['nb']
-        asnap = snap.outputs[field+'as']
-        vsnap = snap.outputs[field+'vs']
-
-        fig, axs = plt.subplots(2, sharex=True, tight_layout=True)
-
-        POD_modes = [np.linspace(1, nb, nb, dtype=int),
-                     np.linspace(1, nb, nb, dtype=int)]
-
-        data = [rom.outputs[field+'a'], rom.outputs[field+'v']]
-        refs = [asnap, vsnap]
-
-        ylabels = [r'$\langle '+field+r'_{n} \rangle_s$', r'$V_s('+field+r'_n)$']
-        params = [{'c': 'b', 'marker': 'o', 'mfc': 'None', 'label': 'ROM'},
-                  {'c': 'k', 'marker': 'x', 'mfc': 'None', 'label': 'FOM'}]
-        for i in range(2):
-            axs[i].plot(POD_modes[i], data[i], **params[0])
-            axs[i].plot(POD_modes[i], refs[i][1:nb+1], **params[1])
-            axs[i].legend(loc=0)
-            axs[i].set_ylabel(ylabels[i])
-            axs[i].set_xlabel(r'$n$')
-            axs[i].xaxis.set_major_locator(MaxNLocator(integer=True))
-            if i == 1:
-                axs[i].set_yscale('log')
-        fig.savefig(self.dir_path+'ua_uv_N'+str(nb)+'.png')
-
-        return

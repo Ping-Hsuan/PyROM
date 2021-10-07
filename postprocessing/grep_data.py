@@ -41,17 +41,22 @@ if len(sys.argv) >= 4:
                  re.match('^.*_(.*)rom_'+N+'nb_.*$', name)]
 else:
     filenames = [name for name in files if re.match('^.*_(.*)rom_.*$', name)]
+#   filenames = [name for name in files if re.match('^.*_(.*)rom_(?!.*-90|.*-80|.*-70).*$', name)]
 
 print(filenames)
 create_dir(rom_dir)
 
 # Create a dictionary for supproted features
 labels = ['mabserr', 'nu', 'romu', 'romt', 'mrelerr', 'dual_norm',
-          'fom_norm', 'rom_norm', 'tke']
+          'fom_norm', 'rom_norm', 'tke', 'temp_dual_norm', 'vel_dual_norm',
+          'vel_mrelerr', 'temp_mrelerr','vel_mabserr','temp_mabserr']
 data_pattern = [r'^\sh1\serror:', r'\snus', r'\sromu', r'\sromt',
                 r'\srelative\sh1\serror:',
                 r'(residual in h1 norm:\s\s+)(\d+\.\d+E?-?\d+)',
-                r'^\sFOM*', r'^\sROM*', r'^(?!.*?(?:MOR)s?).*tke$']
+                r'^\sFOM*', r'^\sROM*', r'^(?!.*?(?:MOR)s?).*tke$',
+                r'(temp residual in h1 norm\s\s+)(\d+\.\d+E?-?\d+)',
+                r'(vel residual in h1 norm\s\s+)(\d+\.\d+E?-?\d+)',
+                r'\srelative\sh1\serror\sfor\su:', r'\srelative\sh1\serror\sfor\st:', r'\sabsolute\sh1\serror\sfor\su:', r'\sabsolute\sh1\serror\sfor\st:']
 sprt_features = dict(zip(labels, data_pattern))
 
 # Extract user specify features

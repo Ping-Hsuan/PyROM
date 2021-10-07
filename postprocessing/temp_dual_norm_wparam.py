@@ -7,7 +7,6 @@ sys.path.append('/Users/bigticket0501/Developer/PyMOR/code/plot_helpers/')
 import setup
 import reader
 import checker
-import yaml
 
 setup.style(1)
 colors = setup.color(0)
@@ -23,30 +22,26 @@ T0 = int(sys.argv[4])
 mode = str(sys.argv[5])
 print("---------------------------------------------")
 
-target_dir = '/dual_norm/'
+target_dir = '/temp_dual_norm/'
 setup.checkdir(target_dir)
 
-search_dir = './'+model+'_info/dual_norm'
-if mode == 'all':
-    root, filenames = setup.gtfpath(search_dir, '^.*_'+N+'nb_*.*$')
+search_dir = './'+model+'_info/temp_dual_norm'
+if model == 'all':
+    root, filenames = setup.gtfpath(search_dir, '^.*_'+N+'nb_.*$')
 else:
-    root, filenames = setup.gtfpath(search_dir, '^.*_'+N+'nb_*_h10_(?!.*-90|.*-80|.*-70).*$')
+    root, filenames = setup.gtfpath(search_dir, '^.*_'+N+'nb_ic_h10_(?!.*-90|.*-80|.*-70).*$')
 if model == 'l-rom' or model == 'l-rom_df':
-    fd = str(sys.argv[6])
+    fd = str(sys.argv[5])
     if T0 == 1:
         files_dict = setup.create_dict(filenames, '^.*_ic_h10_(-?\d+)_'+fd+'.*$')
-    elif T0 > 1:
+    elif T0 >= 1:
         files_dict = setup.create_dict(filenames, '^.*_zero_h10_(-?\d+)_'+fd+'.*$')
 else:
     if T0 == 1:
-#       files_dict = setup.create_dict(filenames, '^.*_ic_h10_(-?\d+)_.*$')
-        files_dict = setup.create_dict(filenames, '^.*_ic_h10_.*_(-?\d+)_dual_norm$')
-    elif T0 > 1:
-#       files_dict = setup.create_dict(filenames, '^.*_zero_h10_(-?\d+)_.*$')
-        print(filenames)
-        files_dict = setup.create_dict(filenames, '^.*_zero_h10_.*_(-?\d+)_dual_norm$')
+        files_dict = setup.create_dict(filenames, '^.*_ic_h10_(-?\d+)_.*$')
+    elif T0 >= 1:
+        files_dict = setup.create_dict(filenames, '^.*_zero_h10_(-?\d+)_.*$')
 dict_final = sorted(files_dict.items(), key=operator.itemgetter(0))
-print(dict_final)
 
 color_ctr = 0
 tpath = root+'/'
@@ -60,17 +55,12 @@ for angle, fnames in dict_final:
             data = 1e8
         dual_norm = np.array(data).astype(np.float64)
         erri.append(float(dual_norm))
-        angles.append(int(angle))
+        angles.append(int(angle)+90)
 
 data = np.column_stack((angles, erri))
 data = data[data[:, 0].argsort()]
 
-with open('../g-rom/anchor.yaml') as f:
-    features = yaml.load(f, Loader=yaml.FullLoader)
-akey = list(features.keys())
-aval = list(features.values())
-
-#anchor = setup.find_anchor()
+anchor = setup.find_anchor()
 solver = checker.rom_checker(fname, '^.*_(.*)rom_.*$')
 
 fig, ax = plt.subplots(1, tight_layout=True)
@@ -79,30 +69,27 @@ if model == 'l-rom' or model == 'l-rom_df':
     plot_params = {'c': 'k', 'marker': 'o', 'mfc': 'None',
                    'label': solver+' with '+r'$N='+N+'$ and filter width '+r'$\delta=$'+str(fd)}
 else:
-    plot_params = {'c': 'k', 'marker': 'o', 'mfc': 'None', 'label': solver+' with '+r'$N='+N+'$'}
-
-with open('../g-rom/train.yaml') as f:
-    features = yaml.load(f, Loader=yaml.FullLoader)
-tkey = list(features.keys())
-tval = list(features.values())
-print(tval[0])
-print(data[:, 0])
-
-ax.set(ylabel=r'$\triangle$', xlabel=r'$'+tkey[0]+'$', ylim=[1e-2, 1], xticks=tval[0])
+    plot_params = {'c': 'k', 'marker': 'o', 'mfc': 'None',
+                   'label': solver+' with '+r'$N='+N+'$'}
+ax.set(ylabel=r'$\triangle(\theta_g;{\theta^*_g}='+str(int(anchor))+r')$',
+       xlabel=r'$\theta_g$', ylim=[1e-2, 1],
+       xticks=np.linspace(0, 180, 19, dtype=int))
 
 ax.set_xticklabels(ax.get_xticks(), rotation=45)
 ax.semilogy(data[:, 0], data[:, 1], **plot_params)
 ymin, ymax = ax.get_ylim()
-ax.semilogy(aval[0], ymin, 'ro', label='Anchor point')
+ax.semilogy(int(anchor), ymin, 'ro', label='Anchor point')
 ax.legend(loc=0)
 
 print("---------------------------------------------")
 if model == 'l-rom' or model == 'l-rom_df':
-    fig.savefig('.'+target_dir+'dual_norm_N'+N+'_'+fd+'_'+mode+'.png')
+    fig.savefig('.'+target_dir+'temp_dual_norm_N'+N+'_'+fd+'_'+mode+'.png')
     np.savetxt('.'+target_dir+'angle_list_'+mode+'.dat', data[:, 0])
-    np.savetxt('.'+target_dir+'erri_N'+N+'_'+fd+'_'+mode+'.dat', data[:, 1])
+    np.savetxt('.'+target_dir+'temp_erri_N'+N+'_'+fd+'_'+mode+'.dat', data[:, 1])
 else:
-    fig.savefig('.'+target_dir+'dual_norm_N'+N+'_'+mode+'.png')
+    fig.savefig('.'+target_dir+'temp_dual_norm_N'+N+'_'+mode+'.png')
     np.savetxt('.'+target_dir+'angle_list_'+mode+'.dat', data[:, 0])
-    np.savetxt('.'+target_dir+'erri_N'+N+'_'+mode+'.dat', data[:, 1])
+    np.savetxt('.'+target_dir+'temp_erri_N'+N+'_'+mode+'.dat', data[:, 1])
 print("---------------------------------------------")
+
+

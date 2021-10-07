@@ -32,17 +32,19 @@ else:
 rom = ROM(info)
 rom.get_data()
 
-if (info['features']['romu'] and info['ifrom(1)']):
+if (info['features']['romu'][0] and info['ifrom(1)']):
     rom.field = 'u'
-    rom.get_coef()
-    rom.compute_momentum()
-    aux.plt_coef_in_t(rom, tpath)
+    for nb in info['features']['romu'][1:]:
+        rom.get_coef(nb, 80)
+        rom.compute_momentum()
+        aux.plt_coef_in_t(rom, nb, tpath)
 
-if (info['features']['romt'] and info['ifrom(2)']):
+if (info['features']['romt'][0] and info['ifrom(2)']):
     rom.field = 'T'
-    rom.get_coef()
-    rom.compute_momentum()
-    aux.plt_coef_in_t(rom, tpath)
+    for nb in info['features']['romt'][1:]:
+        rom.get_coef(nb)
+        rom.compute_momentum()
+        aux.plt_coef_in_t(rom, nb, tpath)
 
 if (info['features']['dual_norm']):
     rom.get_dual_wN()
@@ -59,4 +61,10 @@ if (info['features']['mabserr']):
 if (info['features']['rom_norm']):
     rom.get_rom_norm()
     aux.plt_rom_norm_w_N(rom, tpath)
+
+if (info['features']['tke'][0]):
+    rom.get_tke()
+    for nb in info['features']['tke'][1:]:
+        aux.plt_tke_in_t(rom, nb, tpath)
+1/o
 #subprocess.run(["python3", "nu_first_second_momentum_wN.py", tpath, model, theta_g, T0])

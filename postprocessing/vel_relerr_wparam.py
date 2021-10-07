@@ -22,10 +22,10 @@ T0 = int(sys.argv[4])
 mode = str(sys.argv[5])
 print("---------------------------------------------")
 
-target_dir = '/mrelerr/'
+target_dir = '/vel_mrelerr/'
 setup.checkdir(target_dir)
 
-search_dir = './'+model+'_info/mrelerr'
+search_dir = './'+model+'_info/vel_mrelerr'
 if model == 'all':
     root, filenames = setup.gtfpath(search_dir, '^.*_'+N+'nb_.*$')
 else:
@@ -82,7 +82,7 @@ ax.set(xlabel=r'$\theta_g$', ylabel=r'$\frac{\|u(\theta_g) -' +
        str(int(anchor))+r')\|_{H^1}}{\|u(\theta_g)\|_{H^1}}$',
        ylim=[0, 1], yticks=np.linspace(0, 1, 11),
        xticks=np.linspace(0, 180, 19, dtype=int),
-       title='Relative error in the mean flow with \n ROM anchor at ' +
+       title='Relative error in the mean velocity field with \n ROM anchor at ' +
        r'$\theta^*_g='+str(int(anchor))+'$')
 
 ax.set_xticklabels(ax.get_xticks(), rotation=45)
@@ -94,14 +94,13 @@ ax.legend(loc=0, ncol=1)
 
 print("---------------------------------------------")
 if model == 'l-rom' or model == 'l-rom_df':
-    fig.savefig('.'+target_dir+'relerr_N'+N+'_'+fd+'_'+mode+'.png')
+    fig.savefig('.'+target_dir+'vel_relerr_N'+N+'_'+fd+'_'+mode+'.png')
     np.savetxt('.'+target_dir+'angle_list_'+mode+'.dat', data[:, 0])
-    np.savetxt('.'+target_dir+'rom_relerr_N'+N+'_'+fd+'_'+mode+'.dat', data[:, 1])
-    np.savetxt('.'+target_dir+'proj_relerr_N'+N+'_'+mode+'.dat', data[:, 2])
+    np.savetxt('.'+target_dir+'rom_vel_relerr_N'+N+'_'+fd+'_'+mode+'.dat', data[:, 1])
+    np.savetxt('.'+target_dir+'proj_vel_relerr_N'+N+'_'+mode+'.dat', data[:, 2])
 else:
-    fig.savefig('.'+target_dir+'relerr_N'+N+'_'+mode+'.png')
+    fig.savefig('.'+target_dir+'vel_relerr_N'+N+'_'+mode+'.png')
     np.savetxt('.'+target_dir+'angle_list_'+mode+'.dat', data[:, 0])
-    np.savetxt('.'+target_dir+'rom_relerr_N'+N+'_'+mode+'.dat', data[:, 1])
-    np.savetxt('.'+target_dir+'proj_relerr_N'+N+'_'+mode+'.dat', data[:, 2])
+    np.savetxt('.'+target_dir+'rom_vel_relerr_N'+N+'_'+mode+'.dat', data[:, 1])
+    np.savetxt('.'+target_dir+'proj_vel_relerr_N'+N+'_'+mode+'.dat', data[:, 2])
 print("---------------------------------------------")
-

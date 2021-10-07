@@ -20,17 +20,28 @@ os.chdir(str(sys.argv[1]))
 model = str(sys.argv[2])
 N = str(sys.argv[3])
 T0 = int(sys.argv[4])
+mode = str(sys.argv[5])
 print("---------------------------------------------")
 
 target_dir = '/nu/'
 setup.checkdir(target_dir)
 
 search_dir = './'+model+'_info/nu'
-root, filenames = setup.gtfpath(search_dir, '^.*_'+N+'nb_.*$')
-if T0 == 1:
-    files_dict = setup.create_dict(filenames, '^.*_ic_h10_(-?\d+)_.*$')
-elif T0 >= 1:
-    files_dict = setup.create_dict(filenames, '^.*_zero_h10_(-?\d+)_.*$')
+if model == 'all':
+    root, filenames = setup.gtfpath(search_dir, '^.*_'+N+'nb_.*$')
+else:
+    root, filenames = setup.gtfpath(search_dir, '^.*_'+N+'nb_ic_h10_(?!.*-90|.*-80|.*-70).*$')
+if model == 'l-rom' or model == 'l-rom_df':
+    fd = str(sys.argv[5])
+    if T0 == 1:
+        files_dict = setup.create_dict(filenames, '^.*_ic_h10_(-?\d+)_'+fd+'.*$')
+    elif T0 >= 1:
+        files_dict = setup.create_dict(filenames, '^.*_zero_h10_(-?\d+)_'+fd+'.*$')
+else:
+    if T0 == 1:
+        files_dict = setup.create_dict(filenames, '^.*_ic_h10_(-?\d+)_.*$')
+    elif T0 >= 1:
+        files_dict = setup.create_dict(filenames, '^.*_zero_h10_(-?\d+)_.*$')
 dict_final = sorted(files_dict.items(), key=operator.itemgetter(0))
 
 
@@ -86,43 +97,62 @@ data = data[data[:, 0].argsort()]
 anchor = setup.find_anchor()
 solver = checker.rom_checker(fname, '^.*_(.*)rom_.*$')
 
-plot_params = {'c': 'k', 'marker': 'o', 'mfc': 'None',
-               'label': solver+' with '+r'$N='+N+'$, ' +
-               r'$\theta^*_g = '+str(int(anchor))+'$'}
-fig, ax = plt.subplots(1, tight_layout=True)
-ax.set(ylim=[1e-4, 1], xticks=np.linspace(0, 180, 19, dtype=int),
+if model == 'l-rom' or model == 'l-rom_df':
+    fd = fd.strip("0")
+    plot_params = {'c': 'b', 'marker': 'o', 'mfc': 'None',
+                   'label': solver+' with '+r'$N='+N+'$ and filter width '+r'$\delta=$'+str(fd)}
+else:
+    plot_params = {'c': 'b', 'marker': 'o', 'mfc': 'None',
+                   'label': solver+' with '+r'$N='+N+'$'}
+fig1, ax1 = plt.subplots(1, tight_layout=True)
+ax1.set(ylim=[1e-4, 1], xticks=np.linspace(0, 180, 19, dtype=int),
        xlabel=r'$\theta_g$', ylabel=r'$\frac{|\langle \text{Nu} \rangle_s -' +
        r'\langle \widehat{\text{Nu}} \rangle_s|}' +
        r'{|\langle \text{Nu} \rangle_s|}$')
-ax.set_xticklabels(ax.get_xticks(), rotation=45)
-ax.semilogy(data[:, 0], data[:, 1], **plot_params)
-ax.legend(loc=1)
-fig.savefig('.'+target_dir+'relmnu_N'+N+'.png')
-plt.close(fig)
+ax1.set_xticklabels(ax1.get_xticks(), rotation=45)
+ax1.semilogy(data[:, 0], data[:, 1], **plot_params)
+ymin, ymax = ax1.get_ylim()
+ax1.semilogy(int(anchor), ymin, 'ro', label='Anchor point')
+ax1.legend(loc=1)
 
-plot_params = {'c': 'b', 'marker': 'o', 'mfc': 'None',
-               'label': solver+' with '+r'$\theta^*_g = '+str(int(anchor))+'$'}
 FOM_params = {'c': 'k', 'marker': 'o', 'mfc': 'None', 'label': 'FOM'}
-fig, ax = plt.subplots(1, tight_layout=True)
-ax.set(ylim=[1, 4], xticks=np.linspace(0, 180, 19, dtype=int),
+fig2, ax2 = plt.subplots(1, tight_layout=True)
+ax2.set(ylim=[1, 4], xticks=np.linspace(0, 180, 19, dtype=int),
        xlabel=r'$\theta_g$', ylabel='Mean Nu')
-ax.set_xticklabels(ax.get_xticks(), rotation=45)
-ax.plot(data[:, 0], data[:, 3], **plot_params)
-ax.plot(data[:, 0], data[:, 5], **FOM_params)
-ax.legend(loc=1)
-fig.savefig('.'+target_dir+'mnu_N'+N+'.png')
+ax2.set_xticklabels(ax2.get_xticks(), rotation=45)
+ax2.plot(data[:, 0], data[:, 3], **plot_params)
+ax2.plot(data[:, 0], data[:, 5], **FOM_params)
+ymin, ymax = ax2.get_ylim()
+ax2.plot(int(anchor), ymin, 'ro', label='Anchor point')
+ax2.legend(loc=1)
 
-fig, ax = plt.subplots(1, tight_layout=True)
-ax.set(ylim=[0, 0.3], xticks=np.linspace(0, 180, 19, dtype=int),
+fig3, ax3 = plt.subplots(1, tight_layout=True)
+ax3.set(ylim=[0, 0.3], xticks=np.linspace(0, 180, 19, dtype=int),
        xlabel=r'$\theta_g$', ylabel='std(Nu)')
-ax.set_xticklabels(ax.get_xticks(), rotation=45)
-ax.plot(data[:, 0], data[:, 4], **plot_params)
-ax.plot(data[:, 0], data[:, 6], **FOM_params)
-ax.legend(loc=1)
-fig.savefig('.'+target_dir+'stdnu_N'+N+'.png')
+ax3.set_xticklabels(ax3.get_xticks(), rotation=45)
+ax3.plot(data[:, 0], data[:, 4], **plot_params)
+ax3.plot(data[:, 0], data[:, 6], **FOM_params)
+ymin, ymax = ax3.get_ylim()
+ax3.plot(int(anchor), ymin, 'ro', label='Anchor point')
+ax3.legend(loc=1)
 
-np.savetxt('.'+target_dir+'angle.dat', data[:, 0])
-np.savetxt('.'+target_dir+'merr_N'+N+'.dat', data[:, 1])
-np.savetxt('.'+target_dir+'stderr_N'+N+'.dat', data[:, 2])
-np.savetxt('.'+target_dir+'mnu_N'+N+'.dat', data[:, 3])
-np.savetxt('.'+target_dir+'stdnu_N'+N+'.dat', data[:, 4])
+if model == 'l-rom' or model == 'l-rom_df':
+    fig1.savefig('.'+target_dir+'relmnu_N'+N+'_'+fd+'_'+mode+'.png')
+    fig2.savefig('.'+target_dir+'mnu_N'+N+'_'+fd+'_'+mode+'.png')
+    fig3.savefig('.'+target_dir+'stdnu_N'+N+'_'+fd+'_'+mode+'.png')
+
+    np.savetxt('.'+target_dir+'angle_'+mode+'.dat', data[:, 0])
+    np.savetxt('.'+target_dir+'merr_N'+N+'_'+fd+'_'+mode+'.dat', data[:, 1])
+    np.savetxt('.'+target_dir+'stderr_N'+N+'_'+fd+'_'+mode+'.dat', data[:, 2])
+    np.savetxt('.'+target_dir+'mnu_N'+N+'_'+fd+'_'+mode+'.dat', data[:, 3])
+    np.savetxt('.'+target_dir+'stdnu_N'+N+'_'+fd+'_'+mode+'.dat', data[:, 4])
+else:
+    fig1.savefig('.'+target_dir+'relmnu_N'+N+'_'+mode+'.png')
+    fig2.savefig('.'+target_dir+'mnu_N'+N+'_'+mode+'.png')
+    fig3.savefig('.'+target_dir+'stdnu_N'+N+'_'+mode+'.png')
+
+    np.savetxt('.'+target_dir+'angle_'+mode+'.dat', data[:, 0])
+    np.savetxt('.'+target_dir+'merr_N'+N+'_'+mode+'.dat', data[:, 1])
+    np.savetxt('.'+target_dir+'stderr_N'+N+'_'+mode+'.dat', data[:, 2])
+    np.savetxt('.'+target_dir+'mnu_N'+N+'_'+mode+'.dat', data[:, 3])
+    np.savetxt('.'+target_dir+'stdnu_N'+N+'_'+mode+'.dat', data[:, 4])
