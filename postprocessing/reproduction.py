@@ -35,7 +35,7 @@ rom.get_data()
 if (info['features']['romu'][0] and info['ifrom(1)']):
     rom.field = 'u'
     for nb in info['features']['romu'][1:]:
-        rom.get_coef(nb, 80)
+        rom.get_coef(nb)
         rom.compute_momentum()
         aux.plt_coef_in_t(rom, nb, tpath)
 

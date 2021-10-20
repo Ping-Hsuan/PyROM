@@ -24,8 +24,7 @@ class ROM:
             if list(self.info['anchors'])[0] == 'theta':
                 self.fnames[feature] = aux.gtfpath(search_dir, '^.*_'+self.info['POD_norm']+'_'+str(self.info['anchors']['theta']-90)+'_'+feature)
             else:
-                self.fnames[feature] = aux.gtfpath(search_dir, '^.*_'+self.info['POD_norm']+'_.*_'+feature)
-            print(self.fnames[feature])
+                self.fnames[feature] = aux.gtfpath(search_dir, '^.*_'+self.info['POD_norm']+'_.*'+str(self.info['anchors']['Ra'])+'.*_'+feature)
         return
 
     def get_coef(self, nb, rank=None):
@@ -35,7 +34,6 @@ class ROM:
             ptr = r"^.*_(\d+)nb_.*"
         else:
             ptr = r"^.*_(\d+)nb_.*_r"+str(rank)+'_rom.*$'
-        print(ptr)
         for element in self.fnames['rom'+field.lower()]:
             z = re.match(ptr, element)
             if z is not None:
@@ -101,6 +99,7 @@ class ROM:
     def compute_momentum(self):
         if self.info['init'] == 'zero':
             self.info['T0'] = mypostpro.find_nearest(self.outputs['t'][0, :], 501)
+            print(self.info['T0'])
         elif self.info['init'] == 'ic':
             self.info['T0'] = 0
             self.outputs['t'] += 500
@@ -111,7 +110,7 @@ class ROM:
     def get_dual_wN(self):
         # Should make the regular expression more specific
         # Rightnow it will grep other files
-        files_dict = aux.create_dict(self.fnames['dual_norm'], '^.*_([0-9]*)nb_.*$')
+        files_dict = aux.create_dict(self.fnames['dual_norm'], '^.*_([0-9]*)nb_.*_\d+_dual_norm')
         data = []
         nbs = []
         for nb, fnames in files_dict.items():
@@ -127,7 +126,7 @@ class ROM:
 
     def get_mrelerr(self):
         # For now, grep proj and rom relerr at the same time
-        files_dict = aux.create_dict(self.fnames['mrelerr'], '^.*_([0-9]*)nb_.*$')
+        files_dict = aux.create_dict(self.fnames['mrelerr'], '^.*_([0-9]*)nb_.*_\d+_mrelerr$')
         nbs = []
         rom = []
         proj = []
@@ -142,7 +141,7 @@ class ROM:
 
     def get_mabserr(self):
         # For now, grep proj and rom abserr at the same time
-        files_dict = aux.create_dict(self.fnames['mabserr'], '^.*_([0-9]*)nb_.*$')
+        files_dict = aux.create_dict(self.fnames['mabserr'], '^.*_([0-9]*)nb_.*_\d+_mabserr$')
         nbs = []
         rom = []
         proj = []

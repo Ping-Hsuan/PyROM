@@ -7,6 +7,7 @@ import operator
 import sys
 sys.path.append('/Users/bigticket0501/Developer/PyMOR/code/plot_helpers/')
 import mypostpro
+import yaml
 import setup
 
 colors = setup.color(0)
@@ -26,18 +27,25 @@ target_dir = '/nu_'+str(N)
 setup.checkdir(target_dir)
 
 search_dir = './'+model+'_info/nu'
-anchor = setup.find_anchor()
+with open('../'+model+'/anchor.yaml') as f:
+    features = yaml.load(f, Loader=yaml.FullLoader)
+akey = list(features.keys())
+aval = list(features.values())
+with open('../'+model+'/train.yaml') as f:
+    features = yaml.load(f, Loader=yaml.FullLoader)
+tkey = list(features.keys())
+tval = list(features.values())
 
 if (len(sys.argv)) < 7:
     if int(sys.argv[4]) == 1:
-        root, filenames = setup.gtfpath(search_dir, '^.*_(.*)rom_'+N+'nb_ic.*_'+str(int(deg-90))+'_nu$')
+        root, filenames = setup.gtfpath(search_dir, '^.*_(.*)rom_'+N+'nb_ic.*_'+str(int(deg))+'_nu$')
     elif int(sys.argv[4]) > 1:
-        root, filenames = setup.gtfpath(search_dir, '^.*_(.*)rom_'+N+'nb_zero.*_'+str(int(deg-90))+'_*nu$')
+        root, filenames = setup.gtfpath(search_dir, '^.*_(.*)rom_'+N+'nb_zero.*_'+str(int(deg))+'_*nu$')
 else:
     if int(sys.argv[4]) == 1:
-        root, filenames = setup.gtfpath(search_dir, '^.*_(.*)rom_'+N+'nb_ic.*_'+str(int(deg-90))+'_.*_nu$')
+        root, filenames = setup.gtfpath(search_dir, '^.*_(.*)rom_'+N+'nb_ic.*_'+str(int(deg))+'_.*_nu$')
     elif int(sys.argv[4]) > 1:
-        root, filenames = setup.gtfpath(search_dir, '^.*_(.*)rom_'+N+'nb_zero.*_'+str(int(deg-90))+'_.*_nu$')
+        root, filenames = setup.gtfpath(search_dir, '^.*_(.*)rom_'+N+'nb_zero.*_'+str(int(deg))+'_.*_nu$')
 
 files_dict = setup.create_dict(filenames, '^.*_([0-9]*)nb_.*$')
 dict_final = sorted(files_dict.items(), key=operator.itemgetter(0))
@@ -65,9 +73,12 @@ for nb, fnames in dict_final:
                 deg = int(forleg[-2])
 
             # get the FOM data
-            filename = '../../../../fom_nuss/nuss_fom_'+str(deg+90)
+            filename = '../../fom_nuss/nus_fom_'+str(deg)
             data = mypostpro.read_nuss(filename)
-            data[:, 2] = data[:, 2]/40
+            if (deg == '10000'):
+                data[:, 2] = data[:, 2]/40
+            else:
+                data[:, 2] = data[:, 2]
             idx1 = mypostpro.find_nearest(data[:, 0], 0)
             idx2 = mypostpro.find_nearest(data[:, 0], 1000)
             avgidx1 = mypostpro.find_nearest(data[:, 0], 501)
@@ -105,7 +116,8 @@ for nb, fnames in dict_final:
                 pass
 
             fig, ax = plt.subplots(1, tight_layout=True)
-            ax.plot(nuss[:, 1], nuss[:, 2], 'b-', mfc="None", label=solver+' with '+r'$N = $'+str(nb)+' anchor at '+r'$ \theta^*_g='+str(int(anchor))+'$')
+            ax.set(xlabel=r'$t$', ylabel='Nu', title='Predicted Nu in time at '+tkey[0]+'='+str(deg)+' with '+r'$'+akey[0]+'='+str(aval[0])+'$')
+            ax.plot(nuss[:, 1], nuss[:, 2], 'b-', mfc="None", label=solver+' with '+r'$N = $'+str(nb))
 #           ax.hlines(y=rom_mean, xmin=nuss[0, 1], xmax=nuss[-1, 1], colors='b', linestyle='--', label='ROM mean Nu')
             ax.plot(nuss_fom[:, 0], nuss_fom[:, 2], 'k-', mfc="None", label=r'FOM') 
 #           ax.hlines(y=fom_mean, xmin=nuss[0, 1], xmax=nuss[-1, 1], colors='k', linestyle='--', label='FOM mean Nu')
@@ -117,8 +129,6 @@ for nb, fnames in dict_final:
                         xycoords='axes fraction', textcoords='offset points')
             ax.annotate('ROM mean(Nu):'+"%.2e"% rom_mean, xy=(0.3, 0.27), xytext=(12, -12), va='top',
                 xycoords='axes fraction', textcoords='offset points')
-            ax.set_xlabel(r'$t$')
-            ax.set_ylabel('Nu'+r'$(t,\theta_g=$'+str(deg+90)+r'$)$')
 #           print(r'$\text{Nu}(t,\theta_g='+str(deg+90)+'$)')
             ax.set_ylim([0, 4])
             ax.axes.grid(True, axis='y')
@@ -126,9 +136,9 @@ for nb, fnames in dict_final:
 #                  borderaxespad=0, frameon=False)
             ax.legend(loc=0)
             if model == 'lrom' or model == 'l-rom' or model == 'l-rom_df':
-                s1 = '.'+target_dir+'/'+'nu_in_time_N'+str(nb)+'_'+str(deg+90)+'_'+rbf+'.png'
+                s1 = '.'+target_dir+'/'+'nu_in_time_N'+str(nb)+'_'+str(deg)+'_'+rbf+'.png'
             else:
-                s1 = '.'+target_dir+'/'+'nu_in_time_N'+str(nb)+'_'+str(deg+90)+'.png'
+                s1 = '.'+target_dir+'/'+'nu_in_time_N'+str(nb)+'_'+str(deg)+'.png'
             fig.savefig(s1)
             plt.close(fig)
 

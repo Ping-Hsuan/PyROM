@@ -5,11 +5,14 @@ import os
 sys.path.append('/Users/bigticket0501/Developer/PyMOR/code/plot_helpers/')
 import setup
 from reader import erri_w_theta
+from reader import erri_w_param
+from reader import erri_leray_w_param
 import checker
 import mypostpro
 import re
 import collections
 import csv
+import yaml
 
 setup.style(1)
 colors = setup.color(0)
@@ -19,59 +22,60 @@ print("---------------------------------------------")
 print("This is the name of the program:", sys.argv[0])
 print("Argument List:", str(sys.argv))
 print('Current directory is:', os.chdir(str(sys.argv[1])))
-model = str(sys.argv[2])
-mode = str(sys.argv[3])
-print('The model is:', model)
+mode = str(sys.argv[2])
 print("---------------------------------------------")
 
-if len(sys.argv) <= 4:
-#   ylb = r'$\triangle$'
-    ylb = 'Unscaled error indicator'
+if len(sys.argv) <= 3:
+    ylb = r'$\triangle$'
+#   ylb = 'Error indicator'
     tag = ''
-    title = 'Unscaled error indicator'
+    title = r'POD-$h$Greedy, offline stage:'+'\n Error indicator'
 else:
-    if sys.argv[4] == 'fom':
+    if sys.argv[3] == 'fom':
 #       ylb = r'$\frac{\triangle(\theta_g)}{\|u_{FOM}(\theta^*_g)\|_{H^1}}$'
         ylb = 'Scaled error indicator'
         tag = '_sc_fom'
         title = r'Error indicator scaled with $H^1$ norm of FOM solution'
-    elif sys.argv[4] == 'relerr':
+    elif sys.argv[3] == 'relerr':
 #       ylb = r'$\frac{\triangle(\theta_g) \|u(\theta_g)\|_{H^1}}' + \
 #             r'{\|u_{FOM}({\theta_g})-u_{ROM}({\theta_g})\|_{H^1}}$'
         ylb = 'Scaled error indicator'
         tag = '_sc_relerr'
         title = r'Error indicator scaled with relative $H^1$ error'
-    elif sys.argv[4] == 'romabserr':
+    elif sys.argv[3] == 'romabserr':
 #       ylb = r'$\frac{\triangle(\theta_g)}' + \
 #             r'{\|u_{FOM}({\theta_g})-u_{ROM}({\theta_g})\|_{H^1}}$'
         ylb = 'Scaled error indicator'
         tag = '_sc_romabserr'
         title = r'Error indicator scaled with absolute $H^1$ error'
-    elif sys.argv[4] == 'rom':
+    elif sys.argv[3] == 'rom':
 #       ylb = r'$\frac{\triangle(\theta_g)}{\|u_{ROM}(\theta_g)\|_{H^1}}$'
         ylb = 'Scaled error indicator'
         tag = '_sc_rom'
         title = r'Error indicator scaled with $H^1$ norm of ROM solution'
-    elif sys.argv[4] == 'eta_rom':
+    elif sys.argv[3] == 'eta_rom':
 #       ylb = r'$\frac{\triangle(\theta_g)}{\|u_{ROM}(\theta_g)\|_{H^1}}$'
         ylb = 'Scaled error indicator'
         tag = '_sc_eta_rom'
         title = r'Error indicator scaled with effectivity and rom norm'
 
+#with open('train_info'+tag+'.csv', newline='') as f:
+#     reader = csv.reader(f)
+#     data = list(reader)
+with open('train_info.yaml') as f:
+    features = yaml.load(f, Loader=yaml.FullLoader)
 
-with open('train_info'+tag+'.csv', newline='') as f:
-     reader = csv.reader(f)
-     data = list(reader)
+data = []
+for i, key in enumerate(features.keys()):
+    data.append(features[key])
 
-data[0] = [int(i) for i in data[0]]
-P_train_max = data[1]
-N_max = data[2]
-K_list = data[3]
+
 print("POD-hGreedy information:")
 print("Iteration: ", data[0])
 print("Anchor points: ", data[1])
 print("N: ", data[2])
 print("K: ", data[3])
+print("model: ", data[6])
 print("---------------------------------------------")
 
 color_ctr = 0
@@ -84,38 +88,44 @@ erri_anchor = []
 max_erri = []
 
 
-for itr, anchor, N, K in zip(data[0], data[1], data[2], data[3]):
+for itr, anchor, N, K, model in zip(data[0], data[1], data[2], data[3], data[6]):
 
-    ax.set(xlabel=r'$\theta_g$', ylabel=ylb,
-           ylim=[1e-3, 1e-1],
-           xticks=np.linspace(0, 180, 19, dtype=int))
+    ax.set(xlabel=r'$'+features['Param']+'$', ylabel=ylb,
+           ylim=[1e-6, 1e0], xticks=features['Ptrain'])
 
-    print(itr, anchor, N, K)
+    print(itr, anchor, N, K, model)
 
-    if len(sys.argv) <= 4:
-        angle, erri = erri_w_theta(model, anchor, N, mode)
+    if len(sys.argv) <= 3:
+#       angle, erri = erri_w_theta(model, anchor, N, mode)
+        if model != 'l-rom':
+            angle, erri = erri_w_param(model, anchor, N, mode)
+        else:
+            angle, erri = erri_leray_w_param(model, anchor, N, mode, data[7][itr-1])
     else:
-        angle, erri = erri_w_theta(model, anchor, N, mode, sys.argv[4])
+#       angle, erri = erri_w_theta(model, anchor, N, mode, sys.argv[3])
+        if model != 'l-rom':
+            angle, erri = erri_w_param(model, anchor, N, mode, sys.argv[3])
+        else:
+            angle, erri = erri_leray_w_param(model, anchor, N, mode, data[7][itr-1], sys.argv[3])
 
-    ax.plot(angle, erri, 'b--o')
-    ax.set_title('iteration '+str(itr) +
-                ', '+r'$\theta^*_{'+'g,'+str(itr)+'}$'+r'$='+anchor+'$')
+    ax.semilogy(angle, erri, '--o', color=colors[itr-1], mfc="None", label=r'$iter = $ '+str(itr))
+    ax.set_title(title+' at '+r'$\mathcal{P}_{train}$')
     idx = np.where(angle == int(anchor))
     
     erri_anchor.append(erri[idx])
     anchors.append(int(anchor))
-    ax.plot(anchors, erri_anchor, 'ro')
+    anc = ax.semilogy(anchors, erri_anchor, 'ro', label='Anchor point')
 
     erri_his.append(erri)
     erri_comb = np.array(erri_his)
     erri_min = np.amin(erri_comb, axis=0)
 
-    ax.plot(angle, erri_min, 'k-', label='min')
+    lmin = ax.semilogy(angle, erri_min, 'k-', label='min')
     idxmax = np.argmax(erri_min)
     max_erri.append(erri_min[idxmax])
 
     candidate = str(int(angle[idxmax]))
-    while candidate in P_train_max[:itr]:
+    while candidate in data[1][:itr]:
         print('Skipping the same anchor point')
         erri_min[idxmax] = 1e-8
         idxmax = np.argmax(erri_min)
@@ -128,10 +138,13 @@ for itr, anchor, N, K in zip(data[0], data[1], data[2], data[3]):
     ax.axes.grid(True, axis='y')
     ax.set_xticklabels(ax.get_xticks(), rotation=45)
     fig.savefig('offline_erri_L'+str(itr)+tag+'.png')
-    ax.clear()
+    l = anc.pop(0)
+    l.remove()
+    lmin = lmin.pop(0)
+    lmin.remove()
 
 fig, ax = plt.subplots(1, tight_layout=True)
-ax.set(xlabel='Iteration', ylabel=r'$\max{\triangle(\theta_g)}$',
+ax.set(xlabel='Iteration', ylabel=r'$\max{\triangle('+features['Param']+')}$',
        xlim=[0, max(data[0])+1], ylim=[1e-3, 1e0])
 ax.semilogy(data[0], max_erri, 'k-o')
 

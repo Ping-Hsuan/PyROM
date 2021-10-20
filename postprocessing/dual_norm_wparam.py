@@ -1,5 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
+import matplotlib.ticker as mticker
 import os
 import sys
 import operator
@@ -8,6 +9,7 @@ import setup
 import reader
 import checker
 import yaml
+import math
 
 setup.style(1)
 colors = setup.color(0)
@@ -28,15 +30,17 @@ setup.checkdir(target_dir)
 
 search_dir = './'+model+'_info/dual_norm'
 if mode == 'all':
-    root, filenames = setup.gtfpath(search_dir, '^.*_'+N+'nb_*.*$')
+    root, filenames = setup.gtfpath(search_dir, '^.*_'+N+'nb_.*$')
 else:
     root, filenames = setup.gtfpath(search_dir, '^.*_'+N+'nb_*_h10_(?!.*-90|.*-80|.*-70).*$')
 if model == 'l-rom' or model == 'l-rom_df':
     fd = str(sys.argv[6])
     if T0 == 1:
-        files_dict = setup.create_dict(filenames, '^.*_ic_h10_(-?\d+)_'+fd+'.*$')
+#       files_dict = setup.create_dict(filenames, '^.*_ic_h10_(-?\d+)_'+fd+'.*$')
+        files_dict = setup.create_dict(filenames, '^.*_ic_h10_.*_(-?\d+)_'+fd+'_dual_norm$')
     elif T0 > 1:
-        files_dict = setup.create_dict(filenames, '^.*_zero_h10_(-?\d+)_'+fd+'.*$')
+#       files_dict = setup.create_dict(filenames, '^.*_zero_h10_(-?\d+)_'+fd+'.*$')
+        files_dict = setup.create_dict(filenames, '^.*_zero_h10_.*_(-?\d+)_'+fd+'_dual_norm$')
 else:
     if T0 == 1:
 #       files_dict = setup.create_dict(filenames, '^.*_ic_h10_(-?\d+)_.*$')
@@ -46,7 +50,6 @@ else:
         print(filenames)
         files_dict = setup.create_dict(filenames, '^.*_zero_h10_.*_(-?\d+)_dual_norm$')
 dict_final = sorted(files_dict.items(), key=operator.itemgetter(0))
-print(dict_final)
 
 color_ctr = 0
 tpath = root+'/'
@@ -65,7 +68,7 @@ for angle, fnames in dict_final:
 data = np.column_stack((angles, erri))
 data = data[data[:, 0].argsort()]
 
-with open('../g-rom/anchor.yaml') as f:
+with open('../anchor.yaml') as f:
     features = yaml.load(f, Loader=yaml.FullLoader)
 akey = list(features.keys())
 aval = list(features.values())
@@ -81,28 +84,35 @@ if model == 'l-rom' or model == 'l-rom_df':
 else:
     plot_params = {'c': 'k', 'marker': 'o', 'mfc': 'None', 'label': solver+' with '+r'$N='+N+'$'}
 
-with open('../g-rom/train.yaml') as f:
+with open('../train.yaml') as f:
     features = yaml.load(f, Loader=yaml.FullLoader)
 tkey = list(features.keys())
 tval = list(features.values())
 print(tval[0])
 print(data[:, 0])
 
-ax.set(ylabel=r'$\triangle$', xlabel=r'$'+tkey[0]+'$', ylim=[1e-2, 1], xticks=tval[0])
+#ax.set(ylabel=r'$\triangle$', xlabel=r'$'+tkey[0]+'$', ylim=[1e-2, 1], xticks=tval[0], title='Dual norm of the discrete time-averaged residual at '+r'$\mathcal{P}_{train}$')
+ax.set(ylabel=r'$\triangle$', xlabel=r'$'+tkey[0]+'$', xticks=tval[0], title='Dual norm of the discrete time-averaged residual at '+r'$\mathcal{P}_{train}$')
 
 ax.set_xticklabels(ax.get_xticks(), rotation=45)
-ax.semilogy(data[:, 0], data[:, 1], **plot_params)
-ymin, ymax = ax.get_ylim()
-ax.semilogy(aval[0], ymin, 'ro', label='Anchor point')
+ax.plot(data[:, 0], data[:, 1], **plot_params)
+idx = np.where(data[:, 0] == aval[0])
+ylim_exp = math.ceil(math.log10(min(data[:, 1])))-1
+#f = mticker.ScalarFormatter(useOffset=False, useMathText=True)
+#g = lambda x,pos : "${}$".format(f._formatSciNotation('%1.10e' % x))
+ax.set_ylim([10**ylim_exp, None])
+#plt.gca().yaxis.set_major_formatter(mticker.FuncFormatter(g))
+#plt.ticklabel_format(axis="y", style="sci", scilimits=(0,0))
+ax.plot(aval[0], data[idx, 1], 'ro', label='Anchor point')
 ax.legend(loc=0)
 
 print("---------------------------------------------")
 if model == 'l-rom' or model == 'l-rom_df':
     fig.savefig('.'+target_dir+'dual_norm_N'+N+'_'+fd+'_'+mode+'.png')
-    np.savetxt('.'+target_dir+'angle_list_'+mode+'.dat', data[:, 0])
+    np.savetxt('.'+target_dir+'param_list_'+mode+'.dat', data[:, 0])
     np.savetxt('.'+target_dir+'erri_N'+N+'_'+fd+'_'+mode+'.dat', data[:, 1])
 else:
     fig.savefig('.'+target_dir+'dual_norm_N'+N+'_'+mode+'.png')
-    np.savetxt('.'+target_dir+'angle_list_'+mode+'.dat', data[:, 0])
+    np.savetxt('.'+target_dir+'param_list_'+mode+'.dat', data[:, 0])
     np.savetxt('.'+target_dir+'erri_N'+N+'_'+mode+'.dat', data[:, 1])
 print("---------------------------------------------")

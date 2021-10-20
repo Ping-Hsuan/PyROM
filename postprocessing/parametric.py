@@ -12,8 +12,10 @@ N = sys.argv[3]
 T0 = sys.argv[4]
 theta_g = sys.argv[5]
 mode = sys.argv[6]
+if model == 'l-rom':
+    fd = input("Enter filter percentage")
 
-tpath = setup_path+'/'+model+'_parameter_'+str(theta_g)
+tpath = setup_path+'/'+model+'_parameter_ra_'+str(theta_g)
 isExist = os.path.exists(tpath)
 if isExist:
     pass
@@ -22,18 +24,24 @@ else:
 
 subprocess.run(["python3", "grep_data.py", setup_path, model, N])
 
-subprocess.run(["python3", "dual_norm_wparam.py", tpath, model, N, T0, mode])
-subprocess.run(["python3", "vel_dual_norm_wparam.py", tpath, model, N, T0, mode])
-subprocess.run(["python3", "temp_dual_norm_wparam.py", tpath, model, N, T0, mode])
+if model != 'l-rom':
+    subprocess.run(["python3", "dual_norm_wparam.py", tpath, model, N, T0, mode])
+    subprocess.run(["python3", "relerr_wparam.py", tpath, model, N, T0, mode])
+    subprocess.run(["python3", "abserr_wparam.py", tpath, model, N, T0, mode])
+    subprocess.run(["python3", "nu_first_second_momentum_wparam.py", tpath, model, N, T0, mode])
+else:
+    subprocess.run(["python3", "dual_norm_wparam.py", tpath, model, N, T0, mode, fd])
+    subprocess.run(["python3", "relerr_wparam.py", tpath, model, N, T0, mode, fd])
+    subprocess.run(["python3", "abserr_wparam.py", tpath, model, N, T0, mode, fd])
+    subprocess.run(["python3", "nu_first_second_momentum_wparam.py", tpath, model, N, T0, mode, fd])
+#subprocess.run(["python3", "vel_dual_norm_wparam.py", tpath, model, N, T0, mode])
+#subprocess.run(["python3", "temp_dual_norm_wparam.py", tpath, model, N, T0, mode])
 
-#subprocess.run(["python3", "relerr_wparam.py", tpath, model, N, T0, mode])
 #subprocess.run(["python3", "vel_relerr_wparam.py", tpath, model, N, T0, mode])
 #subprocess.run(["python3", "temp_relerr_wparam.py", tpath, model, N, T0, mode])
-#subprocess.run(["python3", "abserr_wparam.py", tpath, model, N, T0, mode])
 #subprocess.run(["python3", "vel_abserr_wparam.py", tpath, model, N, T0, mode])
 #subprocess.run(["python3", "temp_abserr_wparam.py", tpath, model, N, T0, mode])
 
-#subprocess.run(["python3", "nu_first_second_momentum_wparam.py", tpath, model, N, T0, mode])
 
 #subprocess.run(["python3", "fom_norm.py", tpath, model, N, T0, mode])
 #subprocess.run(["python3", "rom_norm_wparam.py", tpath, model, N, T0, mode])
