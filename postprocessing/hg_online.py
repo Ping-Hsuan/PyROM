@@ -262,7 +262,7 @@ for itr in Itr_list:
 
     ax5.plot(angle, opt_flderr_rom, 'k-o', mfc="None", label=model.upper()+' est')
     ax5.set(xlabel=r'$'+features['Param']+'$', ylabel=r'$\frac{\|\langle \bf{u} - \bf{\tilde{u}} \rangle\|_{H^1}}{\|\langle \bf{u} \rangle \|_{H^1}}$',
-            ylim=[0, 1], xticks=features['Ptrain'])
+            ylim=[0, 0.5], xticks=features['Ptrain'])
 
     for k in P_train[:-1]:
         idx = list(angle).index(k)
