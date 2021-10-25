@@ -13,6 +13,7 @@ import re
 import collections
 import csv
 import yaml
+import math
 
 setup.style(1)
 colors = setup.color(0)
@@ -90,8 +91,6 @@ max_erri = []
 
 for itr, anchor, N, K, model in zip(data[0], data[1], data[2], data[3], data[6]):
 
-    ax.set(xlabel=r'$'+features['Param']+'$', ylabel=ylb,
-           ylim=[1e-6, 1e0], xticks=features['Ptrain'])
 
     print(itr, anchor, N, K, model)
 
@@ -109,9 +108,7 @@ for itr, anchor, N, K, model in zip(data[0], data[1], data[2], data[3], data[6])
             angle, erri = erri_leray_w_param(model, anchor, N, mode, data[7][itr-1], sys.argv[3])
 
     ax.semilogy(angle, erri, '--o', color=colors[itr-1], mfc="None", label=r'$iter = $ '+str(itr))
-    ax.set_title(title+' at '+r'$\mathcal{P}_{train}$')
     idx = np.where(angle == int(anchor))
-    
     erri_anchor.append(erri[idx])
     anchors.append(int(anchor))
     anc = ax.semilogy(anchors, erri_anchor, 'ro', label='Anchor point')
@@ -123,6 +120,19 @@ for itr, anchor, N, K, model in zip(data[0], data[1], data[2], data[3], data[6])
     lmin = ax.semilogy(angle, erri_min, 'k-', label='min')
     idxmax = np.argmax(erri_min)
     max_erri.append(erri_min[idxmax])
+
+    if (max(erri)/min(erri) >= 1e2):
+        ax.set_yscale('log')
+        ylim_exp = math.ceil(math.log10(min(erri)))-1
+        ylim = [10**ylim_exp, 1e0]
+    else:
+        ax.set_yscale('linear')
+        ylim_exp = math.ceil(math.log10(min(erri)))-1
+        ylim = [min(erri)-10**ylim_exp, None]
+
+    ax.set(xlabel=r'$'+features['Param']+'$', ylabel=ylb,
+           ylim=ylim, xticks=features['Ptrain'])
+    ax.set_title(title+' at '+r'$\mathcal{P}_{train}$')
 
     candidate = str(int(angle[idxmax]))
     while candidate in data[1][:itr]:
