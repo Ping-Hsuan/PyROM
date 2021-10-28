@@ -1,9 +1,7 @@
 def grep_files(src_dir, N):
-    import sys
     import os
     import re
 
-    N = str(sys.argv[2])
     ptr = '^.*_(.*)rom_'+N+'nb_.*$'
     # re.match('^.*_(.*)rom_(?!.*-90|.*-80|.*-70).*$'
 

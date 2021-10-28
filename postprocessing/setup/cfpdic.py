@@ -1,5 +1,5 @@
-def create_dic():
-    '''Create a dictionary for supproted features'''
+def cfpdic():
+    '''Create a feature-pattern dictionary'''
 
     labels = ['mabserr', 'nu', 'romu', 'romt', 'mrelerr', 'dual_norm',
               'fom_norm', 'rom_norm', 'tke', 'temp_dual_norm', 'vel_dual_norm',

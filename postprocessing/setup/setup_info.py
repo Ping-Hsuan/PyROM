@@ -7,7 +7,7 @@ def setup_info(src_dir, N):
     argv[2]: N
     """
     from aux.create_dir import create_dir
-    from setup.create_dic import create_dic
+    from setup.cfpdic import cfpdic
     from setup.load_features import load_features
     from setup.grep_files import grep_files
     from setup.grep_feature import grep_feature
@@ -17,7 +17,7 @@ def setup_info(src_dir, N):
 
     root, filenames = grep_files(src_dir, N)
 
-    sprt_features = create_dic()
+    sprt_features = cfpdic()
     features = load_features()
 
     for feature in features.keys():
