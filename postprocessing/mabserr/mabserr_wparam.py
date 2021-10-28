@@ -27,7 +27,7 @@ def mabserr_wparam(model, N, T0, mode, idx, aval, tkey, tval, fd=None):
         root, filenames = gtfpath(search_dir, '^.*_'+N+'nb_.*_h10_(?!.*-90|.*-80|.*-70).*$')
 
     ptr = gptr(model, N, T0, mode, fd)
-    files_dict = cffdic(filenames, ptr, 1)
+    files_dict = cffdic(filenames, ptr, idx)
 
     dict_final = sorted(files_dict.items(), key=operator.itemgetter(0))
 
@@ -43,8 +43,8 @@ def mabserr_wparam(model, N, T0, mode, idx, aval, tkey, tval, fd=None):
     ax.plot(data[:, 0], data[:, 1], **plot_params1)
     ax.plot(data[:, 0], data[:, 2], **plot_params2)
 
-    idx = np.where(data[:, 0] == aval[1])
-    ax.plot(aval[1], data[idx, 1], 'ro', label='Anchor point')
+    aidx = np.where(data[:, 0] == aval[idx])
+    ax.plot(aval[idx], data[aidx, 1], 'ro', label='Anchor point')
 
     ax.legend(loc=0, ncol=1)
 
@@ -53,4 +53,4 @@ def mabserr_wparam(model, N, T0, mode, idx, aval, tkey, tval, fd=None):
 
 if __name__ == '__main__':
     import sys
-    mabserr_wparam(sys.argv[1:])
+    mabserr_wparam(*sys.argv[1:])

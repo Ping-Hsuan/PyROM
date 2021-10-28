@@ -1,5 +1,4 @@
 def set_pltparams(feature, solver, N, T0, fd=None):
-
     if feature == 'dual_norm' or feature == 'mnurelerr':
         plot_params = {'c': 'k', 'marker': 'o', 'mfc': 'None'}
         if fd:
@@ -26,6 +25,6 @@ def set_pltparams(feature, solver, N, T0, fd=None):
             plot_params['label'] = solver+' with '+r'$N='+N+'$ and filter width '+r'$\delta=$'+str(fd)
         else:
             plot_params['label'] = solver+' with '+r'$N='+N+'$'
-    elif  feature == 'FOM':
+    elif feature == 'FOM':
         plot_params = {'c': 'k', 'marker': 'o', 'mfc': 'None', 'label': 'FOM'}
     return plot_params

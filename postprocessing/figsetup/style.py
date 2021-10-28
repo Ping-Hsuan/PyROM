@@ -4,7 +4,7 @@ def style(num_fig):
     if num_fig == 1:
         plt.style.use('report_1fig')
     elif num_fig == 2:
-        plt.style.use('report')
+        plt.style.use('report_2fig')
     elif num_fig == 3:
         plt.style.use('report_3fig')
     elif num_fig == 4:

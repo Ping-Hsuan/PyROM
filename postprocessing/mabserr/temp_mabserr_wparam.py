@@ -1,4 +1,4 @@
-def mrelerr_wparam(model, N, T0, mode, idx, aval, tkey, tval, fd=None):
+def temp_mabserr_wparam(model, N, T0, mode, idx, aval, tkey, tval, fd=None):
     import numpy as np
     import matplotlib.pyplot as plt
     import operator
@@ -17,10 +17,10 @@ def mrelerr_wparam(model, N, T0, mode, idx, aval, tkey, tval, fd=None):
     text()
     T0 = int(T0)
 
-    target_dir = './mrelerr/'
+    target_dir = './temp_mabserr/'
     create_dir(target_dir)
 
-    search_dir = '../'+model+'_info/mrelerr'
+    search_dir = '../'+model+'_info/temp_mabserr'
     if mode == 'all':
         root, filenames = gtfpath(search_dir, '^.*_'+N+'nb_.*$')
     else:
@@ -31,14 +31,14 @@ def mrelerr_wparam(model, N, T0, mode, idx, aval, tkey, tval, fd=None):
 
     dict_final = sorted(files_dict.items(), key=operator.itemgetter(0))
 
-    data = rdatatoarray(dict_final, 'mrelerr')
+    data = rdatatoarray(dict_final, 'mabserr')
 
     solver = model.upper()
-    plot_params1 = set_pltparams('rom_mrelerr', solver, N, T0, fd)
-    plot_params2 = set_pltparams('proj_mrelerr', solver, N, T0, fd)
+    plot_params1 = set_pltparams('rom_mabserr', solver, N, T0, fd)
+    plot_params2 = set_pltparams('proj_mabserr', solver, N, T0, fd)
 
     fig, ax = plt.subplots(1, tight_layout=True)
-    set_ax(ax, 'mrelerr', tkey, tval)
+    set_ax(ax, 'temp_mabserr', tkey, tval)
 
     ax.plot(data[:, 0], data[:, 1], **plot_params1)
     ax.plot(data[:, 0], data[:, 2], **plot_params2)
@@ -48,9 +48,10 @@ def mrelerr_wparam(model, N, T0, mode, idx, aval, tkey, tval, fd=None):
 
     ax.legend(loc=0, ncol=1)
 
-    header = tkey[0]+','+'rom_mrelerr'+','+'proj_mrelerr'
-    mysave(fig, target_dir, data, 'mrelerr', header, N, fd)
+    header = tkey[0]+','+'rom_mabserr'+','+'proj_mabserr'
+    mysave(fig, target_dir, data, 'mabserr', header, N, fd)
+
 
 if __name__ == '__main__':
     import sys
-    mrelerr_wparam(*sys.argv[1:])
+    temp_mabserr_wparam(*sys.argv[1:])

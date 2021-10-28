@@ -29,7 +29,7 @@ def nu_1st2nd_momentum_wparam(model, N, T0, mode, idx, aval, tkey, tval, fd=None
         root, filenames = gtfpath(search_dir, '^.*_'+N+'nb_.*_h10_(?!.*-90|.*-80|.*-70).*$')
 
     ptr = gptr(model, N, T0, mode, fd)
-    files_dict = cffdic(filenames, ptr, 1)
+    files_dict = cffdic(filenames, ptr, idx)
 
     dict_final = sorted(files_dict.items(), key=operator.itemgetter(0))
 
@@ -47,10 +47,10 @@ def nu_1st2nd_momentum_wparam(model, N, T0, mode, idx, aval, tkey, tval, fd=None
     if iffom:
         FOM_params = set_pltparams('FOM', solver, N, T0, fd)
         ax1.plot(fom_data[:, 0], fom_data[:, 1], **FOM_params)
-    idx = np.where(rom_data[:, 0] == aval[1])
+    aidx = np.where(rom_data[:, 0] == aval[idx])
     ylim_exp = math.ceil(math.log10(min(rom_data[:, 1])))-1
     ax1.set_ylim([10**ylim_exp, None])
-    ax1.plot(aval[1], rom_data[idx, 1], 'ro', label='Anchor point')
+    ax1.plot(aval[idx], rom_data[aidx, 1], 'ro', label='Anchor point')
     ax1.legend(loc=1)
 
     fig2, ax2 = plt.subplots(1, tight_layout=True)
@@ -59,7 +59,7 @@ def nu_1st2nd_momentum_wparam(model, N, T0, mode, idx, aval, tkey, tval, fd=None
     ax2.plot(rom_data[:, 0], rom_data[:, 2], **plot_params)
     if iffom:
         ax2.plot(fom_data[:, 0], fom_data[:, 2], **FOM_params)
-    ax2.plot(aval[1], rom_data[idx, 2], 'ro', label='Anchor point')
+    ax2.plot(aval[idx], rom_data[aidx, 2], 'ro', label='Anchor point')
     ax2.legend(loc=1)
 
     if iffom:
@@ -72,10 +72,10 @@ def nu_1st2nd_momentum_wparam(model, N, T0, mode, idx, aval, tkey, tval, fd=None
         set_ax(ax3, 'mnurelerr', tkey, tval)
         plot_params = set_pltparams('mnurelerr', solver, N, T0, fd)
         ax3.semilogy(fom_data[:, 0], mnu_relerr, **plot_params)
-        idx = np.where(fom_data[:, 0] == aval[1])
+        aidx = np.where(fom_data[:, 0] == aval[idx])
         ylim_exp = math.ceil(math.log10(min(mnu_relerr)))-1
         ax3.set_ylim([10**ylim_exp, None])
-        ax3.semilogy(aval[1], mnu_relerr[idx], 'ro', label='Anchor point')
+        ax3.semilogy(aval[idx], mnu_relerr[aidx], 'ro', label='Anchor point')
         ax3.legend(loc=1)
 
         header = tkey[0]+','+'mnurelerr'
@@ -89,4 +89,4 @@ def nu_1st2nd_momentum_wparam(model, N, T0, mode, idx, aval, tkey, tval, fd=None
 
 if __name__ == '__main__':
     import sys
-    nu_1st2nd_momentum_wparam(sys.argv[1:])
+    nu_1st2nd_momentum_wparam(*sys.argv[1:])
