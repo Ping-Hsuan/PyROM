@@ -1,8 +1,11 @@
-def grep_files(src_dir, N):
+def grep_files(src_dir, N=None):
     import os
     import re
 
-    ptr = '^.*_(.*)rom_'+N+'nb_.*$'
+    if N is None:
+        ptr = '^.*_(.*)rom_.*$'
+    else:
+        ptr = '^.*_(.*)rom_'+N+'nb_.*$'
     # re.match('^.*_(.*)rom_(?!.*-90|.*-80|.*-70).*$'
 
     filenames = []

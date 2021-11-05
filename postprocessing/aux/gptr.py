@@ -9,7 +9,8 @@ def gptr(model, N=None, T0=None, mode=None, fd=None):
     elif T0 > 1:
         ptr = ptr+'_zero_h10_'
     if fd is not None:
-        if model != 'l-rom' or model != 'l-rom_df':
+        print(fd, model)
+        if model != 'l-rom' and model != 'l-rom_df':
             raise Exception("fd only supported for l-rom or l-rom_df")
         else:
             ptr = ptr+'(-?\d+)_(-?\d+)_'+fd+'_.*'

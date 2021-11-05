@@ -1,7 +1,7 @@
 import sys
 
 
-def setup_info(src_dir, N):
+def setup_info(src_dir, N=None):
     """setup info directory
     argv[1]: source directory
     argv[2]: N

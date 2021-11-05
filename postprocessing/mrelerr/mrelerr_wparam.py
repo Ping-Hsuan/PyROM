@@ -1,4 +1,4 @@
-def mrelerr_wparam(model, N, T0, mode, idx, aval, tkey, tval, fd=None):
+def mrelerr_wparam(model, N, T0, mode, idx, aval, tkey, tval, norm, fd=None):
     import numpy as np
     import matplotlib.pyplot as plt
     import operator
@@ -17,10 +17,10 @@ def mrelerr_wparam(model, N, T0, mode, idx, aval, tkey, tval, fd=None):
     text()
     T0 = int(T0)
 
-    target_dir = './mrelerr/'
+    target_dir = './mrelerr_'+norm+'/'
     create_dir(target_dir)
 
-    search_dir = '../'+model+'_info/mrelerr'
+    search_dir = '../'+model+'_info/mrelerr_'+norm
     if mode == 'all':
         root, filenames = gtfpath(search_dir, '^.*_'+N+'nb_.*$')
     else:
@@ -38,7 +38,7 @@ def mrelerr_wparam(model, N, T0, mode, idx, aval, tkey, tval, fd=None):
     plot_params2 = set_pltparams('proj_mrelerr', solver, N, T0, fd)
 
     fig, ax = plt.subplots(1, tight_layout=True)
-    set_ax(ax, 'mrelerr', tkey, tval)
+    set_ax(ax, 'mrelerr_'+norm, tkey, tval)
 
     ax.plot(data[:, 0], data[:, 1], **plot_params1)
     ax.plot(data[:, 0], data[:, 2], **plot_params2)

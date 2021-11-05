@@ -1,4 +1,4 @@
-def vel_mabserr_wparam(model, N, T0, mode, idx, aval, tkey, tval, fd=None):
+def vel_mabserr_wparam(model, N, T0, mode, idx, aval, tkey, tval, norm, fd=None):
     import numpy as np
     import matplotlib.pyplot as plt
     import operator
