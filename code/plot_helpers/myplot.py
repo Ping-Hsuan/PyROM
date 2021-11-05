@@ -22,7 +22,7 @@ def plt_romcoef_in_t(ax, n, T0, data):
     rom_params = {'c': 'b', 'mfc': 'None'}
     rom_params['label'] = data.info['method'].upper()
     ax.set(xlabel=r'$t$', ylabel=r'$'+field+r'_{'+str(n+1)+'}(t)$')
-    ax.plot(data.outputs['t'][n, T0:], data.outputs[field][n, T0:],
+    ax.plot(data.outputs['t'][n, :], data.outputs[field][n, :],
             **rom_params)
     return
 
@@ -33,10 +33,12 @@ def plt_snapcoef_in_t(ax, n, T0, data):
     ax.set(xlabel=r'$t$', ylabel=r'$'+field+r'_{'+str(n+1)+'}(t)$')
     ax.plot(data.outputs['t'], data.outputs[field+'k'][n+1, :],
             **snap_params)
+    ax.set_xlim([min(data.outputs['t']), max(data.outputs['t'])])
     return
 
 
 def plt_snap_minmax(ax, n, T0, snap):
+    import math
     field = snap.field
     tmin = snap.outputs['t'][0]
     tmax = snap.outputs['t'][-1]
@@ -44,6 +46,12 @@ def plt_snap_minmax(ax, n, T0, snap):
     coef_min = snap.outputs[field+'min'][n]
     ax.hlines(y=coef_max, xmin=tmin, xmax=tmax, colors='r')
     ax.hlines(y=coef_min, xmin=tmin, xmax=tmax, colors='r')
+    ymax = coef_max*1.5
+    if coef_min < 0:
+        ymin = 1.5*coef_min
+    else:
+        ymin = 0.5*coef_min
+    ax.set_ylim([ymin, ymax])
     return
 
 
@@ -58,6 +66,17 @@ def plt_mean_in_t(ax, n, T0, snap, rom):
               linestyle='--', label=rom.info['method'].upper()+' avg')
 
 
+def add_mean_in_t(ax, n, T0, snap, rom):
+    sfield = snap.field
+    rfield = rom.field
+    ax.annotate('Snap avg:'+"%.2e" % snap.outputs[sfield+'as'][n+1],
+                xy=(0.5, -0.1), xytext=(12, -12), va='top',
+                xycoords='axes fraction', textcoords='offset points')
+    ax.annotate(rom.info['method']+' avg:'+"%.2e" % rom.outputs[rfield+'a'][n],
+                xy=(0.8, -0.1), xytext=(12, -12), va='top',
+                xycoords='axes fraction', textcoords='offset points')
+
+
 def add_std_in_t(ax, n, T0, snap, rom):
     sfield = snap.field
     rfield = rom.field
@@ -70,6 +89,7 @@ def add_std_in_t(ax, n, T0, snap, rom):
 
 
 def plt_sample_mean_var(rom, snap, nb):
+    import math
     sfield = snap.field
     rfield = rom.field
 
@@ -97,7 +117,9 @@ def plt_sample_mean_var(rom, snap, nb):
         axs[i].xaxis.set_major_locator(MaxNLocator(integer=True))
         axs[i].set_ylim([np.min(refs[i])-1, np.max(refs[i])+1])
         if i == 1:
-            axs[i].set_ylim([1e-2, 1e1])
+            ylim_exp = math.ceil(math.log10(min(refs[i][1::nb+1])))-1
+            axs[i].set_ylim([10**ylim_exp, None])
+#           axs[i].set_ylim([1e-2, 1e1])
             axs[i].set_yscale('log')
 
     return fig
