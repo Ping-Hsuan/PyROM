@@ -120,17 +120,14 @@ def plt_erri_wN(rom, tdir):
     import numpy as np
     import matplotlib.pyplot as plt
     import os
+    from reprod.fig_helpers import set_ax
+    from reprod.fig_helpers import set_pltparams
+    from figsetup.style import style
+    from figsetup.text import text
 
-    setup_old.style(1)
-    setup_old.text()
+    style(1)
+    text()
 
-    solver = rom.info['method'].upper()
-    if solver == 'L-ROM':
-        fd = rom.info['perc'].replace('p', '.')
-        fd = str(int(float(fd)*100))
-        solver += ' with '+str(fd)+' percentage filtered'
-    plot_params = {'c': 'k', 'marker': 'o', 'mfc': 'None',
-                   'label': solver}
     # Create subdirectory
     sub_dir = os.path.join(tdir, 'dual_norm')
     checkdir(sub_dir)
@@ -141,22 +138,15 @@ def plt_erri_wN(rom, tdir):
     output = os.path.join(sub_dir, fname1)
     if rom.info['method'] == 'l-rom':
         output += '_'+rom.info['perc']
+    elif rom.info['method'] == 'l-rom-df':
+        output += '_'+rom.info['fwdith']
     output += '.csv'
     np.savetxt(output, data, delimiter=',', header='N, dual_norm', comments="")
 
     fig, ax = plt.subplots(1, tight_layout=True)
-    # Create label
-    title = 'Dual norm of the discrete time-averaged residual at '
-    anc_lb = ''
-    for key, value in rom.info['parameters'].items():
-        if key == 'theta':
-            anc_lb += '\\'+str(key)+'^*_g='+str(value)
-        else:
-            anc_lb += str(key)+'^*='+str(value)
-
-    ax.set(ylabel=r'$\Delta$', xlabel=r'$N$',
-           ylim=[10**np.floor(np.log10(min(rom.erris))), 1], xlim=[1, max(rom.nbs)], title=title+'$'+anc_lb+'$')
+    plot_params = set_pltparams('dual_norm', rom)
     ax.semilogy(rom.nbs, rom.erris, **plot_params)
+    set_ax(ax, rom, 'dual_norm')
     plt.legend()
 
     output = os.path.join(sub_dir, fname1)
@@ -166,65 +156,50 @@ def plt_erri_wN(rom, tdir):
     return
 
 
-def plt_mrelerr_wN(rom, tdir):
+def plt_mrelerr_wN(rom, tdir, feature):
     import numpy as np
     import matplotlib.pyplot as plt
     import os
     import math
+    from reprod.fig_helpers import set_ax
+    from reprod.fig_helpers import set_pltparams
+    from figsetup.style import style
+    from figsetup.text import text
 
-    setup_old.style(1)
-    setup_old.text()
+    style(1)
+    text()
 
     # Create subdirectory
-    sub_dir = os.path.join(tdir, 'mrelerr')
+    sub_dir = os.path.join(tdir, feature)
     checkdir(sub_dir)
 
-    solver = rom.info['method'].upper()
-    if solver == 'L-ROM':
-        fd = rom.info['perc'].replace('p', '.')
-        fd = str(int(float(fd)*100))
-        solver += ' with '+str(fd)+' percentage filtered'
-    plot_params1 = {'c': 'b', 'marker': 'o', 'mfc': 'None',
-                    'label': solver}
-    plot_params2 = {'c': 'k', 'marker': 'o', 'mfc': 'None',
-                    'label': 'Projection'}
-    # Create title
-    title = 'Relative error in the mean flow at '
-    anc_lb = ''
-    for key, value in rom.info['parameters'].items():
-        if key == 'theta':
-            anc_lb += '\\'+str(key)+'^*_g='+str(value)
-        else:
-            anc_lb += str(key)+'^*='+str(value)
+    plot_params1 = set_pltparams('rom_'+feature, rom)
+    plot_params2 = set_pltparams('proj_'+feature, rom)
 
     fig1, ax1 = plt.subplots(1, tight_layout=True)
-    ax1.set(xlabel=r'$N$', ylabel=r'$\frac{\|u - \tilde{u}\|_{H^1}}{\|u\|_{H^1}}$',
-           xlim=[0, max(rom.nbs)], title=title+'$'+anc_lb+'$')
-
+    set_ax(ax1, rom, 'rom_'+feature)
     ax1.semilogy(rom.nbs, rom.rom_relerr, **plot_params1)
     ylim_exp = math.ceil(math.log10(min(rom.rom_relerr)))-1
-#   ax.set_ylim([10**ylim_exp, 1])
     ax1.set_ylim([10**ylim_exp, 1])
     ax1.legend(loc=0, ncol=1)
 
     fig2, ax2 = plt.subplots(1, tight_layout=True)
-    ax2.set(xlabel=r'$N$', ylabel=r'$\frac{\|u - \tilde{u}\|_{H^1}}{\|u\|_{H^1}}$',
-           xlim=[0, max(rom.nbs)], title=title+'$'+anc_lb+'$')
-
+    set_ax(ax2, rom, 'proj_'+feature)
     ax2.semilogy(rom.nbs, rom.proj_relerr, **plot_params2)
     ylim_exp = math.ceil(math.log10(min(rom.proj_relerr)))-1
-#   ax.set_ylim([10**ylim_exp, 1])
     ax2.set_ylim([10**ylim_exp, 1])
     ax2.legend(loc=0, ncol=1)
 
     # Create filename
-    fname1 = 'mrelerr'
-    fname2 = 'mrelerr_rom'
-    fname3 = 'mrelerr_proj'
+    fname1 = feature
+    fname2 = feature+'_rom'
+    fname3 = feature+'_proj'
     data = np.column_stack((rom.nbs, rom.rom_relerr, rom.proj_relerr))
     output = os.path.join(sub_dir, fname1)
     if rom.info['method'] == 'l-rom':
         output += '_'+rom.info['perc']
+    elif rom.info['method'] == 'l-rom-df':
+        output += '_'+rom.info['fwdith']
     output += '.csv'
     np.savetxt(output, data, delimiter=',', header='N, rom_mrelerr, proj_mrelerr', comments="")
 
@@ -246,61 +221,47 @@ def reader(fname):
     return data
 
 
-def plt_mabserr_wN(rom, tdir):
+def plt_mabserr_wN(rom, tdir, feature):
     import numpy as np
     import matplotlib.pyplot as plt
     import os
+    from reprod.fig_helpers import set_ax
+    from reprod.fig_helpers import set_pltparams
+    from figsetup.style import style
+    from figsetup.text import text
 
-    setup_old.style(1)
-    setup_old.text()
+    style(1)
+    text()
 
     # Create subdirectory
-    sub_dir = os.path.join(tdir, 'mabserr')
+    sub_dir = os.path.join(tdir, feature)
     checkdir(sub_dir)
 
-    solver = rom.info['method'].upper()
-    if solver == 'L-ROM':
-        fd = rom.info['perc'].replace('p', '.')
-        fd = str(int(float(fd)*100))
-        solver += ' with '+str(fd)+' percentage filtered'
-    plot_params1 = {'c': 'b', 'marker': 'o', 'mfc': 'None',
-                    'label': solver}
-    plot_params2 = {'c': 'k', 'marker': 'o', 'mfc': 'None',
-                    'label': 'Projection'}
-    # Create title
-    title = 'Absolute error in the mean flow at '
-    anc_lb = ''
-    for key, value in rom.info['parameters'].items():
-        if key == 'theta':
-            anc_lb += '\\'+str(key)+'^*_g='+str(value)
-        else:
-            anc_lb += str(key)+'^*='+str(value)
-
+    plot_params1 = set_pltparams('rom_'+feature, rom)
+    plot_params2 = set_pltparams('proj_'+feature, rom)
 
     fig1, ax1 = plt.subplots(1, tight_layout=True)
-    ax1.set(xlabel=r'$N$', ylabel=r'$\|u - \tilde{u}\|_{H^1}$',
-            xlim=[0, max(rom.nbs)], title=title+'$'+anc_lb+'$')
-
+    set_ax(ax1, rom, 'rom_'+feature)
     ax1.semilogy(rom.nbs, rom.rom_abserr, **plot_params1)
     ax1.set_ylim([1, 40])
     ax1.legend(loc=0, ncol=1)
 
     fig2, ax2 = plt.subplots(1, tight_layout=True)
-    ax2.set(xlabel=r'$N$', ylabel=r'$\|u - \tilde{u}\|_{H^1}$',
-            xlim=[0, max(rom.nbs)], title=title+'$'+anc_lb+'$')
-
+    set_ax(ax2, rom, 'proj_'+feature)
     ax2.semilogy(rom.nbs, rom.proj_abserr, **plot_params2)
     ax2.set_ylim([1e-2, 1])
     ax2.legend(loc=0, ncol=1)
 
     # Create filename
-    fname1 = 'mabserr'
-    fname2 = 'mabserr_rom'
-    fname3 = 'mabserr_proj'
+    fname1 = feature
+    fname2 = feature+'_rom'
+    fname3 = feature+'_proj'
     data = np.column_stack((rom.nbs, rom.rom_abserr, rom.proj_abserr))
     output = os.path.join(sub_dir, fname1)
     if rom.info['method'] == 'l-rom':
         output += '_'+rom.info['perc']
+    elif rom.info['method'] == 'l-rom-df':
+        output += '_'+rom.info['fwdith']
     output += '.csv'
     np.savetxt(output, data, delimiter=',', header='N, rom_mabserr, proj_mabserr', comments="")
 
