@@ -12,11 +12,11 @@ import sys
 sys.path.append('/Users/bigticket0501/Developer/PyMOR/code/post_pro/')
 sys.path.append('/Users/bigticket0501/Developer/PyMOR/code/plot_helpers/')
 import pod
-import setup
+from figsetup.style import style
+from figsetup.text import text
 
-setup.style(1)
-colors = setup.color(0)
-setup.text()
+style(1)
+text()
 
 # adjust markersize
 mpl.rcParams['lines.markersize'] = 3
@@ -265,7 +265,7 @@ ax.legend()
 fig.savefig(tpath+'Nmax.png')
 fig.clf()
 
-plt.style.use('report')
+plt.style.use('report_2fig')
 fig, ax = plt.subplots(1, tight_layout=True)
 ax.semilogy(xdata, vu, 'b-o', label=r'$H^{1}$'+'-POD, vel')
 if (ifrom[1]):
