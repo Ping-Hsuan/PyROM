@@ -1,9 +1,8 @@
 import re
 import sys
-sys.path.append('/Users/bigticket0501/Developer/PyMOR/postprocessing/')
-from mor import ROM
+from reprod.mor import ROM
 from snapshot import Snapshot
-sys.path.append('/Users/bigticket0501/Developer/PyMOR/code/plot_helpers/')
+sys.path.append('/home/pht2/Developer/PyROM/code/plot_helpers/')
 import setup_old
 
 
@@ -139,7 +138,7 @@ def plt_erri_wN(rom, tdir):
     if rom.info['method'] == 'l-rom':
         output += '_'+rom.info['perc']
     elif rom.info['method'] == 'l-rom-df':
-        output += '_'+rom.info['fwdith']
+        output += '_'+rom.info['fwidth']
     output += '.csv'
     np.savetxt(output, data, delimiter=',', header='N, dual_norm', comments="")
 
@@ -199,7 +198,7 @@ def plt_mrelerr_wN(rom, tdir, feature):
     if rom.info['method'] == 'l-rom':
         output += '_'+rom.info['perc']
     elif rom.info['method'] == 'l-rom-df':
-        output += '_'+rom.info['fwdith']
+        output += '_'+rom.info['fwidth']
     output += '.csv'
     np.savetxt(output, data, delimiter=',', header='N, rom_mrelerr, proj_mrelerr', comments="")
 
@@ -261,7 +260,7 @@ def plt_mabserr_wN(rom, tdir, feature):
     if rom.info['method'] == 'l-rom':
         output += '_'+rom.info['perc']
     elif rom.info['method'] == 'l-rom-df':
-        output += '_'+rom.info['fwdith']
+        output += '_'+rom.info['fwidth']
     output += '.csv'
     np.savetxt(output, data, delimiter=',', header='N, rom_mabserr, proj_mabserr', comments="")
 

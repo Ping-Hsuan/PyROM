@@ -2,9 +2,9 @@ import numpy as np
 import sys
 import re
 import os
-sys.path.append('/Users/bigticket0501/Developer/PyMOR/code/post_pro/')
+sys.path.append('/home/pht2/Developer/PyROM/code/post_pro/')
 import aux1
-sys.path.append('/Users/bigticket0501/Developer/PyMOR/code/plot_helpers/')
+sys.path.append('/home/pht2/Developer/PyROM/code/plot_helpers/')
 import mypostpro
 
 
@@ -19,14 +19,17 @@ class ROM:
             self.info[key] = value
 
     def get_data(self):
+        lb = ''
+        for key, value in self.info['anchors'].items():
+            lb += str(key.lower())+str(value)+'_'
         for feature in self.info['features'].keys():
             search_dir = self.info['method']+'_info'
             if list(self.info['anchors'])[0] == 'theta':
                 self.fnames[feature] = aux1.gtfpath(search_dir, '^.*_'+self.info['POD_norm']+'_'+str(self.info['anchors']['theta']-90)+'_'+feature)
             elif list(self.info['anchors'])[0] == 'Ra':
                 self.fnames[feature] = aux1.gtfpath(search_dir, '^.*_'+self.info['POD_norm']+'_.*'+str(self.info['anchors']['Ra'])+'.*_'+feature)
-            elif list(self.info['anchors'])[0] == 'Re':
-                self.fnames[feature] = aux1.gtfpath(search_dir, '^.*_'+self.info['POD_norm']+'_.*'+str(self.info['anchors']['Re'])+'.*_'+feature)
+            else:
+                self.fnames[feature] = aux1.gtfpath(search_dir, '^.*_'+self.info['POD_norm']+'_.*'+lb+feature)
         return
 
     def get_coef(self, nb, rank=None):
@@ -115,6 +118,8 @@ class ROM:
     def cdict(self, feature):
         if self.info['method'] == 'l-rom':
             files_dict = aux1.create_dict(self.fnames[feature], '^.*_([0-9]*)nb_.*_'+self.info['perc']+'_'+feature+'$')
+        elif self.info['method'] == 'l-rom-df':
+            files_dict = aux1.create_dict(self.fnames[feature], '^.*_([0-9]*)nb_.*_'+self.info['fwidth']+'_'+feature+'$')
         else:
             files_dict = aux1.create_dict(self.fnames[feature], '^.*_([0-9]*)nb_.*\d+_'+feature+'$')
         return files_dict

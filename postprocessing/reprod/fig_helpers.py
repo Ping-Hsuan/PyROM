@@ -48,7 +48,6 @@ def set_pltparams(feature, rom):
         solver += ' with '+str(fd)+' percentage filtered'
     if solver == 'L-ROM-DF':
         fd = rom.info['fwidth'].replace('p', '.')
-        fd = str(int(float(fd)*100))
         solver += ' with filter wdith '+r'$\delta=$'+str(fd)
     plot_params['label'] = solver
 

@@ -1,9 +1,9 @@
 import sys
 import os
 import yaml
-sys.path.append('/Users/bigticket0501/Developer/PyMOR/code/post_pro/')
+sys.path.append('/home/pht2/Developer/PyROM/code/post_pro/')
 import aux1
-from mor import ROM
+from reprod.mor import ROM
 
 # This python script is used to plot "reproduction" results
 # What you should do before running this script:
@@ -39,9 +39,9 @@ if (info['features']['dual_norm']):
     rom.get_dual_wN()
     aux1.plt_erri_wN(rom, tpath)
 
-if (info['features']['mrelerr']):
-    rom.get_mrelerr('mrelerr')
-    aux1.plt_mrelerr_wN(rom, tpath, 'mrelerr')
+if (info['features']['mrelerr_h1']):
+    rom.get_mrelerr('mrelerr_h1')
+    aux1.plt_mrelerr_wN(rom, tpath, 'mrelerr_h1')
 
 if (info['features']['mrelerr_l2']):
     rom.get_mrelerr('mrelerr_l2')
@@ -51,9 +51,9 @@ if (info['features']['mabserr_l2']):
     rom.get_mabserr('mabserr_l2')
     aux1.plt_mabserr_wN(rom, tpath, 'mabserr_l2')
 
-if (info['features']['mabserr']):
-    rom.get_mabserr('mabserr')
-    aux1.plt_mabserr_wN(rom, tpath, 'mabserr')
+if (info['features']['mabserr_h1']):
+    rom.get_mabserr('mabserr_h1')
+    aux1.plt_mabserr_wN(rom, tpath, 'mabserr_h1')
 
 if (info['features']['rom_norm']):
     rom.get_rom_norm()

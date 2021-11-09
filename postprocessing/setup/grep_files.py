@@ -3,9 +3,9 @@ def grep_files(src_dir, N=None):
     import re
 
     if N is None:
-        ptr = '^.*_(.*)rom_.*$'
+        ptr = '^.*_'+src_dir+'_.*$'
     else:
-        ptr = '^.*_(.*)rom_'+N+'nb_.*$'
+        ptr = '^.*_'+src_dir+'_'+N+'nb_.*$'
     # re.match('^.*_(.*)rom_(?!.*-90|.*-80|.*-70).*$'
 
     filenames = []

@@ -117,7 +117,7 @@ def plt_sample_mean_var(rom, snap, nb):
         axs[i].xaxis.set_major_locator(MaxNLocator(integer=True))
         axs[i].set_ylim([np.min(refs[i])-1, np.max(refs[i])+1])
         if i == 1:
-            ylim_exp = math.ceil(math.log10(min(refs[i][1::nb+1])))-1
+            ylim_exp = math.ceil(math.log10(min(refs[i][1:nb+1])))-1
             axs[i].set_ylim([10**ylim_exp, None])
 #           axs[i].set_ylim([1e-2, 1e1])
             axs[i].set_yscale('log')
