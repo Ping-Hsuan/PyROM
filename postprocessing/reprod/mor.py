@@ -21,7 +21,7 @@ class ROM:
     def get_data(self):
         lb = ''
         for key, value in self.info['anchors'].items():
-            lb += str(key.lower())+str(value)+'_'
+            lb += '_'+str(key.lower())+str(value)
         for feature in self.info['features'].keys():
             search_dir = self.info['method']+'_info'
             if list(self.info['anchors'])[0] == 'theta':
@@ -29,7 +29,7 @@ class ROM:
             elif list(self.info['anchors'])[0] == 'Ra':
                 self.fnames[feature] = aux1.gtfpath(search_dir, '^.*_'+self.info['POD_norm']+'_.*'+str(self.info['anchors']['Ra'])+'.*_'+feature)
             else:
-                self.fnames[feature] = aux1.gtfpath(search_dir, '^.*_'+self.info['POD_norm']+'_.*'+lb+feature)
+                self.fnames[feature] = aux1.gtfpath(search_dir, '^.*_'+self.info['POD_norm']+lb+'_.*'+feature)
         return
 
     def get_coef(self, nb, rank=None):
