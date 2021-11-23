@@ -11,7 +11,8 @@ def cfpdic():
               'vel_mrelerr_h10', 'temp_mrelerr_h10',
               'vel_mabserr_h10', 'temp_mabserr_h10',
               'vel_mrelerr_l2', 'temp_mrelerr_l2',
-              'vel_mabserr_l2', 'temp_mabserr_l2']
+              'vel_mabserr_l2', 'temp_mabserr_l2',
+              'mtke']
 
     data_pattern = [r'\snus', r'\snus', r'\sromu', r'\sromt',
                     r'^\sFOM*', r'^\sROM*', r'^(?!.*?(?:MOR)s?).*tke$',
@@ -38,6 +39,7 @@ def cfpdic():
                     r'\srelative\sl2\s\serror\sfor\st:',
                     r'\sabsolute\sl2\s\serror\sfor\su:',
                     r'\sabsolute\sl2\s\serror\sfor\st:',
+                    r'mean\stke',
                     ]
 
     sprt_features = dict(zip(labels, data_pattern))
