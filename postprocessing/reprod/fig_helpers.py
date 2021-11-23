@@ -52,15 +52,14 @@ def set_pltparams(feature, rom):
     plot_params['label'] = solver
 
     if feature == 'dual_norm' or feature == 'mnurelerr':
-        plot_params.update({'c': 'k', 'marker': 'o', 'mfc': 'None'})
+        plot_params.update({'c': 'k', 'marker': 'o'} )
     elif feature == 'nu_1st2nd':
-        plot_params.update({'c': 'b', 'marker': 'o', 'mfc': 'None'})
+        plot_params.update({'c': 'b', 'marker': 'o'})
     elif feature == 'FOM':
-        plot_params.update({'c': 'k', 'marker': 'o', 'mfc': 'None', 'label': 'FOM'})
+        plot_params.update({'c': 'k', 'marker': 'o'})
     elif 'mrelerr' in feature.split('_') or 'mabserr' in feature.split('_'):
         if 'rom' in feature.split('_'):
-            plot_params.update({'c': 'b', 'marker': 'o', 'mfc': 'None'})
+            plot_params.update({'c': 'b', 'marker': 'o'})
         elif 'proj' in feature.split('_'):
-            plot_params.update({'c': 'k', 'marker': 'o', 'mfc': 'None',
-                           'label': 'Projection'})
+            plot_params.update({'c': 'k', 'marker': 'o', 'label': 'Projection'})
     return plot_params
