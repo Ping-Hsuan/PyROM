@@ -16,25 +16,25 @@ def set_ax(ax, rom, feature):
         title = r'Relative $H^1$ error in the predicted mean flow at '
         ax.set(ylabel=r'$\frac{\|u - \tilde{u}\|_{H^1}}{\|u\|_{H^1}}$', title=title+'$'+anc_lb+'$')
     elif feature == 'proj_mrelerr_h1' or feature == 'proj_mrelerr':
-        title = r'Relative $H^1$ error in the prjected mean flow at '
+        title = r'Relative $H^1$ error in the projected mean flow at '
         ax.set(ylabel=r'$\frac{\|u - \tilde{u}\|_{H^1}}{\|u\|_{H^1}}$', title=title+'$'+anc_lb+'$')
     elif feature == 'rom_mrelerr_l2':
         title = r'Relative $L^2$ error in the predicted mean flow at '
         ax.set(ylabel=r'$\frac{\|u - \tilde{u}\|_{L^2}}{\|u\|_{L^2}}$', title=title+'$'+anc_lb+'$')
     elif feature == 'proj_mrelerr_l2':
-        title = r'Relative $L^2$ error in the prjected mean flow at '
+        title = r'Relative $L^2$ error in the projected mean flow at '
         ax.set(ylabel=r'$\frac{\|u - \tilde{u}\|_{L^2}}{\|u\|_{L^2}}$', title=title+'$'+anc_lb+'$')
     elif feature == 'rom_mabserr_h1' or feature == 'rom_mabserr':
         title = r'Absolute $H^1$ error in the predicted mean flow at '
         ax.set(ylabel=r'${\|u - \tilde{u}\|_{H^1}}$', title=title+'$'+anc_lb+'$')
     elif feature == 'proj_mabserr_h1' or feature == 'proj_mabserr':
-        title = r'Absolute $H^1$ error in the prjected mean flow at '
+        title = r'Absolute $H^1$ error in the projected mean flow at '
         ax.set(ylabel=r'${\|u - \tilde{u}\|_{H^1}}$', title=title+'$'+anc_lb+'$')
     elif feature == 'rom_mabserr_l2':
         title = r'Absolute $L^2$ error in the predicted mean flow at '
         ax.set(ylabel=r'${\|u - \tilde{u}\|_{L^2}}$', title=title+'$'+anc_lb+'$')
     elif feature == 'proj_mabserr_l2':
-        title = r'Absolute $L^2$ error in the prjected mean flow at '
+        title = r'Absolute $L^2$ error in the projected mean flow at '
         ax.set(ylabel=r'${\|u - \tilde{u}\|_{L^2}}$', title=title+'$'+anc_lb+'$')
     return
 
