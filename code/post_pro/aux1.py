@@ -179,7 +179,8 @@ def plt_mrelerr_wN(rom, tdir, feature):
     set_ax(ax1, rom, 'rom_'+feature)
     ax1.semilogy(rom.nbs, rom.rom_relerr, **plot_params1)
     ylim_exp = math.ceil(math.log10(min(rom.rom_relerr)))-1
-    ax1.set_ylim([10**ylim_exp, 1])
+#   ax1.set_ylim([10**ylim_exp, 1])
+    ax1.set_ylim([1e-2, 1])
     ax1.legend(loc=0, ncol=1)
 
     fig2, ax2 = plt.subplots(1, tight_layout=True)
@@ -241,14 +242,12 @@ def plt_mabserr_wN(rom, tdir, feature):
 
     fig1, ax1 = plt.subplots(1, tight_layout=True)
     set_ax(ax1, rom, 'rom_'+feature)
-    ax1.semilogy(rom.nbs, rom.rom_abserr, **plot_params1)
-    ax1.set_ylim([1, 40])
+    ax1.plot(rom.nbs, rom.rom_abserr, **plot_params1)
     ax1.legend(loc=0, ncol=1)
 
     fig2, ax2 = plt.subplots(1, tight_layout=True)
     set_ax(ax2, rom, 'proj_'+feature)
-    ax2.semilogy(rom.nbs, rom.proj_abserr, **plot_params2)
-    ax2.set_ylim([1e-2, 1])
+    ax2.plot(rom.nbs, rom.proj_abserr, **plot_params2)
     ax2.legend(loc=0, ncol=1)
 
     # Create filename
@@ -449,5 +448,38 @@ def plt_tke_in_t(rom, nb, tdir):
     ax.legend(loc='upper left', bbox_to_anchor= (0.0, 1.11), ncol=4,
               borderaxespad=0, frameon=False)
     output = os.path.join(sub_dir, 'tke_N'+str(nb)+'.png')
+    fig.savefig(output)
+    plt.close(fig)
+
+
+def plt_mtke(rom, tdir):
+    import numpy as np
+    import matplotlib.pyplot as plt
+    import sys
+    from myplot import plt_romcoef_in_t, plt_snapcoef_in_t, \
+    plt_snap_minmax, plt_mean_in_t, add_std_in_t, plt_sample_mean_var
+    sys.path.append('/Users/bigticket0501/Developer/PyMOR/postprocessing/')
+    from snapshot import Snapshot
+    import os
+
+    setup_old.style(1)
+    setup_old.text()
+
+    sub_dir = os.path.join(tdir, 'mtke')
+    checkdir(sub_dir)
+
+    rom_params = {'c': 'b','marker':'o'}
+    rom_params['label'] = rom.info['method'].upper()
+    xlabel = r'$N$'
+    ylabel = r'$\langle TKE \rangle_s$'
+
+    fig, ax = plt.subplots(1, squeeze=True, tight_layout=True)
+    ax.set(ylabel=ylabel, xlabel=xlabel)
+    ax.semilogy(rom.nbs, rom.mtke, **rom_params)
+    mtke_fom = np.loadtxt('../qoi/tmtke')
+    fom_params = {'c': 'k', 'marker': 'o','label':'FOM'}
+    ax.semilogy(rom.nbs, mtke_fom*np.ones(len(rom.nbs)), **fom_params)
+    ax.legend(loc=0)
+    output = os.path.join(sub_dir, 'mtke.png')
     fig.savefig(output)
     plt.close(fig)
