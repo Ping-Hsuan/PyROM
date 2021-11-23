@@ -77,5 +77,9 @@ if (info['features']['romt'][0] and info['ifrom(2)']):
         rom.get_coef(nb)
         rom.compute_momentum()
         aux1.plt_coef_in_t(rom, nb, tpath)
+
+if (info['features']['mtke'][0]):
+    rom.get_mtke()
+    aux1.plt_mtke(rom, tpath)
 1/o
 #subprocess.run(["python3", "nu_first_second_momentum_wN.py", tpath, model, theta_g, T0])

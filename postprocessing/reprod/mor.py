@@ -214,3 +214,16 @@ class ROM:
 #               fname = element
         return
 
+    def get_mtke(self):
+        files_dict = aux1.create_dict(self.fnames['mtke'], '^.*_([0-9]*)nb_.*$')
+        nbs = []
+        mtke = []
+        for nb, fnames in files_dict.items():
+            for fname in fnames:
+                with open(fname, 'r') as f:
+                    for line in f:
+                        info = line.split()
+                mtke.append(float(info[4]))
+                nbs.append(int(nb))
+        self.nbs, self.mtke = [list(tuple) for tuple in zip(*sorted(zip(nbs, mtke)))]
+        return
