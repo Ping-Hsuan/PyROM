@@ -49,7 +49,7 @@ def plt_coef_in_t(rom, nb, tdir):
 
     # Create snapshot class
     # Need to modify the ops_path so that it does not depends on the position
-    ops_path = './ops/'
+    ops_path = '../ops/'
     snap = Snapshot(ops_path, field)
     snap.coef(rom.info['K'])
     ds = (rom.info['Tf']-rom.info['T0']+1)/rom.info['K']
@@ -155,7 +155,7 @@ def plt_erri_wN(rom, tdir):
     return
 
 
-def plt_mrelerr_wN(rom, tdir, feature):
+def plt_mrelerr_wN(rom, tdir, feature, ylim):
     import numpy as np
     import matplotlib.pyplot as plt
     import os
@@ -180,7 +180,7 @@ def plt_mrelerr_wN(rom, tdir, feature):
     ax1.semilogy(rom.nbs, rom.rom_relerr, **plot_params1)
     ylim_exp = math.ceil(math.log10(min(rom.rom_relerr)))-1
 #   ax1.set_ylim([10**ylim_exp, 1])
-    ax1.set_ylim([1e-2, 1])
+    ax1.set_ylim(ylim)
     ax1.legend(loc=0, ncol=1)
 
     fig2, ax2 = plt.subplots(1, tight_layout=True)
@@ -475,11 +475,181 @@ def plt_mtke(rom, tdir):
 
     fig, ax = plt.subplots(1, squeeze=True, tight_layout=True)
     ax.set(ylabel=ylabel, xlabel=xlabel)
-    ax.semilogy(rom.nbs, rom.mtke, **rom_params)
+    ax.plot(rom.nbs, rom.mtke, **rom_params)
     mtke_fom = np.loadtxt('../qoi/tmtke')
     fom_params = {'c': 'k', 'marker': 'o','label':'FOM'}
-    ax.semilogy(rom.nbs, mtke_fom*np.ones(len(rom.nbs)), **fom_params)
+    ax.plot(rom.nbs, mtke_fom*np.ones(len(rom.nbs)), **fom_params)
     ax.legend(loc=0)
+
+    fname1 = 'mtke'
+    data = np.column_stack((rom.nbs, rom.mtke))
+    output = os.path.join(sub_dir, fname1)
+    if rom.info['method'] == 'l-rom':
+        output += '_'+rom.info['perc']
+    elif rom.info['method'] == 'l-rom-df':
+        output += '_'+rom.info['fwidth']
+    output += '.csv'
+    np.savetxt(output, data, delimiter=',', header='N, mtke', comments="")
     output = os.path.join(sub_dir, 'mtke.png')
+    fig.savefig(output)
+    plt.close(fig)
+
+
+def plt_mtfluc(rom, tdir):
+    import numpy as np
+    import matplotlib.pyplot as plt
+    import sys
+    from myplot import plt_romcoef_in_t, plt_snapcoef_in_t, \
+    plt_snap_minmax, plt_mean_in_t, add_std_in_t, plt_sample_mean_var
+    sys.path.append('/Users/bigticket0501/Developer/PyMOR/postprocessing/')
+    from snapshot import Snapshot
+    import os
+
+    setup_old.style(1)
+    setup_old.text()
+
+    sub_dir = os.path.join(tdir, 'mtfluc')
+    checkdir(sub_dir)
+
+    rom_params = {'c': 'b','marker':'o'}
+    rom_params['label'] = rom.info['method'].upper()
+    xlabel = r'$N$'
+    ylabel = r'$\langle T_{fluc} \rangle_s$'
+
+    fig, ax = plt.subplots(1, squeeze=True, tight_layout=True)
+    ax.set(ylabel=ylabel, xlabel=xlabel)
+    ax.plot(rom.nbs, rom.mtfluc, **rom_params)
+    mtfluc_fom = np.loadtxt('../qoi/tmtfluc')
+    fom_params = {'c': 'k', 'marker': 'o','label':'FOM'}
+    ax.plot(rom.nbs, mtfluc_fom*np.ones(len(rom.nbs)), **fom_params)
+    ax.legend(loc=0)
+
+    fname1 = 'mtfluc'
+    data = np.column_stack((rom.nbs, rom.mtfluc))
+    output = os.path.join(sub_dir, fname1)
+    if rom.info['method'] == 'l-rom':
+        output += '_'+rom.info['perc']
+    elif rom.info['method'] == 'l-rom-df':
+        output += '_'+rom.info['fwidth']
+    output += '.csv'
+    np.savetxt(output, data, delimiter=',', header='N, mtfluc', comments="")
+    output = os.path.join(sub_dir, 'mtfluc.png')
+    fig.savefig(output)
+    plt.close(fig)
+
+def plt_nu_1st_2nd(rom, tdir):
+    import numpy as np
+    import matplotlib.pyplot as plt
+    import sys
+    import pandas as pd
+    sys.path.append('/Users/bigticket0501/Developer/PyMOR/postprocessing/')
+    from snapshot import Snapshot
+    import os
+    import math
+
+    setup_old.style(1)
+    setup_old.text()
+
+    sub_dir = os.path.join(tdir, 'nu')
+    checkdir(sub_dir)
+
+    # get the FOM data
+    filename = './fom/nus_mom.csv'
+    fom = pd.read_csv(filename).to_numpy()
+
+    rom_params = {'c': 'b','marker':'o'}
+    rom_params['label'] = rom.info['method'].upper()
+    xlabel = r'$N$'
+    ylabel = r'$\langle Nu \rangle_g$'
+
+    fig, ax = plt.subplots(1, squeeze=True, tight_layout=True)
+    ax.set(ylabel=ylabel, xlabel=xlabel, title='Predicted Mean Nu vs. Truth Mean Nu')
+    ax.plot(rom.nbs, rom.nus_ms, **rom_params)
+    fom_params = {'c': 'k', 'marker': 'o','label':'FOM'}
+    ax.plot(rom.nbs, fom[0][0]*np.ones(len(rom.nbs)), '-o', **fom_params)
+    ax.legend(loc=0)
+
+    fname1 = 'mnu'
+    data = np.column_stack((rom.nbs, rom.nus_ms))
+    output = os.path.join(sub_dir, fname1)
+    if rom.info['method'] == 'l-rom':
+        output += '_'+rom.info['perc']
+    elif rom.info['method'] == 'l-rom-df':
+        output += '_'+rom.info['fwidth']
+    output += '.csv'
+    np.savetxt(output, data, delimiter=',', header='N, mnus', comments="")
+    output = os.path.join(sub_dir, 'mnus.png')
+    fig.savefig(output)
+    plt.close(fig)
+
+    rom_params = {'c': 'b','marker':'o'}
+    rom_params['label'] = rom.info['method'].upper()
+    xlabel = r'$N$'
+    ylabel = r'$Std(Nu)$'
+
+    fig, ax = plt.subplots(1, squeeze=True, tight_layout=True)
+    ax.set(ylabel=ylabel, xlabel=xlabel, title='Predicted Std(Nu) vs. Truth Std(Nu)')
+    ax.plot(rom.nbs, rom.nus_sds, **rom_params)
+    fom_params = {'c': 'k', 'marker': 'o','label':'FOM'}
+    ax.plot(rom.nbs, fom[0][1]*np.ones(len(rom.nbs)), '-o', **fom_params)
+    ax.set_ylim([fom[0][1]/2, fom[0][1]*2,])
+    ax.legend(loc=0)
+
+    fname1 = 'stdnu'
+    data = np.column_stack((rom.nbs, rom.nus_sds))
+    output = os.path.join(sub_dir, fname1)
+    if rom.info['method'] == 'l-rom':
+        output += '_'+rom.info['perc']
+    elif rom.info['method'] == 'l-rom-df':
+        output += '_'+rom.info['fwidth']
+    output += '.csv'
+    np.savetxt(output, data, delimiter=',', header='N, stdnu', comments="")
+    output = os.path.join(sub_dir, 'stdnu.png')
+    fig.savefig(output)
+    plt.close(fig)
+
+    rom_params = {'c': 'b','marker':'o'}
+    rom_params['label'] = rom.info['method'].upper()
+    xlabel = r'$N$'
+
+    fig, ax = plt.subplots(1, squeeze=True, tight_layout=True)
+    ax.set(xlabel=xlabel, title='Relative Error in Mean Nu')
+    ax.semilogy(rom.nbs, rom.mnuserr, **rom_params)
+    ylim_exp = math.ceil(math.log10(min(rom.mnuserr)))-1
+    ax.set_ylim([10**ylim_exp, 1e0])
+    ax.legend(loc=0)
+
+    fname1 = 'mnu_err'
+    data = np.column_stack((rom.nbs, rom.mnuserr))
+    output = os.path.join(sub_dir, fname1)
+    if rom.info['method'] == 'l-rom':
+        output += '_'+rom.info['perc']
+    elif rom.info['method'] == 'l-rom-df':
+        output += '_'+rom.info['fwidth']
+    output += '.csv'
+    np.savetxt(output, data, delimiter=',', header='N, mnuserr', comments="")
+    output = os.path.join(sub_dir, 'mnuserr.png')
+    fig.savefig(output)
+    plt.close(fig)
+
+    rom_params = {'c': 'b','marker':'o'}
+    rom_params['label'] = rom.info['method'].upper()
+    xlabel = r'$N$'
+
+    fig, ax = plt.subplots(1, squeeze=True, tight_layout=True)
+    ax.set(xlabel=xlabel, title='Relative Error in Std(Nu)')
+    ax.semilogy(rom.nbs, rom.stdnuserr, **rom_params)
+    ax.legend(loc=0)
+
+    fname1 = 'stdnuerr'
+    data = np.column_stack((rom.nbs, rom.stdnuserr))
+    output = os.path.join(sub_dir, fname1)
+    if rom.info['method'] == 'l-rom':
+        output += '_'+rom.info['perc']
+    elif rom.info['method'] == 'l-rom-df':
+        output += '_'+rom.info['fwidth']
+    output += '.csv'
+    np.savetxt(output, data, delimiter=',', header='N, stdnuerr', comments="")
+    output = os.path.join(sub_dir, 'stdnuerr.png')
     fig.savefig(output)
     plt.close(fig)
