@@ -39,19 +39,19 @@ if (info['features']['dual_norm']):
     rom.get_dual_wN()
     aux1.plt_erri_wN(rom, tpath)
 
-if (info['features']['mrelerr_h1']):
+if (info['features']['mrelerr_h1'][0]):
     rom.get_mrelerr('mrelerr_h1')
-    aux1.plt_mrelerr_wN(rom, tpath, 'mrelerr_h1')
+    aux1.plt_mrelerr_wN(rom, tpath, 'mrelerr_h1',info['features']['mrelerr_h1'][1])
 
-if (info['features']['mrelerr_l2']):
+if (info['features']['mrelerr_l2'][0]):
     rom.get_mrelerr('mrelerr_l2')
-    aux1.plt_mrelerr_wN(rom, tpath, 'mrelerr_l2')
+    aux1.plt_mrelerr_wN(rom, tpath, 'mrelerr_l2',info['features']['mrelerr_l2'][1])
 
-if (info['features']['mabserr_l2']):
+if (info['features']['mabserr_l2'][0]):
     rom.get_mabserr('mabserr_l2')
     aux1.plt_mabserr_wN(rom, tpath, 'mabserr_l2')
 
-if (info['features']['mabserr_h1']):
+if (info['features']['mabserr_h1'][0]):
     rom.get_mabserr('mabserr_h1')
     aux1.plt_mabserr_wN(rom, tpath, 'mabserr_h1')
 
@@ -81,5 +81,13 @@ if (info['features']['romt'][0] and info['ifrom(2)']):
 if (info['features']['mtke'][0]):
     rom.get_mtke()
     aux1.plt_mtke(rom, tpath)
+
+if (info['features']['mtfluc'][0]):
+    rom.get_mtfluc()
+    aux1.plt_mtfluc(rom, tpath)
+
+if (info['features']['nu'][0]):
+    rom.get_nu_1st_2nd()
+    aux1.plt_nu_1st_2nd(rom, tpath)
 1/o
 #subprocess.run(["python3", "nu_first_second_momentum_wN.py", tpath, model, theta_g, T0])

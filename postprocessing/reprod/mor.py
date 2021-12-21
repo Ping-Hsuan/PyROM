@@ -25,9 +25,11 @@ class ROM:
         for feature in self.info['features'].keys():
             search_dir = self.info['method']+'_info'
             if list(self.info['anchors'])[0] == 'theta':
-                self.fnames[feature] = aux1.gtfpath(search_dir, '^.*_'+self.info['POD_norm']+'_'+str(self.info['anchors']['theta']-90)+'_'+feature)
+                self.fnames[feature] = aux1.gtfpath(search_dir, '^.*_'+self.info['POD_norm']+'_theta'+str(self.info['anchors']['theta'])+'_ra'+str(self.info['anchors']['Ra'])+'_'+feature)
             elif list(self.info['anchors'])[0] == 'Ra':
                 self.fnames[feature] = aux1.gtfpath(search_dir, '^.*_'+self.info['POD_norm']+'_.*'+str(self.info['anchors']['Ra'])+'.*_'+feature)
+            elif list(self.info['anchors'])[0] == 'Re':
+                self.fnames[feature] = aux1.gtfpath(search_dir, '^.*_'+self.info['POD_norm']+'_.*'+str(self.info['anchors']['Re'])+'.*_'+feature)
             else:
                 self.fnames[feature] = aux1.gtfpath(search_dir, '^.*_'+self.info['POD_norm']+lb+'_.*'+feature)
         return
@@ -116,6 +118,7 @@ class ROM:
         return
 
     def cdict(self, feature):
+        print(self.fnames[feature])
         if self.info['method'] == 'l-rom':
             files_dict = aux1.create_dict(self.fnames[feature], '^.*_([0-9]*)nb_.*_'+self.info['perc']+'_'+feature+'$')
         elif self.info['method'] == 'l-rom-df':
@@ -219,6 +222,7 @@ class ROM:
         nbs = []
         mtke = []
         for nb, fnames in files_dict.items():
+            print(fnames)
             for fname in fnames:
                 with open(fname, 'r') as f:
                     for line in f:
@@ -226,4 +230,57 @@ class ROM:
                 mtke.append(float(info[4]))
                 nbs.append(int(nb))
         self.nbs, self.mtke = [list(tuple) for tuple in zip(*sorted(zip(nbs, mtke)))]
+        return
+
+
+    def get_mtfluc(self):
+        files_dict = aux1.create_dict(self.fnames['mtfluc'], '^.*_([0-9]*)nb_.*$')
+        nbs = []
+        mtfluc = []
+        for nb, fnames in files_dict.items():
+            print(fnames)
+            for fname in fnames:
+                with open(fname, 'r') as f:
+                    for line in f:
+                        info = line.split()
+                mtfluc.append(float(info[4]))
+                nbs.append(int(nb))
+        self.nbs, self.mtfluc = [list(tuple) for tuple in zip(*sorted(zip(nbs, mtfluc)))]
+        return
+
+    def get_nu_1st_2nd(self):
+        import pandas as pd
+        filename = './fom/nus_mom.csv'
+        fom = pd.read_csv(filename).to_numpy()
+
+        # For now, grep proj and rom relerr at the same time
+        if self.info['init'] == 'zero':
+            self.info['J0'] = mypostpro.find_nearest(self.outputs['t'][0, :], 501)
+        elif self.info['init'] == 'ic':
+            self.info['J0'] = 0
+        files_dict = self.cdict('nu')
+        nbs = []
+        ms = []
+        sds = []
+        merr = []
+        verr = []
+        sderr = []
+        for nb, fnames in files_dict.items():
+            for fname in fnames:
+                nuss = mypostpro.read_nuss(fname)
+                nuss[:, 2] = nuss[:, 2]/40
+                avgidx1 = mypostpro.find_nearest(nuss[:, 1], int(self.info['J0']))
+                rom_mean = mypostpro.cmean(nuss[avgidx1:-1, :], 2)
+                rom_var = mypostpro.cvar(nuss[avgidx1:-1, :], rom_mean, 2)
+                rom_sd = mypostpro.csd(nuss[avgidx1:-1, :], rom_mean, 2)
+                [mean_err, var_err, sd_err] = mypostpro.cnuss_err(fom[0][0], fom[0][1],
+                                                                   fom[0][1], rom_mean,
+                                                                   rom_var, rom_sd)
+            merr.append(mean_err)
+            verr.append(var_err)
+            sderr.append(sd_err)
+            nbs.append(int(nb))
+            ms.append(rom_mean)
+            sds.append(rom_sd)
+        self.nbs, self.nus_ms, self.nus_sds, self.mnuserr, self.stdnuserr= [list(tuple) for tuple in zip(*sorted(zip(nbs, ms, sds, merr, sderr)))]
         return
