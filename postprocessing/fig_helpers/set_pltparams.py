@@ -1,16 +1,17 @@
 def set_pltparams(feature, solver, N, T0, fd=None):
+    plot_params = {'c': 'None', 'marker': 'o', 'mfc': 'None', 'label': None}
     if feature == 'dual_norm' or feature == 'mnurelerr':
-        plot_params = {'c': 'k', 'marker': 'o', 'mfc': 'None'}
-
+        plot_params['c'] = 'k'
     elif feature == 'rom_mrelerr' or feature == 'nu_1st2nd':
-        plot_params = {'c': 'b', 'marker': 'o', 'mfc': 'None'}
+        plot_params['c'] = 'b'
     elif feature == 'proj_mrelerr' or feature == 'proj_mabserr':
-        plot_params = {'c': 'k', 'marker': 'o', 'mfc': 'None',
-                       'label': 'Projection with '+r'$N='+N+'$'}
+        plot_params['c'] = 'k'
+        plot_params['label'] = 'Projection with '+r'$N='+N+'$'
     elif feature == 'rom_mabserr':
-        plot_params = {'c': 'b', 'marker': 'o', 'mfc': 'None'}
+        plot_params['c'] = 'b'
     elif feature == 'FOM':
-        plot_params = {'c': 'k', 'marker': 'o', 'mfc': 'None', 'label': 'FOM'}
+        plot_params['c'] = 'k'
+        plot_params['label'] = 'FOM'
     if fd:
         if solver == 'L-ROM':
             fd = fd.replace('p', '.')
@@ -21,5 +22,6 @@ def set_pltparams(feature, solver, N, T0, fd=None):
         else:
             raise Exception("fd only supported for l-rom or l-rom_df")
     else:
-        plot_params['label'] = solver+' with '+r'$N='+N+'$'
+        if plot_params['label'] is None:
+           plot_params['label'] = solver+' with '+r'$N='+N+'$'
     return plot_params

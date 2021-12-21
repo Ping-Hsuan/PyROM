@@ -42,7 +42,7 @@ else:
 
 tpath = './gram_analysis/'
 
-gu = np.loadtxt('./ops/gu')
+gu = np.loadtxt('../ops/gu')
 lsu = int(np.sqrt(len(gu)))
 gu = np.reshape(gu, (lsu, lsu))
 Numax = LA.matrix_rank(gu)
@@ -73,7 +73,7 @@ np.savetxt(tpath+'veps.dat', veps)
 vene = pod.cene(vu)
 
 if (ifrom[1]):
-    gt = np.loadtxt('./ops/gt')
+    gt = np.loadtxt('../ops/gt')
     lst = int(np.sqrt(len(gt)))
     gt = np.reshape(gt, (lst, lst))
     Ntmax = LA.matrix_rank(gt)

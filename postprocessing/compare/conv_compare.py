@@ -28,12 +28,16 @@ def conv_compare(argv):
             fd = str(int(float(fd)*100))
             solver = model.upper()+' with '+str(fd)+' percentage filtered'
             fname = feature+'_'+info['perc']+'.csv'
+        elif model == 'l-rom-df':
+            fd = info['fwidth'].replace('p', '.')
+            solver = model.upper()+r' with filter width $\delta=$ '+str(fd)
+            fname = feature+'_'+info['fwidth']+'.csv'
         else:
             solver = model.upper()
             fname = feature+'.csv'
         tpath = os.path.join(dir1, feature, fname)
         data = pd.read_csv(tpath)
-        ax.plot(data.iloc[:, 0], data.iloc[:, 1], label=solver)
+        ax.plot(data.iloc[:, 0], data.iloc[:, 1], '-o', label=solver)
     ax.legend(loc=0)
     anc_lb = ''
     for key, value in info['parameters'].items():
