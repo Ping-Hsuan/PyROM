@@ -13,7 +13,6 @@ def ene_his():
 
     fname = os.path.split(os.getcwd())[-1]
     fname = fname.replace('_', '')
-    res = re.split('(\d+)', fname)
 
     with open('ene_his', 'r') as f:
         k = f.read()
@@ -36,6 +35,7 @@ def ene_his():
            xlabel=r'$t$',
            title='Energy History')
     fig.savefig('ene_his')
+    np.savetxt('ene_his.csv', data[:, [1, 2]], delimiter=',', header='t, ene', comments="")
     return
 
 

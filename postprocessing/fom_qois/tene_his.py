@@ -28,6 +28,7 @@ def tene_his():
            xlabel=r'$t$',
            title='Energy History')
     fig.savefig('tene_his')
+    np.savetxt('tene_his.csv', data[:, [1, 3]], delimiter=',', header='t, tene', comments="")
     return
 
 
