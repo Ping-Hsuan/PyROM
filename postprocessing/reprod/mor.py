@@ -25,7 +25,7 @@ class ROM:
         for feature in self.info['features'].keys():
             search_dir = self.info['method']+'_info'
             if list(self.info['anchors'])[0] == 'theta':
-                self.fnames[feature] = aux1.gtfpath(search_dir, '^.*_'+self.info['POD_norm']+'_theta'+str(self.info['anchors']['theta'])+'_ra'+str(self.info['anchors']['Ra'])+'_'+feature)
+                self.fnames[feature] = aux1.gtfpath(search_dir, '^.*_'+self.info['POD_norm']+'_theta'+str(self.info['anchors']['theta'])+'_ra'+str(self.info['anchors']['Ra'])+'.*_'+feature)
             elif list(self.info['anchors'])[0] == 'Ra':
                 self.fnames[feature] = aux1.gtfpath(search_dir, '^.*_'+self.info['POD_norm']+'_.*'+str(self.info['anchors']['Ra'])+'.*_'+feature)
             elif list(self.info['anchors'])[0] == 'Re':
@@ -48,7 +48,6 @@ class ROM:
                     fname = element
         coef = []
         t = []
-        print(fname)
         with open(fname, 'r') as f:
             for line in f:
                 info = line.split()
@@ -118,7 +117,6 @@ class ROM:
         return
 
     def cdict(self, feature):
-        print(self.fnames[feature])
         if self.info['method'] == 'l-rom':
             files_dict = aux1.create_dict(self.fnames[feature], '^.*_([0-9]*)nb_.*_'+self.info['perc']+'_'+feature+'$')
         elif self.info['method'] == 'l-rom-df':
@@ -218,11 +216,10 @@ class ROM:
         return
 
     def get_mtke(self):
-        files_dict = aux1.create_dict(self.fnames['mtke'], '^.*_([0-9]*)nb_.*$')
+        files_dict = self.cdict('mtke')
         nbs = []
         mtke = []
         for nb, fnames in files_dict.items():
-            print(fnames)
             for fname in fnames:
                 with open(fname, 'r') as f:
                     for line in f:
@@ -234,11 +231,10 @@ class ROM:
 
 
     def get_mtfluc(self):
-        files_dict = aux1.create_dict(self.fnames['mtfluc'], '^.*_([0-9]*)nb_.*$')
+        files_dict = self.cdict('mtfluc')
         nbs = []
         mtfluc = []
         for nb, fnames in files_dict.items():
-            print(fnames)
             for fname in fnames:
                 with open(fname, 'r') as f:
                     for line in f:
