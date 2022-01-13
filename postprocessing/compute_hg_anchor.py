@@ -88,7 +88,7 @@ max_erri = []
 
 for itr, anchor, N, K, model in zip(data[0], data[1], data[2], data[3], data[6]):
 
-    print(itr, anchor, N, K, model)
+    print(itr, anchor, N, K, model, data[7])
 
     if len(sys.argv) <= 3:
 #       angle, erri = erri_w_theta(model, anchor, N, mode)
@@ -123,7 +123,9 @@ for itr, anchor, N, K, model in zip(data[0], data[1], data[2], data[3], data[6])
             angle, erri = erri_w_param(model, anchor, N, mode, sys.argv[3])
         else:
             angle, erri = erri_leray_w_param(model, anchor, N, mode, data[7][itr-1], sys.argv[3])
-    print(angle, erri)
+    idx = [angle.index(i) for i in features['Ptrain']]
+    angle = np.asarray(angle)[idx]
+    erri = np.asarray(erri)[idx]
     ax.semilogy(angle, erri, '--o', color=colors[itr-1], mfc="None", label=r'$\mathsf{Iter} = $ '+str(itr))
     print(anchor)
     idx = np.where(angle == int(anchor))
@@ -139,10 +141,11 @@ for itr, anchor, N, K, model in zip(data[0], data[1], data[2], data[3], data[6])
     idxmax = np.argmax(erri_min)
     max_erri.append(erri_min[idxmax])
 
-    if (max(erri)/min(erri) >= 1e2):
+    if (max(erri)/min(erri) >= 1e2) or (max(erri) < 0.1):
         ax.set_yscale('log')
         ylim_exp = math.ceil(math.log10(min(erri)))-1
-        ylim = [10**ylim_exp, 1e0]
+#       ylim = [10**ylim_exp, 1e0]
+        ylim = [1e-3, 1e0]
     else:
         ax.set_yscale('linear')
         ylim_exp = math.ceil(math.log10(min(erri)))-1
