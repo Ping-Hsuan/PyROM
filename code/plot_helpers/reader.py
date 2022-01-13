@@ -49,6 +49,7 @@ def erri_w_param(model, anchor, N, mode, *argv):
 #   filename = '../ra_'+str(anchor)+'_theta_90/'+model+'_parameter_theta90_Ra'+str(anchor)+'/dual_norm/'+fname
 #   filename = '../re'+str(anchor)+'/'+model+'_parameter_Re'+str(anchor)+'/dual_norm/'+fname
     filenames = find_files(fname, '../')
+    filenames = find_files(fname, '../../')
     for f in filenames:
 #       if 'Re'+str(anchor) in re.split('[/_]', f):
         if all(x in f for x in ['Ra'+str(anchor), model, str(N)]):
@@ -57,7 +58,8 @@ def erri_w_param(model, anchor, N, mode, *argv):
             filename = f
     data = pd.read_csv(filename)
 
-    return [data[i].to_numpy() for i in data.columns]
+    return [data[i].tolist() for i in data.columns]
+#   return data
 
 
 def erri_leray_w_param(model, anchor, N, mode, pt, *argv):
@@ -77,6 +79,7 @@ def erri_leray_w_param(model, anchor, N, mode, pt, *argv):
 #   filename = '../ra_'+str(anchor)+'_theta_90/'+model+'_parameter_theta90_Ra'+str(anchor)+'/dual_norm/'+fname
     print(fname)
     filenames = find_files(fname, '../')
+    filenames = find_files(fname, '../../')
     for f in filenames:
 #       if 'Re'+str(anchor) in re.split('[/_]', f):
 #       if 'Ra'+str(anchor) in re.split('[/_]', f):
@@ -90,7 +93,7 @@ def erri_leray_w_param(model, anchor, N, mode, pt, *argv):
 #              str(anchor)+'/'+'dual_norm/'+fname
 #   erri = np.loadtxt(filename)
 
-    return [data[i].to_numpy() for i in data.columns]
+    return [data[i].tolist() for i in data.columns]
 
 
 def find_files(filename, search_path):

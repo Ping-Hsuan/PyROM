@@ -46,10 +46,15 @@ def get_ncand_param(P_test, P_train, ncand, N, model, mode, fd, scaled=''):
     P_test_anchor = []
     # Find out the nearest anchor(s) point to each testing parameter
     for i, test in enumerate(P_test):
-        erri = []
+        erris = []
         near_anch = []
         # distance between two parameters is used
         tmp = abs(test-P_train)
+        print(test, tmp, P_train, len(set(tmp)))
+        if (len(set(tmp)) < len(P_train)):
+            ncand = 3
+        elif (len(set(tmp)) == len(P_train)):
+            ncand = 2
         for j in range(ncand):
             # find out the index corresponding to the closest anchor point
             if 0 in tmp:
@@ -78,6 +83,7 @@ def get_ncand_param(P_test, P_train, ncand, N, model, mode, fd, scaled=''):
 #           dual_norm = np.loadtxt(dirs+fname)
 #           data = np.array(dual_norm).astype(np.float64)
             filenames = reader.find_files(fname, '../')
+            filenames = reader.find_files(fname, '../../')
 #           print(['Ra'+str(int(P_train[minidx])), model[minidx], str(N[minidx])])
             for f in filenames:
                 if all(x in f for x in ['Ra'+str(int(P_train[minidx])), model[minidx], str(N[minidx])]):
@@ -85,8 +91,11 @@ def get_ncand_param(P_test, P_train, ncand, N, model, mode, fd, scaled=''):
 #               if 'Re'+str(int(P_train[minidx])) in re.split('[/_]', f):
                     filename = f
             data = pd.read_csv(filename)
-            erri.append(data['dual_norm'][i])
-        idx = erri.index(min(erri))
+            param, erri = [data[k].tolist() for k in data.columns]
+            idx = param.index(test)
+            erris.append(erri[idx])
+        idx = erris.index(min(erris))
+        print(i, test, near_anch, idx)
         P_test_anchor.append(near_anch[idx])
     return P_test_anchor
 
@@ -117,12 +126,10 @@ def get_opterri(P_test, P_train, N, P_test_anchor, ax, colors, model, mode,
     return erri_opt
 
 
-def get_opterri_param(P_test, P_train, N, P_test_anchor, ax, colors, model, mode, fd,
-                scaled=''):
+def get_opterri_param(P_test, P_train, N, P_test_anchor, model, mode, fd, scaled=''):
     import numpy as np
     import pandas as pd
     import reader
-    import re
     # get erri with theta_g at each anchor points
     erri_his = []
     for i, train in enumerate(P_train):
@@ -133,17 +140,19 @@ def get_opterri_param(P_test, P_train, N, P_test_anchor, ax, colors, model, mode
         else:
             fname = 'dual_norm_N'+str(N[i])+scaled+'.csv'
         filenames = reader.find_files(fname, '../')
+        filenames = reader.find_files(fname, '../../')
         for f in filenames:
             if all(x in f for x in ['Ra'+str(train), model[i], str(N[i])]):
 #           if 'Ra'+str(train) in re.split('[/_]', f):
 #           if 'Re'+str(train) in re.split('[/_]', f):
                 filename = f
-                print(filename)
         data = pd.read_csv(filename)
+        param, erri = [data[i].tolist() for i in data.columns]
+        idx = [param.index(i) for i in P_test]
+        param = np.asarray(param)[idx]
+        erri = np.asarray(erri)[idx]
 
-        erri_his.append(data.iloc[:, 1])
-        ax.semilogy(data.iloc[:, 0], data.iloc[:, 1], '--o', color=colors[i], mfc="None",
-                    label=r'\textit{it} = '+str(i+1))
+        erri_his.append(erri)
 
     erri_comb = np.array(erri_his)
     erri_opt = []
@@ -152,7 +161,7 @@ def get_opterri_param(P_test, P_train, N, P_test_anchor, ax, colors, model, mode
     for i, test in enumerate(P_test):
         index = P_train.index(P_test_anchor[i])
         erri_opt.append(erri_comb[index, i])
-    return erri_opt
+    return param, erri_comb, erri_opt
 
 
 def get_anchor_qoi(i, train, N, model, mode):
@@ -184,70 +193,47 @@ def get_anchor_qoi_param(i, train, N, model, mode, fd):
         fname = 'mnurelerr_N'+str(N[i])+'_'+fd[i].strip('0')+'_'+mode+'.csv'
     elif model[i] == 'l-rom-df':
         fname = 'mnurelerr_N'+str(N[i])+'_0'+fd[i]+'.csv'
-        filenames = reader.find_files(fname, '../')
-        for f in filenames:
-#           if 'Ra'+str(train) in re.split('[/_]', f):
-            if all(x in f for x in ['Ra'+str(train), model[i], str(N[i])]):
-                filename = f
-        data = pd.read_csv(filename)
-        param = data['Ra']
-        merr = data['mnurelerr']
-
-        fname = 'mnu_N'+str(N[i])+'_0'+fd[i]+'.csv'
-        filenames = reader.find_files(fname, '../')
-        for f in filenames:
-#           if 'Ra'+str(train) in re.split('[/_]', f):
-            if all(x in f for x in ['Ra'+str(train), model[i], str(N[i])]):
-                filename = f
-        data = pd.read_csv(filename)
-        m = data['mnu']
-        
-        fname = 'std_nu_N'+str(N[i])+'_0'+fd[i]+'.csv'
-        filenames = reader.find_files(fname, '../')
-        for f in filenames:
-#           if 'Ra'+str(train) in re.split('[/_]', f):
-            if all(x in f for x in ['Ra'+str(train), model[i], str(N[i])]):
-                filename = f
-        data = pd.read_csv(filename)
-        std = data['std_nu']
     else:
-#       filename = 'param_'+mode+'.dat'
-#       angle = np.loadtxt(dirs+filename)
-#       filename = 'merr_N'+str(N[i])+'_'+mode+'.dat'
-#       merr = np.loadtxt(dirs+filename)
-#       filename = 'stderr_N'+str(N[i])+'_'+mode+'.dat'
-#       sderr = np.loadtxt(dirs+filename)
-#       filename = 'mnu_N'+str(N[i])+'_'+mode+'.dat'
-#       m = np.loadtxt(dirs+filename)
-#       filename = 'stdnu_N'+str(N[i])+'_'+mode+'.dat'
-#       sd = np.loadtxt(dirs+filename)
         fname = 'mnurelerr_N'+str(N[i])+'.csv'
-        filenames = reader.find_files(fname, '../')
-        for f in filenames:
+    filenames = reader.find_files(fname, '../')
+    filenames = reader.find_files(fname, '../../')
+    for f in filenames:
 #           if 'Ra'+str(train) in re.split('[/_]', f):
-            if all(x in f for x in ['Ra'+str(train), model[i], str(N[i])]):
-                filename = f
-        data = pd.read_csv(filename)
-        param = data['Ra']
-        merr = data['mnurelerr']
+        if all(x in f for x in ['Ra'+str(train), model[i], str(N[i])]):
+            filename = f
+    data = pd.read_csv(filename)
+    param = data['Ra'].tolist()
+    merr = data['mnurelerr'].tolist()
 
+    if model[i] == 'l-rom':
+        fname = 'mnu_N'+str(N[i])+'_'+fd[i].strip('0')+'_'+mode+'.csv'
+    elif model[i] == 'l-rom-df':
+        fname = 'mnu_N'+str(N[i])+'_0'+fd[i]+'.csv'
+    else:
         fname = 'mnu_N'+str(N[i])+'.csv'
-        filenames = reader.find_files(fname, '../')
-        for f in filenames:
+    filenames = reader.find_files(fname, '../')
+    filenames = reader.find_files(fname, '../../')
+    for f in filenames:
 #           if 'Ra'+str(train) in re.split('[/_]', f):
-            if all(x in f for x in ['Ra'+str(train), model[i], str(N[i])]):
-                filename = f
-        data = pd.read_csv(filename)
-        m = data['mnu']
-        
+        if all(x in f for x in ['Ra'+str(train), model[i], str(N[i])]):
+            filename = f
+    data = pd.read_csv(filename)
+    m = data['mnu'].tolist()
+    
+    if model[i] == 'l-rom':
+        fname = 'std_nu_N'+str(N[i])+'_'+fd[i].strip('0')+'_'+mode+'.csv'
+    elif model[i] == 'l-rom-df':
+        fname = 'std_nu_N'+str(N[i])+'_0'+fd[i]+'.csv'
+    else:
         fname = 'std_nu_N'+str(N[i])+'.csv'
-        filenames = reader.find_files(fname, '../')
-        for f in filenames:
+    filenames = reader.find_files(fname, '../')
+    filenames = reader.find_files(fname, '../../')
+    for f in filenames:
 #           if 'Ra'+str(train) in re.split('[/_]', f):
-            if all(x in f for x in ['Ra'+str(train), model[i], str(N[i])]):
-                filename = f
-        data = pd.read_csv(filename)
-        std = data['std_nu']
+        if all(x in f for x in ['Ra'+str(train), model[i], str(N[i])]):
+            filename = f
+    data = pd.read_csv(filename)
+    std = data['std_nu'].tolist()
 
     return param, merr, m, std
 
@@ -303,6 +289,7 @@ def get_anchor_flderr_param(i, train, N, model, mode, fd):
         fname = 'mrelerr_N'+str(N[i])+'.csv'
 
     filenames = reader.find_files(fname, '../')
+    filenames = reader.find_files(fname, '../../')
     for f in filenames:
         if all(x in f for x in ['Ra'+str(train), model[i], str(N[i])]):
 #       if 'Ra'+str(train) in re.split('[/_]', f):
@@ -310,7 +297,7 @@ def get_anchor_flderr_param(i, train, N, model, mode, fd):
             filename = f
     data = pd.read_csv(filename)
 
-    return [data[i].to_numpy() for i in data.columns]
+    return [data[i].tolist() for i in data.columns]
 
 
 def get_optflderr(flderr_rom, flderr_proj, P_test, P_train,
